@@ -1,0 +1,21 @@
+(footprint "OSC-TZ1067B" (version 20221018) (generator pcbnew)
+  (layer "F.Cu")
+  (attr smd)
+  (fp_text reference "REF**" (at 0 0) (layer "F.SilkS") hide
+      (effects (font (size 1.524 1.524) (thickness 0.05)))
+    (tstamp 4b0e79c8-e25f-437a-997f-3e116d79bb40)
+  )
+  (fp_text value "X-tal 12MHz,3.2x2.5 SMD, CL=20pF" (at 0 0) (layer "F.SilkS") hide
+      (effects (font (size 1.524 1.524) (thickness 0.05)))
+    (tstamp b12e1d19-e4b5-4635-b1a2-73ef244dc488)
+  )
+  (pad "1" smd rect (at 1.05 -0.75 180) (size 1.4 1.2) (layers "F.Cu") (tstamp 20b8147c-300d-46f5-993f-86f11660deb6))
+  (pad "2" smd rect (at -1.05 -0.75 180) (size 1.4 1.2) (layers "F.Cu") (tstamp e85d43b0-7494-402f-b39f-f3f732c1a5d3))
+  (pad "3" smd rect (at -1.05 0.75 180) (size 1.4 1.2) (layers "F.Cu") (tstamp 7e73ecfa-7c21-44f9-9e53-6c1d4da5e043))
+  (pad "4" smd rect (at 1.05 0.75 180) (size 1.4 1.2) (layers "F.Cu") (tstamp 30a9e613-ff16-432b-aa1b-1f5bed03a930))
+  (model "./wrlshp/8CD16B12-2CC2.wrl"
+    (offset (xyz 0 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 0))
+  )
+)

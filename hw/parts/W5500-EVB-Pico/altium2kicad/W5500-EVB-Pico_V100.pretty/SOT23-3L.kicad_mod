@@ -1,0 +1,20 @@
+(footprint "SOT23-3L" (version 20221018) (generator pcbnew)
+  (layer "F.Cu")
+  (attr smd)
+  (fp_text reference "REF**" (at 0 0) (layer "F.SilkS") hide
+      (effects (font (size 1.524 1.524) (thickness 0.05)))
+    (tstamp 57fa98a0-75b0-4f5e-8d58-87d891f77e57)
+  )
+  (fp_text value "N-Channel 60-V (D-S) MOSFET" (at 0 0) (layer "F.SilkS") hide
+      (effects (font (size 1.524 1.524) (thickness 0.05)))
+    (tstamp a19162a9-addf-491d-9385-01a4acdd97f0)
+  )
+  (pad "1" smd rect (at -1 -0.95 270) (size 0.8 1.2) (layers "F.Cu") (tstamp f77ec72d-71ec-45fb-8750-f6c0b9d422d2))
+  (pad "2" smd rect (at -1 0.95 270) (size 0.8 1.2) (layers "F.Cu") (tstamp 19abd952-ec4a-4587-b24e-17b2dbb57f58))
+  (pad "3" smd rect (at 1 0 270) (size 0.8 1.2) (layers "F.Cu") (tstamp 3beb3f13-9d9b-484b-9a7d-ea586f9772e6))
+  (model "./wrlshp/401C990C-4CD5.wrl"
+    (offset (xyz 0 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 180))
+  )
+)

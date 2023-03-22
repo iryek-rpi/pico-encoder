@@ -1,0 +1,19 @@
+(footprint "IND-0603" (version 20221018) (generator pcbnew)
+  (layer "F.Cu")
+  (attr smd)
+  (fp_text reference "REF**" (at 0 0) (layer "F.SilkS") hide
+      (effects (font (size 1.524 1.524) (thickness 0.05)))
+    (tstamp 2eaead7d-b67b-4570-89c6-0a4d3396af1f)
+  )
+  (fp_text value "Inductor 0603(1608)" (at 0 0) (layer "F.SilkS") hide
+      (effects (font (size 1.524 1.524) (thickness 0.05)))
+    (tstamp 157d43ad-9541-434f-9e09-f91a0d996659)
+  )
+  (pad "1" smd rect (at 0 -0.8 270) (size 0.89 0.82) (layers "F.Cu") (tstamp 49fb5e64-3eb5-4285-9a53-4004148ca0a7))
+  (pad "2" smd rect (at 0 0.8 270) (size 0.89 0.82) (layers "F.Cu") (tstamp 33547dd5-e381-4122-9791-439056aa0d2c))
+  (model "./wrlshp/64956B68-3BCD.wrl"
+    (offset (xyz 0 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 180))
+  )
+)

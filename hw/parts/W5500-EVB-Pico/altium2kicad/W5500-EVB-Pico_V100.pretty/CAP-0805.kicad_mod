@@ -1,0 +1,19 @@
+(footprint "CAP-0805" (version 20221018) (generator pcbnew)
+  (layer "F.Cu")
+  (attr smd)
+  (fp_text reference "REF**" (at 0 0) (layer "F.SilkS") hide
+      (effects (font (size 1.524 1.524) (thickness 0.05)))
+    (tstamp 05ab0f92-e648-434d-9aa2-347518df909e)
+  )
+  (fp_text value "Ceramic CAP 0805(2012)" (at 0 0) (layer "F.SilkS") hide
+      (effects (font (size 1.524 1.524) (thickness 0.05)))
+    (tstamp 93f0a819-9dbe-4528-a31e-d02299ab7321)
+  )
+  (pad "1" smd rect (at 0 0.889 90) (size 0.9144 1.2446) (layers "F.Cu") (tstamp b46d8536-4eb3-485b-9f33-c2f192146631))
+  (pad "2" smd rect (at 0 -0.889 90) (size 0.9 1.2446) (layers "F.Cu") (tstamp 5e3905a4-862c-4233-98eb-1a81746bcca8))
+  (model "./wrlshp/06341B58-CF93.wrl"
+    (offset (xyz 0 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 180))
+  )
+)

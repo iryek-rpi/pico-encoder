@@ -1,0 +1,19 @@
+(footprint "RES-0402" (version 20221018) (generator pcbnew)
+  (layer "F.Cu")
+  (attr smd)
+  (fp_text reference "REF**" (at 0 0) (layer "F.SilkS") hide
+      (effects (font (size 1.524 1.524) (thickness 0.05)))
+    (tstamp 02675efc-d171-403e-add4-b14f61db1175)
+  )
+  (fp_text value "RES-0402" (at 0 0) (layer "F.SilkS") hide
+      (effects (font (size 1.524 1.524) (thickness 0.05)))
+    (tstamp f82a47f8-47a9-432c-87a6-8f8c64065691)
+  )
+  (pad "1" smd rect (at 0 -0.5 270) (size 0.5 0.5) (layers "F.Cu") (tstamp 5c51213f-5b23-46a7-aee6-78ae532fdf19))
+  (pad "2" smd rect (at 0 0.5 270) (size 0.5 0.5) (layers "F.Cu") (tstamp 978c0b13-2599-44e8-afc5-fefeb0fd89b4))
+  (model "./wrlshp/2866B722-47D3.wrl"
+    (offset (xyz 0 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 180))
+  )
+)

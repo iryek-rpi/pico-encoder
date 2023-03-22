@@ -1,0 +1,22 @@
+(footprint "SOT-23-5L" (version 20221018) (generator pcbnew)
+  (layer "F.Cu")
+  (attr smd)
+  (fp_text reference "REF**" (at 0 0) (layer "F.SilkS") hide
+      (effects (font (size 1.524 1.524) (thickness 0.05)))
+    (tstamp 6955d96c-459d-43e3-83e2-4def047b94b8)
+  )
+  (fp_text value "600mA CMOS LDO Regulator" (at 0 0) (layer "F.SilkS") hide
+      (effects (font (size 1.524 1.524) (thickness 0.05)))
+    (tstamp f3cbe3a9-6430-431a-9a63-1e9af5a708ea)
+  )
+  (pad "1" smd rect (at -0.95 1.075) (size 0.55001 1.45001) (layers "F.Cu") (tstamp a14e05ec-4a78-484d-a014-d88c27228d8e))
+  (pad "2" smd rect (at 0 1.075) (size 0.55001 1.45001) (layers "F.Cu") (tstamp 9be6eb88-9b4f-439b-b995-b3f9961dbfd0))
+  (pad "3" smd rect (at 0.95 1.075) (size 0.55001 1.45001) (layers "F.Cu") (tstamp ab6c6582-b923-48fd-9049-2e0a8bb47205))
+  (pad "4" smd rect (at 0.95 -1.075) (size 0.55001 1.45001) (layers "F.Cu") (tstamp 5bf043a3-76fe-4347-82f8-507835411c7f))
+  (pad "5" smd rect (at -0.95 -1.075) (size 0.55001 1.45001) (layers "F.Cu") (tstamp b6a065a0-c0b0-4f41-bdbf-42febe29c547))
+  (model "./wrlshp/DF59F263-27BB.wrl"
+    (offset (xyz 0 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 180))
+  )
+)

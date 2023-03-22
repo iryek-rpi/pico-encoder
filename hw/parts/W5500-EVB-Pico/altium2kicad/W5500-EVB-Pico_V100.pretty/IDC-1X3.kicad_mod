@@ -1,0 +1,20 @@
+(footprint "IDC-1X3" (version 20221018) (generator pcbnew)
+  (layer "F.Cu")
+  (attr smd)
+  (fp_text reference "REF**" (at 0 0) (layer "F.SilkS") hide
+      (effects (font (size 1.524 1.524) (thickness 0.05)))
+    (tstamp e0cdfb19-2347-49c9-91fb-98bd1b80295d)
+  )
+  (fp_text value "2.54mm 1x3 Pin Header DIP" (at 0 0) (layer "F.SilkS") hide
+      (effects (font (size 1.524 1.524) (thickness 0.05)))
+    (tstamp 92a0f5b2-becb-4049-b7c1-66266e5fe814)
+  )
+  (pad "1" thru_hole roundrect (at 0 0) (size 1.524 1.524) (drill 0.9144) (layers "*.Cu") (roundrect_rratio 0.25) (tstamp 2787e0b9-3046-46bd-835e-cd6536ac5d57))
+  (pad "2" thru_hole circle (at 2.54 0) (size 1.524 1.524) (drill 0.9144) (layers "*.Cu") (tstamp 9458e86a-5d09-4d74-a0b3-77a407760810))
+  (pad "3" thru_hole circle (at 5.08 0) (size 1.524 1.524) (drill 0.9144) (layers "*.Cu") (tstamp ee24d248-3c3b-43ed-bc97-ca5f53737b54))
+  (model "./wrlshp/A9B1A99E-DA9F.wrl"
+    (offset (xyz 0 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 0))
+  )
+)

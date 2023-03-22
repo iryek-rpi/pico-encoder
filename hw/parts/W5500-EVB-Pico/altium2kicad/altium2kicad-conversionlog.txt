@@ -1,0 +1,56 @@
+Archive:  db/19706.zip
+  inflating: db/19706/W5500-EVB-Pico_V100.PcbDoc  
+  inflating: db/19706/W5500-EVB-Pico_V100.PrjPcb  
+  inflating: db/19706/W5500-EVB-Pico_V100.SchDoc  
+Loading W5500-EVB-Pico_V100.SchDoc
+
+Loading W5500-EVB-Pico_V100.PcbDoc
+
+Done.
+Handling W5500-EVB-Pico_V100-PcbDoc/Root Entry/Board6/Data.dat
+ASCII-W5500-EVB-Pico_V100-PcbDoc.PcbDoc exists?
+Writing to W5500-EVB-Pico_V100-PcbDoc/Root Entry/Board6/Data.dat.txt
+Writing to W5500-EVB-Pico_V100-PcbDoc/Root Entry/Models/Data.dat.txt
+Writing to W5500-EVB-Pico_V100-PcbDoc/Root Entry/UniqueIDPrimitiveInformation/Data.dat.txt
+Writing to W5500-EVB-Pico_V100-PcbDoc/Root Entry/Rules6/Data.dat.txt
+Writing to W5500-EVB-Pico_V100-PcbDoc/Root Entry/Classes6/Data.dat.txt
+Writing PCB to W5500-EVB-Pico_V100-PcbDoc.kicad_pcb
+Writing to W5500-EVB-Pico_V100-PcbDoc/Root Entry/Nets6/Data.dat.txt
+Writing to W5500-EVB-Pico_V100-PcbDoc/Root Entry/Components6/Data.dat.txt
+Pads6...
+Writing to W5500-EVB-Pico_V100-PcbDoc/Root Entry/ComponentBodies6/Data.dat.txt
+NOT FOUND: CAPC1005X06.wrl
+NOT FOUND: RES_C1005X04N.wrl
+NOT FOUND: User Library-pts820_15_pb.wrl
+NOT FOUND: 0805 SMD Capacitor.wrl
+NOT FOUND: User Library-QFN56_0_4.wrl
+NOT FOUND: 45855.wrl
+NOT FOUND: User Library-Chip InductorINDC1608X95N.wrl
+NOT FOUND: W5500.wrl
+NOT FOUND: User Library-MicroUSB-B_Molex_105017-0001.wrl
+NOT FOUND: User Library-SOT23-5-2.wrl
+NOT FOUND: User Library-ABRACON_ASE.wrl
+NOT FOUND: LED-0603-RED.wrl
+NOT FOUND: User Library-Chip Cap_MLCC_1808 (4520)_K.wrl
+NOT FOUND: SOD-323F.wrl
+NOT FOUND: PH03-3.wrl
+NOT FOUND: LED-0603-GREEN.wrl
+NOT FOUND: SOT23.wrl
+Writing to W5500-EVB-Pico_V100-PcbDoc/Root Entry/ShapeBasedComponentBodies6/Data.dat.txt
+Writing to W5500-EVB-Pico_V100-PcbDoc/Root Entry/Components6/Data.dat.txt
+Writing to W5500-EVB-Pico_V100-PcbDoc/Root Entry/Arcs6/Data.dat.txt
+Writing to W5500-EVB-Pico_V100-PcbDoc/Root Entry/Vias6/Data.dat.txt
+Writing to W5500-EVB-Pico_V100-PcbDoc/Root Entry/Polygons6/Data.dat.txt
+Writing to W5500-EVB-Pico_V100-PcbDoc/Root Entry/Tracks6/Data.dat.txt
+Writing to W5500-EVB-Pico_V100-PcbDoc/Root Entry/Dimensions6/Data.dat.txt
+Writing to W5500-EVB-Pico_V100-PcbDoc/Root Entry/FileVersionInfo/Data.dat.txt
+Writing to W5500-EVB-Pico_V100-PcbDoc/Root Entry/Fills6/Data.dat.txt
+Writing to W5500-EVB-Pico_V100-PcbDoc/Root Entry/Regions6/Data.dat.txt
+Overflow: verts:507 ver:251 vpos:4020 length:4020 !
+Overflow: verts:296 ver:40 vpos:644 length:644 !
+Texts6...
+Handling W5500-EVB-Pico_V100-PcbDoc/Root Entry/FileHeader.dat
+Handling W5500-EVB-Pico_V100-SchDoc/Root Entry/FileHeader.dat
+ERROR: iop4iot-¼¼·Î.png not found!
+Unhandled Record type within: 30
+Handling W5500-EVB-Pico_V100.SchDoc

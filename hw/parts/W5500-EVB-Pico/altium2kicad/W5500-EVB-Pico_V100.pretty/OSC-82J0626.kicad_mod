@@ -1,0 +1,21 @@
+(footprint "OSC-82J0626" (version 20221018) (generator pcbnew)
+  (layer "F.Cu")
+  (attr smd)
+  (fp_text reference "REF**" (at 0 0) (layer "F.SilkS") hide
+      (effects (font (size 1.524 1.524) (thickness 0.05)))
+    (tstamp 2ae57676-abdb-4732-9842-255a8ccc4bdf)
+  )
+  (fp_text value "X-tal 25MHz,3.2x2.5 SMD, CL=18pF" (at 0 0) (layer "F.SilkS") hide
+      (effects (font (size 1.524 1.524) (thickness 0.05)))
+    (tstamp 11fabb37-ce72-4cc3-ba43-dd0bcd2aaf41)
+  )
+  (pad "1" smd rect (at 0.8 1.1 90) (size 1.4 1.2) (layers "F.Cu") (tstamp 70e8c8a3-f294-44cf-be06-d303606f1f1b))
+  (pad "2" smd rect (at 0.8 -1.1 90) (size 1.4 1.2) (layers "F.Cu") (tstamp 7864ed1b-0e16-4ec1-8922-7402dd260668))
+  (pad "3" smd rect (at -0.8 -1.1 90) (size 1.4 1.2) (layers "F.Cu") (tstamp 935bd37e-36d5-4181-aa5f-abb6c6e39839))
+  (pad "4" smd rect (at -0.8 1.1 90) (size 1.4 1.2) (layers "F.Cu") (tstamp bd2660a5-b393-40a7-bad0-d7531480584d))
+  (model "./wrlshp/8CD16B12-2CC2.wrl"
+    (offset (xyz 0 0 0))
+    (scale (xyz 1 1 1))
+    (rotate (xyz 0 0 180))
+  )
+)
