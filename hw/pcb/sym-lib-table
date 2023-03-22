@@ -1,0 +1,5 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "RaspberryPi-Pico")(type "KiCad")(uri "${KIPRJMOD}/RaspberryPi-Pico.kicad_sym")(options "")(descr ""))
+  (lib (name "power-module")(type "KiCad")(uri "${KIPRJMOD}/power-module.kicad_sym")(options "")(descr ""))
+)
