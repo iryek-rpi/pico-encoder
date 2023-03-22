@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 0)
+  (lib (name "max3232_from_eagle-eagle-import")(type "KiCad")(uri "${KIPRJMOD}/max3232_from_eagle-eagle-import.kicad_sym")(options "")(descr ""))
+)

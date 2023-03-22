@@ -1,0 +1,15 @@
+Line #,Designator,Name,Description,Quantity,Manufacturer 1,Manufacturer Part Number 1,Link
+1,C1,10uF,10µF ±20% 50V Ceramic Capacitor X5R 1210 (3225 Metric),1,Taiyo Yuden,CEUMK325BJ106MM-T,https://amzn.to/3akMjF3
+2,C2,22uF,22µF ±10% 25V Ceramic Capacitor X5R 1210 (3225 Metric) ,1,KEMET,C1210C226K3PACTU,https://amzn.to/33zMOs9
+3,C3,220pF,220pF ±10% 100V Ceramic Capacitor BX 0805 (2012 Metric),1,KEMET,CDR01BX221BKUS7185,https://amzn.to/2WzREnE
+4,C4,0.1uF,0.1uF 50V,1,KEMET,C0805C104K5RACTU,https://amzn.to/3aUmz24
+5,D1,SS34,3A 40V SS34 SMA,1,Multicomp,SS34A,https://amzn.to/2QbmNd4
+6,L1,4.7uH,RLF7030T-4R7 4.7µH Shielded Wirewound Inductor 3.4A 31.2 mOhm Max Nonstandard,1,TDK,RLF7030T-4R7M3R4,https://www.ebay.com/itm/Drossel-Ferrit-SMD-4-7uH-3-4A-26m-20-Serie-RLF-RLF7030T-4R7M3R4-SMD-Leistun/383158359568?hash=item5936049610:m:mkrMTOh04wB9_WQ1xhv3jpg
+7,R1,124K,"124 kOhms ±1% 0.125W, 1/8W Chip Resistor 0805 (2012 Metric) Moisture Resistant Thick Film ",1,Yageo,RC0805FR-07124KL,https://www.ebay.com/itm/Qty-100-124K-ohm-1-1-8W-0805-thick-film-resistors/192867371274
+8,R2,40K2,"40.2 kOhms ±1% 0.125W, 1/8W Chip Resistor 0805 (2012 Metric) Automotive AEC-Q200 Thick Film",1,Stackpole Electronics,RMCF0805FT40K2,https://www.ebay.com/itm/50PCS-1-8W-0805-SMD-SMT-Resistors-1-Full-Range-of-Values-0-1-to-20M/253771062996?hash=item3b15ef1ed4:m:mh0pWtSn_ePr3EZrVdEsLZw
+9,R3,68K,"4.7 kOhms ±1% 0.125W, 1/8W Chip Resistor 0805 (2012 Metric) Automotive AEC-Q200 Thick Film",1,Vishay,CRCW0805680KFKEA,https://amzn.to/3dlf6uH
+10,R4,24K9,"200 Ohms ±5% 0.125W, 1/8W Chip Resistor 0805 (2012 Metric) Automotive AEC-Q200 Thick Film",1,Yageo,RC0805FR-0724K9L,https://www.ebay.com/itm/50PCS-1-8W-0805-SMD-SMT-Resistors-1-Full-Range-of-Values-0-1-to-20M/253771062996?hash=item3b15ef1ed4:m:mh0pWtSn_ePr3EZrVdEsLZw
+11,R5,100K,"100 kOhms ±1% 0.125W, 1/8W Chip Resistor 0805 (2012 Metric) Moisture Resistant Thick Film",1,Yageo,RC0805FR-07100KL,https://amzn.to/3dlf6uH
+12,R6,200K,"200 kOhms ±5% 0.125W, 1/8W Chip Resistor 0805 (2012 Metric) Automotive AEC-Q200 Thick Film",1,Stackpole Electronics,RMCF0805JT200K,https://amzn.to/2U7vtn3
+13,U1,MP1584,"Buck Switching Regulator IC Positive Adjustable 0.8V 1 Output 3A 8-SOIC (0.154"", 3.90mm Width) Exposed Pad",1,Monolithic Power Systems,MP1584EN-LF-Z,https://amzn.to/2JasvYF
+14,Wire,,,1,,,https://amzn.to/3d96tUf
