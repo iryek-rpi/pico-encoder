@@ -3,4 +3,5 @@
   (lib (name "power-module")(type "KiCad")(uri "${KIPRJMOD}/symbols/power-module.kicad_sym")(options "")(descr ""))
   (lib (name "w5500-evb-pico")(type "KiCad")(uri "${KIPRJMOD}/symbols/w5500-evb-pico.kicad_sym")(options "")(descr ""))
   (lib (name "max3232")(type "KiCad")(uri "${KIPRJMOD}/symbols/max3232.kicad_sym")(options "")(descr ""))
+  (lib (name "pico-w")(type "KiCad")(uri "${KIPRJMOD}/symbols/RaspberryPi-Pico.kicad_sym")(options "")(descr ""))
 )
