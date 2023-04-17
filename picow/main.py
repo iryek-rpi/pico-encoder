@@ -34,10 +34,14 @@ def main():
         data2eth = spc.read()
         if data2eth:
             led_blink_red()
+            print(buf2eth)
             buf2eth += data2eth
+            print(buf2eth)
         else:
             if buf2eth:
+                buf2eth = ubinascii.hexlify(buf2eth)
                 n_to_write = len(buf2eth)
+                #buf2eth = ubinascii.a2b_base64(buf2eth)
                 while True:
                     n_written = seth.write(buf2eth)
                     if not n_written:
@@ -53,9 +57,12 @@ def main():
                 data2pc = seth.read()
                 if data2pc:
                     led_blink_red()
+                    print('buf2pc: ', buf2pc)
                     buf2pc += data2pc
+                    print('buf2pc: ', buf2pc)
                 else:
                     if buf2pc:
+                        buf2pc = ubinascii.unhexlify(buf2pc)                        
                         n_to_write = len(buf2pc)
                         while True:
                             n_written = spc.write(buf2pc)
