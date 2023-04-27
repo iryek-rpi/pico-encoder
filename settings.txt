@@ -1,0 +1,15 @@
+key
+serial
+  baud
+  parity
+  data size
+  stop bits
+network
+  dhcp
+  ip
+  gateway
+  subnet mask
+  port
+peer 
+  ip
+  port
