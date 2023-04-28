@@ -11,6 +11,7 @@ from usocket import socket
 import network
 import ubinascii
 
+from settings import init_settings
 from send_tcp import w5x00_init
 
 interrupt_flag=0
