@@ -23,7 +23,7 @@ PEERPORT = 'peer_port'
 DEFAUlT_SETTINGS = {
     KEY:'00000000',
     BAUD : 9600,
-    PARITY : None,
+    PARITY : 'N',
     DATASIZE : 8,
     STOPBITS : 1,
     DHCP : True,
