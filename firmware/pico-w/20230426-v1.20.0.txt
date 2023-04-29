@@ -1,0 +1,62 @@
+New mip package manager, compressed type structs and Pico W support Latest
+@dpgeorge dpgeorge released this 3 days ago
+· 24 commits to master since this release
+ v1.20.0
+ 294baf5
+This release of MicroPython introduces a new lightweight package manager called mip, which uses a custom protocol to query and install packages that is optimised for embedded systems. It is intended to take over the role of upip and supports installing packages from micropython-lib as well as any URL. Mip can be run directly on a device (with network connectivity) or via mpremote. As part of this, all pure-Python drivers have been moved from the micropython repository to the micropython-lib repository, making it easier to install the packages needed for a given project.
+
+In the MicroPython runtime, core/built-in types have been compressed by only including in the C-level type struct as many slots for C function pointers as is needed for a given type (instead of storing NULL pointers for unused slots). This resulted in a reduction of code size of many kilobytes for all ports (eg around 1200 for bare-arm) with a very minimal loss in performance. Any third-party C extensions will need to be updated to work with this change. See commits 662b976 and 3ac8b58 for details.
+
+The MicroPython VM/runtime has also seen many improvements and bug fixes, including: addition of hex/fromhex methods to bytes/memoryview/bytearray, dictionary union (PEP 584), support for __float__ and __complex__ functions, support for __dict__ on module objects and UTF-8 validation of all strings. Whole number floats are now formatted exactly, and there have been other accuracy improvements to parsing and formatting of floats. A sub-version has been introduced for .mpy files which is used only when a .mpy file includes native code, allowing the native ABI to change while retaining backwards compatibility with pure bytecode .mpy files. There is now an option to have the GC heap split across more than one pool of memory, although this is not yet in use by the ports. And root pointer registration has been simplified with the new MP_REGISTER_ROOT_POINTER macro.
+
+In the network module, the keyword arguments to scan(), connect() and config() have been renamed to be more consistent across ports and drivers. The changed argument names are: "essid" changed to "ssid", "auth" or "authmode" changed to "security", and "password" changed to "key". The old keyword arguments are still supported so this change is backwards compatible. The functions network.hostname() and network.country() have also been added and provide a standard interface across ports to set the global networking configuration for all interfaces and interface types. In particular, setting the hostname is now supported for all CYW43xx-based boards (pyboard-D, Arduino Portenta, Pico W, and others).
+
+The mbedtls (SSL library) settings have also been unified across ports that use this library and enable elliptic curve DH and DSA cryptography enabled so that devices can connect to more websites. The cert_reqs and cadata arguments have also been implemented. Sockets now support leaving multicast groups. WebREPL will now run the page from the device, allowing WebREPL resources to load from a HTTPS site.
+
+The bluetooth module has a minor breaking change for IRQ_GATTC_CHARACTERISTIC_RESULT: def_handle has been replaced with end_handle. This is not expected to affect most programs as def_handle is unlikely to be used. See commit cacc96d.
+
+The uasyncio module now supports stream read(-1), handles gather with no awaitables, and adds a clear() method to ThreadSafeFlag. The framebuf module adds ellipse and polygon drawing methods, and a fill argument to rect() for consistency with those new methods.
+
+A new port has been added, the "embed" port, which is a port of MicroPython that targets the C language and outputs a set of self-contained .c and .h files for embedding into a wider project. An example is provided to show how this works.
+
+The esp8266 port has reverse-special-methods enabled on the GENERIC board, uart.flush() and uart.txdone() added, real open drain output enabled on pins driven by PWM, and adds the ability to set TX power for the WLAN interface.
+
+The esp32 port now uses synchronous BLE events which allows support for BLE pairing and bonding. The LAN driver adds support for LAN8710, KSZ8081, configuration of ETH ref_clk pin, and support for SPI-based Ethernet chips. UART now supports setting timeout_char and implements uart.flush() and uart.txdone(). New boards include ESP32S3 with octal SPIRAM, Olimex PoE boards and a generic board for unicore chips. There have also been many bug fixes, in particular for newer MCU versions such as S2, S3 and C3.
+
+The mimxrt port has seen a lot of clean up of the code, support for MIMXRT1176 MCUs and the MIMXRT1170_EVK board, a soft-timer implementation of machine.Timer, addition of machine.bootloader(), as well as uart.flush() and uart.txdone().
+
+On the nrf port, machine.UART and machine.PWM have been improved to match other ports (the PWM change is a breaking change), and machine.I2C now supports the freq argument. New boards include the Arduino Nano 33 BLE sense board and the Seeed XIAO NRF52840 Sense.
+
+The rp2 port sees the integration of the CYW43xx WiFi driver which is used in the new Pico W board, a board similar to the Pico but with WiFi support. Other new boards include W5500_EVB_PICO, WEACTSTUDIO and the nullbits Bit-C PRO board. Support has been added for named pins, including Pin.board and Pin.cpu attributes, consistent with other ports that support this feature. The machine.lightsleep() function has been implemented, along with SSL certificate time validation, and more accurate formulas are used to determine PWM frequency and duty. The GC heap available to MicroPython programs has been increased to use the maximum available free RAM, adding about 20k to the user heap. There have also been important bug fixes to threading and concurrency when using both cores.
+
+The samd port has been significantly extended to include: named pins with a pins.csv file, and Pin.board and Pin.cpu attributes; ADC, PWM, DAC, SoftSPI, SoftI2C, SPI, I2C and RTC classes added to the machine module; pin.irq() method and OPEN_DRAIN mode for pins; freq, disable_irq, enable_irq, idle, lightsleep and time_pulse_us functions added to the machine module. Floating point support has been added for SAMD21 devices, and the math module enabled for SAMD51. A board definition for Sparkfun Think Plus has been added.
+
+The stm32 port sees support added for STM32L1xx MCUs, STM32H723, USB on STM32G0xx and mboot support for STM32G0xx. The existing CYW43xx WiFi driver has been replaced with the open-source version of cyw43-driver and this has been integrated with all existing boards with CYW43xx chips. Support for the CC3000 WiFi driver has been removed, and the Wiznet driver integration has been reworked to use the generic one shared with other ports (and also uses lib/wiznet5k instead of the old drivers/wiznet5k). Hardware I2C implementation has been added for STM32L1xx and STM32L4xx, support added for Arduino 1200bps touch to enter the bootloader (only on Arduino boards), mbedtls (SSL) certificate time validation added, and link-time-optimisation (LTO) enabled by default on boards with small flash size. New board definitions include: LEGO Hub No. 7, NUCLEO-L152RE, NUCLEO-F756ZG, NUCLEO-H723ZG, Arduino Nicla Vision and Arduino Giga H7. Arduino boards also now include a range of frozen libraries including senml.
+
+For the unix and windows ports, build outputs (including executables) are now kept inside the $(BUILD) directory associated with the build. As part of this the variant suffix has been removed from the executable name. For example, what was micropython-coverage is now build-coverage/micropython, and the standard variant is build-standard/micropython. Furthermore, the dev variant has been removed and its features enabled instead on the standard variant, which now enables the same feature set as a typical bare-metal board, making it more convenient to use for development. The remaining variants are: minimal, standard, nanbox, coverage. The SSL implementation for this port has switched from axtls to mbedtls, again to match most bare-metal ports.
+
+The javascript port has been renamed to the webassembly port, and adds support for VFS and VfsPosix using Emscripten's POSIX filesystem layer. The way stdout printing works has also changed to dispatch via a custom event called "micropython-print".
+
+The zephyr port upgraded Zephyr to v3.1.0, added custom configuration for bbc_microbit_v2, and enabled finalisers.
+
+The change in code size since the previous release for various ports is (absolute and percentage change in the text section):
+
+   bare-arm:   -1124  -1.934%
+minimal x86:   -4322  -2.967%
+   unix x64: +264181 +50.533% standard
+      stm32:   -3592  -0.906% PYBV10
+     cc3200:   -1832  -0.990%
+    esp8266:   -2284  -0.327% GENERIC
+      esp32:   +9659  +0.632% GENERIC
+        nrf:     -84  -0.045% pca10040
+        rp2:  +13096  +4.291% PICO
+       samd: +127776 +90.488% ADAFRUIT_ITSYBITSY_M4_EXPRESS
+
+The changes that dominate these numbers are:
+
+bare-arm, minimal, stm32, cc3200, esp8266: reduced size due to compressed type structs
+unix: switching axtls for mbedtls, merging in dev configuration options and features
+esp32: new Ethernet drivers and some additional machine module functionality
+nrf: compressed type struct and machine module improvements
+rp2: additional mbedtls features and ciphers
+samd: many new features, and machine module classes and functions
