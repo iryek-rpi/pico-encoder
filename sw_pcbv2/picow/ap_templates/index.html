@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1", charset="utf-8">
+        <title>위너스 암호화 단말 설정 WIFI</title>
+		<script>
+			window.onload = function() {
+				//alert({{msg}});
+				//document.getElementById("demo").innerHTML = "test";
+				document.getElementById("baud").value = "{{ns['baud']}}";
+				//document.getElementById("parity").value = "{ns['parity']}}";
+				document.getElementById("datasize").value = "{{ns['datasize']}}";
+				document.getElementById("stopbits").value = "{{ns['stopbits']}}";
+				document.getElementById("dhcp").value = "{{ns['dhcp']}}";
+				document.getElementById("parity").value = "{{ns['parity']}}";
+				
+				document.getElementById("ip").value = "{{ns["ip"]}}";
+				document.getElementById("port").value = "{{ns['port']}}";
+				document.getElementById("gateway").value = "{{ns['gateway']}}";
+				document.getElementById("subnet").value = "{{ns['subnet']}}";
+				document.getElementById("remote_ip").value = "{{ns['remote_ip']}}";
+				document.getElementById("remote_port").value = "{{ns['remote_port']}}";
+				document.getElementById("crypto_key").value = "{{ns['crypto_key']}}";
+            };
+		</script>
+    </head>
+    <body>
+        <h1>위너스 암호화 단말 설정</h1>
+		<div>
+			{{render_template("./ap_templates/msg.html")}}
+		</div>
+        <form id="settings-form" action="/configure" method="POST" autocomplete="off" autocapitalize="none">
+        	<label for="baud">RS232 속도:</label>
+			<select id="baud" name="baud">
+				<option selected value="9600">9600</option>
+				<option value="19200">19200</option>
+				<option value="38400">38400</option>
+				<option value="57600">57600</option>
+				<option value="115200">115200</option>
+			</select><br>
+			<label for="parity">패리티 비트:</label>
+			<select id="parity" name="parity">
+				<option selected value="no">No</option>
+				<option value="0">짝수</option>
+				<option value="1">홀수</option>
+			</select><br>
+			<label for="datasize">데이터 길이:</label>
+			<select id="datasize" name="datasize">
+				<option value="7">7 비트</option>
+				<option selected value="8">8 비트</option>
+				<option value="9">9 비트</option>
+			</select><br>
+			<label for="stopbits">스톱 비트:</label>
+			<select id="stopbits" name="stopbits">
+				<option selected value="1">1 비트</option>
+				<option value="2">2 비트</option>
+			</select><br><br>
+			<label for="dhcp">DHCP:</label>
+			<select id="dhcp" name="dhcp">
+				<option selected value="False">Off</option>
+				<option value="True">On</option>
+			</select><br>
+			<label for="ip">IP 주소:</label>
+			<input type="text" id="ip" name="ip"><br>
+			<label for="port">포트:</label>
+			<input type="text" id="port" name="port"><br>
+			<label for="gateway">게이트웨이 주소:</label>
+			<input type="text" id="gateway" name="gateway"><br>
+			<label for="subnet">서브넷 마스크:</label>
+			<input type="text" id="subnet" name="gateway"><br><br>
+			<label for="remote_ip">원격 단말 주소:</label>
+			<input type="text" id="remote_ip" name="remote_ip"><br>
+			<label for="remote_port">원격 단말 포트:</label>
+			<input type="text" id="remote_port" name="remote_port"><br><br>
+
+            <label for="crypto_key">암호키(8자리):</label>
+            <input type="text" id="crypto_key" name="crypto_key"><br><br>
+
+            <button form="settings-form">저장</button>&nbsp;&nbsp;&nbsp;
+			<button form="settings-form" formaction="/reset">초기화</button>&nbsp;&nbsp;&nbsp;
+			<button form="settings-form" formaction="/cancel">취소</button>
+        </form>
+    </body>
+</html>

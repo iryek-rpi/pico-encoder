@@ -2,9 +2,11 @@
 from machine import Pin
 from machine import Timer
 from machine import UART
+import os
 import ubinascii
 
 import utime
+import ujson
 
 from phew import logging, server, access_point, dns
 from phew.template import render_template
@@ -12,7 +14,10 @@ from phew.server import redirect
 
 import utils
 
-DOMAIN = "Winners.hotspot"  # This is the address that is shown on the Captive Portal
+AP_NAME = "Winners WIFI"
+AP_DOMAIN = "winners.net"
+AP_TEMPLATE_PATH = "ap_templates"
+APP_TEMPLATE_PATH = "app_templates"
 
 SERIAL1_TIMEOUT = 20 # ms
 UART1_DELAY = 0.05 # 50ms
@@ -22,65 +27,71 @@ led = Pin('LED', Pin.OUT)
 interrupt_flag = 0
 
 def callback(btn):
-    global interrupt_flag
-    interrupt_flag=1
-
-    ap = access_point("위너스 핫스팟")
+    ap = access_point(AP_NAME)
     ip = ap.ifconfig()[0] # Grab the IP address and store it
     logging.info(f"starting DNS server on {ip}")
     dns.run_catchall(ip)  # Catch all requests and reroute them
     server.run()          # Run the server
     logging.info("Webserver Started")    
 
-print('Starting script')
+def setup_mode(prev_settings):
+    print("Entering setup mode...")
+    print(f"Previous settings: {prev_settings}")
+    
+    def ap_index(request):
+        if request.headers.get("host") != AP_DOMAIN:
+            return render_template(f"{AP_TEMPLATE_PATH}/redirect.html", domain = AP_DOMAIN)
 
-@server.route("/", methods=['GET'])
-def index(request):
-    """ Render the Index page"""
-    if request.method == 'GET':
-        logging.debug("Get request")
-        return render_template("index.html")
+        print(f"Previous settings in ap_index: {prev_settings}")
+        print(f"prev_settings['dhcp']: {prev_settings['dhcp']}")
+        print(f"prev_settings['parity']: {prev_settings['parity']}")
+        return render_template(f"{AP_TEMPLATE_PATH}/index.html", ns=prev_settings)
 
-# microsoft windows redirects
-@server.route("/ncsi.txt", methods=["GET"])
-def hotspot(request):
-    print(request)
-    print("ncsi.txt")
-    return "", 200
+    def ap_configure(request):
+        print("Saving user inputs...")
+        print(f"Previous settings in ap_configure: {prev_settings}")
 
+        print(request.form)
+        settings = ujson.loads(request.form)
+        print(settings)
+        print(type(request.form))
+        print(type(settings))
+        ns, msg = utils.validate_settings(settings)
+        with open("./app_templates/msg.html", "w") as f:
+            f.write(msg)
+            f.close()
+        if not ns:
+            return render_template(f"{AP_TEMPLATE_PATH}/index.html", ns=ns)
+        else:
+            utils.save_settings(ns)
+            return render_template(f"{AP_TEMPLATE_PATH}/configured.html", ns=ns)
 
-@server.route("/connecttest.txt", methods=["GET"])
-def hotspot(request):
-    print(request)
-    print("connecttest.txt")
-    return "", 200
+        #with open(WIFI_FILE, "w") as f:
+        #    print(request.form)
+        #    print(ujson.dumps(request.form))
+        #    ujson.dump(request.form, f)
+        #    f.close()
 
+        # Reboot from new thread after we have responded to the user.
+        #_thread.start_new_thread(machine_reset, ())
+        #return render_template(f"{AP_TEMPLATE_PATH}/configured.html", ssid = request.form["ssid"])
+        
+    def ap_catch_all(request):
+        if request.headers.get("host") != AP_DOMAIN:
+            return render_template(f"{AP_TEMPLATE_PATH}/redirect.html", domain = AP_DOMAIN)
 
-@server.route("/redirect", methods=["GET"])
-def hotspot(request):
-    print(request)
-    print("****************ms redir*********************")
-    return redirect(f"http://{DOMAIN}/", 302)
+        return "Not found.", 404
 
-# android redirects
-@server.route("/generate_204", methods=["GET"])
-def hotspot(request):
-    print(request)
-    print("******generate_204********")
-    return redirect(f"http://{DOMAIN}/", 302)
+    server.add_route("/", handler = ap_index, methods = ["GET"])
+    server.add_route("/configure", handler = ap_configure, methods = ["POST"])
+    server.set_callback(ap_catch_all)
 
-# apple redir
-@server.route("/hotspot-detect.html", methods=["GET"])
-def hotspot(request):
-    print(request)
-    """ Redirect to the Index Page """
-    return render_template("index.html")
+    ap = access_point(AP_NAME)
+    ip = ap.ifconfig()[0]
+    logging.info(f"starting DNS server on {ip}")
+    dns.run_catchall(ip) # Catch all requests and reroute them
 
-
-@server.catchall()
-def catch_all(request):
-    print("***************CATCHALL***********************\n" + str(request))
-    return redirect("http://" + DOMAIN + "/")
+print('Starting PICO-W script')
 
 
 def init_serial():
@@ -145,10 +156,17 @@ def main():
     json_settings = utils.load_json_settings()
     print(json_settings)
 
-    send_settings(s1, json_settings)
+    #send_settings(s1, json_settings)
     led.on()
 
-    callback2(0)
+    try:
+        os.remove('./ap_templates/msg.html')
+    except:
+        pass
+
+    setup_mode(ujson.loads(json_settings))
+    server.run()          # Run the server
+    logging.info("Webserver Started")    
 
     return
 
