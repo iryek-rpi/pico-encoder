@@ -1,3 +1,4 @@
+'''micropython example of serial communication between pico and pc'''
 from machine import Pin, UART
 import time
 
