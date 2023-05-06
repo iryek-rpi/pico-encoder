@@ -1,16 +1,10 @@
 from machine import Pin, Timer
 from machine import SPI
-from machine import UART
 from usocket import socket
 import network
 import ubinascii
 
 import time
-
-led_red = Pin(15, Pin.OUT)
-led_green = Pin(14, Pin.OUT)
-timer_red = Timer()
-timer_green = Timer()
 
 def w5x00_init(ip):
     spi=SPI(0,2_000_000, mosi=Pin(19),miso=Pin(16),sck=Pin(18))

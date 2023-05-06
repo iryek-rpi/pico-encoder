@@ -17,7 +17,6 @@ import utils
 AP_NAME = "Winners WIFI"
 AP_DOMAIN = "winners.net"
 AP_TEMPLATE_PATH = "ap_templates"
-APP_TEMPLATE_PATH = "app_templates"
 
 SERIAL1_TIMEOUT = 20 # ms
 UART1_DELAY = 0.05 # 50ms
@@ -39,11 +38,10 @@ def setup_mode(prev_settings):
     print(f"Previous settings: {prev_settings}")
     
     def ap_index(request):
-        if request.headers.get("host") != AP_DOMAIN:
-            return render_template(f"{AP_TEMPLATE_PATH}/redirect.html", domain = AP_DOMAIN)
+        #if request.headers.get("host") != AP_DOMAIN:
+        #    return render_template(f"{AP_TEMPLATE_PATH}/redirect.html", domain = AP_DOMAIN)
 
         print(f"Previous settings in ap_index: {prev_settings}")
-        print(f"prev_settings['dhcp']: {prev_settings['dhcp']}")
         print(f"prev_settings['parity']: {prev_settings['parity']}")
         return render_template(f"{AP_TEMPLATE_PATH}/index.html", ns=prev_settings)
 
@@ -52,19 +50,20 @@ def setup_mode(prev_settings):
         print(f"Previous settings in ap_configure: {prev_settings}")
 
         print(request.form)
-        settings = ujson.loads(request.form)
-        print(settings)
         print(type(request.form))
+        
+        settings = request.form #ujson.loads(request.form)
+        print(settings)
         print(type(settings))
         ns, msg = utils.validate_settings(settings)
-        with open("./app_templates/msg.html", "w") as f:
+        with open("./ap_templates/msg.html", "w") as f:
             f.write(msg)
             f.close()
         if not ns:
-            return render_template(f"{AP_TEMPLATE_PATH}/index.html", ns=ns)
+            return render_template(f"{AP_TEMPLATE_PATH}/index.html", ns=settings)
         else:
             utils.save_settings(ns)
-            return render_template(f"{AP_TEMPLATE_PATH}/configured.html", ns=ns)
+            return render_template(f"{AP_TEMPLATE_PATH}/index.html", ns=ns)
 
         #with open(WIFI_FILE, "w") as f:
         #    print(request.form)
@@ -156,7 +155,7 @@ def main():
     json_settings = utils.load_json_settings()
     print(json_settings)
 
-    #send_settings(s1, json_settings)
+    send_settings(s1, json_settings)
     led.on()
 
     try:
