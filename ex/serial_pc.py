@@ -7,7 +7,6 @@ def init(port):
     ser = serial.Serial(port, 9600, timeout=1)
     return ser
 
-
 def main():
     # read two bytes of data
     ser = init('/dev/ttyUSB0')
