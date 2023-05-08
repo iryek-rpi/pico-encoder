@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <export version="E">
   <design>
-    <source>C:\Dev\pico-encoder\hw\pcb_v6\pcb.kicad_sch</source>
-    <date>5/8/2023 6:03:35 AM</date>
-    <tool>Eeschema 7.0.2</tool>
+    <source>/home/hwan/2023-work/winners/pico-encoder/hw/pcb_v6/pcb.kicad_sch</source>
+    <date>2023년 05월 08일 (월) 오전 06시 50분 19초</date>
+    <tool>Eeschema 7.0.1-3b83917a11~171~ubuntu20.04.1</tool>
     <sheet number="1" name="/" tstamps="/">
       <title_block>
         <title>RS-232, Ethernet Data Encryption Terminal</title>
@@ -277,11 +277,8 @@
       <value>RS232</value>
       <footprint>Connector_Dsub:DSUB-9_Female_Horizontal_P2.77x2.84mm_EdgePinOffset7.70mm_Housed_MountingHolesOffset9.12mm</footprint>
       <datasheet> ~</datasheet>
-      <fields>
-        <field name="LCSC">C141880</field>
-      </fields>
       <libsource lib="Connector" part="DE9_Receptacle_MountingHoles" description="9-pin female receptacle socket D-SUB connector, Mounting Hole"/>
-      <property name="LCSC" value="C141880"/>
+      <property name="LCSC" value=""/>
       <property name="Manufacturer" value=""/>
       <property name="Manufacturer PN" value=""/>
       <property name="Sheetname" value=""/>
@@ -358,12 +355,12 @@
       <value>100K</value>
       <footprint>Resistor_SMD:R_0805_2012Metric</footprint>
       <fields>
-        <field name="LCSC">C25271</field>
+        <field name="LCSC">C149504</field>
       </fields>
       <libsource lib="Device" part="R_US" description="Resistor, US symbol"/>
       <property name="Manufacturer" value=""/>
       <property name="Manufacturer PN" value=""/>
-      <property name="LCSC" value="C25271"/>
+      <property name="LCSC" value="C149504"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="pcb.kicad_sch"/>
       <property name="ki_description" value="Resistor, US symbol"/>
@@ -460,7 +457,7 @@
       <value>120</value>
       <footprint>Resistor_SMD:R_0603_1608Metric</footprint>
       <fields>
-        <field name="LCSC">C4190</field>
+        <field name="LCSC">C22787</field>
         <field name="MPN">0603WAF2201T5E</field>
         <field name="Manufacturer">UNIOHM</field>
       </fields>
@@ -468,7 +465,7 @@
       <property name="MPN" value="0603WAF2201T5E"/>
       <property name="Manufacturer" value="UNIOHM"/>
       <property name="Manufacturer PN" value=""/>
-      <property name="LCSC" value="C4190"/>
+      <property name="LCSC" value="C22787"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="pcb.kicad_sch"/>
       <property name="ki_description" value="Resistor"/>
@@ -480,7 +477,7 @@
       <value>120</value>
       <footprint>Resistor_SMD:R_0603_1608Metric</footprint>
       <fields>
-        <field name="LCSC">C4190</field>
+        <field name="LCSC">C22787</field>
         <field name="MPN">0603WAF2201T5E</field>
         <field name="Manufacturer">UNIOHM</field>
       </fields>
@@ -488,7 +485,7 @@
       <property name="MPN" value="0603WAF2201T5E"/>
       <property name="Manufacturer" value="UNIOHM"/>
       <property name="Manufacturer PN" value=""/>
-      <property name="LCSC" value="C4190"/>
+      <property name="LCSC" value="C22787"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="pcb.kicad_sch"/>
       <property name="ki_description" value="Resistor"/>
@@ -517,7 +514,7 @@
       <value>120</value>
       <footprint>Resistor_SMD:R_0603_1608Metric</footprint>
       <fields>
-        <field name="LCSC">C4190</field>
+        <field name="LCSC">C22787</field>
         <field name="MPN">0603WAF2201T5E</field>
         <field name="Manufacturer">UNIOHM</field>
       </fields>
@@ -525,7 +522,7 @@
       <property name="MPN" value="0603WAF2201T5E"/>
       <property name="Manufacturer" value="UNIOHM"/>
       <property name="Manufacturer PN" value=""/>
-      <property name="LCSC" value="C4190"/>
+      <property name="LCSC" value="C22787"/>
       <property name="Sheetname" value=""/>
       <property name="Sheetfile" value="pcb.kicad_sch"/>
       <property name="ki_description" value="Resistor"/>
@@ -995,37 +992,37 @@
   </libparts>
   <libraries>
     <library logical="Connector">
-      <uri>C:\Tools\Kicad-7.0.2\share\kicad\symbols\/Connector.kicad_sym</uri>
+      <uri>/usr/share/kicad/symbols//Connector.kicad_sym</uri>
     </library>
     <library logical="Connector_Generic">
-      <uri>C:\Tools\Kicad-7.0.2\share\kicad\symbols\/Connector_Generic.kicad_sym</uri>
+      <uri>/usr/share/kicad/symbols//Connector_Generic.kicad_sym</uri>
     </library>
     <library logical="Device">
-      <uri>C:\Tools\Kicad-7.0.2\share\kicad\symbols\/Device.kicad_sym</uri>
+      <uri>/usr/share/kicad/symbols//Device.kicad_sym</uri>
     </library>
     <library logical="Interface_UART">
-      <uri>C:\Tools\Kicad-7.0.2\share\kicad\symbols\/Interface_UART.kicad_sym</uri>
+      <uri>/usr/share/kicad/symbols//Interface_UART.kicad_sym</uri>
     </library>
     <library logical="Switch">
-      <uri>C:\Tools\Kicad-7.0.2\share\kicad\symbols\/Switch.kicad_sym</uri>
+      <uri>/usr/share/kicad/symbols//Switch.kicad_sym</uri>
     </library>
     <library logical="dmg2305-FET">
-      <uri>C:\Dev\pico-encoder\hw\pcb_v6/symbols/DMG2305UX-7.kicad_sym</uri>
+      <uri>/home/hwan/2023-work/winners/pico-encoder/hw/pcb_v6/symbols/DMG2305UX-7.kicad_sym</uri>
     </library>
     <library logical="mp1584en">
-      <uri>C:\Dev\pico-encoder\hw\pcb_v6/symbols/mp1584en.kicad_sym</uri>
+      <uri>/home/hwan/2023-work/winners/pico-encoder/hw/pcb_v6/symbols/mp1584en.kicad_sym</uri>
     </library>
     <library logical="raspberrypi-pico-w">
-      <uri>C:\Dev\pico-encoder\hw\pcb_v6/symbols/RaspberryPi-Pico-W.kicad_sym</uri>
+      <uri>/home/hwan/2023-work/winners/pico-encoder/hw/pcb_v6/symbols/RaspberryPi-Pico-W.kicad_sym</uri>
     </library>
     <library logical="rlf7030t-4r7m3r4">
-      <uri>C:\Dev\pico-encoder\hw\pcb_v6/symbols/rlf7030t-4r7m3r4.kicad_sym</uri>
+      <uri>/home/hwan/2023-work/winners/pico-encoder/hw/pcb_v6/symbols/rlf7030t-4r7m3r4.kicad_sym</uri>
     </library>
     <library logical="ss34">
-      <uri>C:\Dev\pico-encoder\hw\pcb_v6/symbols/ss34.kicad_sym</uri>
+      <uri>/home/hwan/2023-work/winners/pico-encoder/hw/pcb_v6/symbols/ss34.kicad_sym</uri>
     </library>
     <library logical="w5500-evb-pico">
-      <uri>C:\Dev\pico-encoder\hw\pcb_v6/symbols/w5500-evb-pico.kicad_sym</uri>
+      <uri>/home/hwan/2023-work/winners/pico-encoder/hw/pcb_v6/symbols/w5500-evb-pico.kicad_sym</uri>
     </library>
   </libraries>
   <nets>
