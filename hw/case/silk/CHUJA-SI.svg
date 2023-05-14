@@ -25,8 +25,8 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="0.73851712"
-     inkscape:cx="106.97112"
-     inkscape:cy="552.45842"
+     inkscape:cx="-97.492662"
+     inkscape:cy="553.81248"
      inkscape:window-width="2498"
      inkscape:window-height="1417"
      inkscape:window-x="54"
@@ -92,14 +92,25 @@
     <text
        xml:space="preserve"
        style="font-size:21.4065px;fill:#000000;stroke-width:1.78387"
-       x="36.872002"
-       y="178.16666"
+       x="25.989441"
+       y="143.4324"
        id="text174"
-       transform="scale(1.0205458,0.97986781)"><tspan
+       transform="scale(1.0205458,0.97986782)"><tspan
          sodipodi:role="line"
          id="tspan172"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21.4065px;font-family:Perpetua;-inkscape-font-specification:'Perpetua, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:1.78387"
-         x="36.872002"
-         y="178.16666">CHUJA-SI</tspan></text>
+         x="25.989441"
+         y="143.4324">CHUJA-SI</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:20.9445px;font-family:'Felix Titling';-inkscape-font-specification:'Felix Titling, Normal';fill:#000000;stroke-width:0.264583"
+       x="26.511457"
+       y="195.96985"
+       id="text230"><tspan
+         sodipodi:role="line"
+         id="tspan228"
+         style="stroke-width:0.264583"
+         x="26.511457"
+         y="195.96985">PWR RUN EOR</tspan></text>
   </g>
 </svg>
