@@ -1,5 +1,4 @@
-# pico-serial
+# Raspberry Pi Pico W + W5500-EVB-Pico
 
-Simple two-way serial between Raspberry Pi Pico and Pi (or PC).
-
-Files for https://goldensyrupgames.com/blog/2022-02-04-pico-simple-two-way-serial, see there for details.
+* Raspberry Pi Pico W for serving a device configuration web page
+* W5500-EVB-Pico from Wiznet for TCP/IP relay
