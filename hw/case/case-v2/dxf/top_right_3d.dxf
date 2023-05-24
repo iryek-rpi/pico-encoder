@@ -1,0 +1,2740 @@
+999
+FreeCAD v0.21 33110 (Git)
+  0
+SECTION
+  2
+HEADER
+  9
+$ACADVER
+  1
+AC1014
+  9
+$ACADMAINTVER
+ 70
+     9
+  9
+$DWGCODEPAGE
+  3
+ANSI_1252
+  9
+$TEXTSTYLE
+  7
+STANDARD
+  9
+$DIMSTYLE
+  2
+STANDARD
+  9
+$DIMTXSTY
+  7
+STANDARD
+  9
+$CMLSTYLE
+  2
+STANDARD
+  9
+$LUNITS
+ 70
+2
+  9
+$INSUNITS
+ 70
+4
+  9
+$PEXTMAX
+ 10
+50
+ 20
+50
+ 30
+50
+  9
+$PEXTMIN
+ 10
+0
+ 20
+0
+ 30
+0
+  9
+$HANDSEED
+  5
+FFFF
+  0
+ENDSEC
+  0
+SECTION
+  2
+CLASSES
+  0
+CLASS
+  1
+ACDBDICTIONARYWDFLT
+  2
+AcDbDictionaryWithDefault
+  3
+ObjectDBX Classes
+ 90
+        0
+280
+     0
+281
+     0
+  0
+CLASS
+  1
+XRECORD
+  2
+AcDbXrecord
+  3
+ObjectDBX Classes
+ 90
+        0
+280
+     0
+281
+     0
+  0
+CLASS
+  1
+LWPOLYLINE
+  2
+AcDbPolyline
+  3
+ObjectDBX Classes
+ 90
+        0
+280
+     0
+281
+     1
+  0
+ENDSEC
+  0
+SECTION
+  2
+TABLES
+  0
+TABLE
+  2
+VPORT
+  5
+20
+330
+0
+100
+AcDbSymbolTable
+ 70
+     1
+  0
+VPORT
+  5
+21
+330
+20
+100
+AcDbSymbolTableRecord
+100
+AcDbViewportTableRecord
+  2
+*ACTIVE
+ 70
+     0
+  0
+ENDTAB
+  0
+TABLE
+  2
+LTYPE
+  5
+22
+330
+0
+100
+AcDbSymbolTable
+ 70
+     1
+  0
+LTYPE
+  5
+23
+330
+21
+100
+AcDbSymbolTableRecord
+100
+AcDbLinetypeTableRecord
+  2
+BYBLOCK
+ 70
+     0
+  3
+
+ 72
+    65
+ 73
+     0
+ 40
+0.0
+  0
+LTYPE
+  5
+24
+330
+21
+100
+AcDbSymbolTableRecord
+100
+AcDbLinetypeTableRecord
+  2
+BYLAYER
+ 70
+     0
+  3
+
+ 72
+    65
+ 73
+     0
+ 40
+0.0
+  0
+LTYPE
+  5
+25
+330
+21
+100
+AcDbSymbolTableRecord
+100
+AcDbLinetypeTableRecord
+  2
+CONTINUOUS
+ 70
+     0
+  3
+Solid line
+ 72
+    65
+ 73
+     0
+ 40
+0.0
+  0
+ENDTAB
+  0
+TABLE
+  2
+LAYER
+  5
+A51
+330
+0
+100
+AcDbSymbolTable
+ 70
+2
+  0
+LAYER
+  5
+A52
+330
+A51
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+0
+ 70
+   0
+ 62
+   7
+  6
+CONTINUOUS
+  0
+LAYER
+  5
+A53
+330
+A51
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+View014
+ 70
+    0
+ 62
+    7
+  6
+CONTINUOUS
+  0
+ENDTAB
+  0
+TABLE
+  2
+STYLE
+  5
+70
+330
+0
+100
+AcDbSymbolTable
+ 70
+     2
+  0
+STYLE
+  5
+71
+330
+70
+100
+AcDbSymbolTableRecord
+100
+AcDbTextStyleTableRecord
+  2
+STANDARD
+ 70
+     0
+ 40
+0.0
+ 41
+1.0
+ 50
+0.0
+ 71
+     0
+ 42
+2.5
+  3
+arial.ttf
+  4
+
+  0
+STYLE
+  5
+72
+330
+70
+100
+AcDbSymbolTableRecord
+100
+AcDbTextStyleTableRecord
+  2
+ANNOTATIVE
+ 70
+     0
+ 40
+0.0
+ 41
+1.0
+ 50
+0.0
+ 71
+     0
+ 42
+2.5
+  3
+arial.ttf
+  4
+
+  0
+ENDTAB
+  0
+TABLE
+  2
+VIEW
+  5
+73
+330
+0
+100
+AcDbSymbolTable
+ 70
+     0
+  0
+ENDTAB
+  0
+TABLE
+  2
+UCS
+  5
+74
+330
+0
+100
+AcDbSymbolTable
+ 70
+     0
+  0
+ENDTAB
+  0
+TABLE
+  2
+APPID
+  5
+75
+330
+0
+100
+AcDbSymbolTable
+ 70
+     2
+  0
+APPID
+  5
+76
+330
+75
+100
+AcDbSymbolTableRecord
+100
+AcDbRegAppTableRecord
+  2
+ACAD
+ 70
+     0
+  0
+APPID
+  5
+77
+330
+75
+100
+AcDbSymbolTableRecord
+100
+AcDbRegAppTableRecord
+  2
+ACADANNOTATIVE
+ 70
+     0
+  0
+ENDTAB
+  0
+TABLE
+  2
+DIMSTYLE
+  5
+78
+330
+0
+100
+AcDbSymbolTable
+ 70
+     2
+  0
+DIMSTYLE
+105
+79
+330
+78
+100
+AcDbSymbolTableRecord
+100
+AcDbDimStyleTableRecord
+  2
+STANDARD
+ 70
+     0
+  3
+
+  4
+
+  5
+
+  6
+
+  7
+
+ 40
+0.0
+ 41
+2.5
+ 42
+0.625
+ 43
+3.75
+ 44
+1.25
+ 45
+0.0
+ 46
+0.0
+ 47
+0.0
+ 48
+0.0
+140
+2.5
+141
+2.5
+142
+0.0
+143
+0.03937007874016
+144
+1.0
+145
+0.0
+146
+1.0
+147
+0.625
+ 71
+     0
+ 72
+     0
+ 73
+     0
+ 74
+     0
+ 75
+     0
+ 76
+     0
+ 77
+     1
+ 78
+     8
+170
+     0
+171
+     3
+172
+     1
+173
+     0
+174
+     0
+175
+     0
+176
+     0
+177
+     0
+178
+     0
+270
+     2
+271
+     2
+272
+     2
+273
+     2
+274
+     3
+340
+71
+275
+     0
+280
+     0
+281
+     0
+282
+     0
+283
+     0
+284
+     8
+285
+     0
+286
+     0
+287
+     3
+288
+     0
+  0
+ENDTAB
+  0
+TABLE
+  2
+BLOCK_RECORD
+  5
+A01
+330
+0
+100
+AcDbSymbolTable
+  70
+5
+  0
+BLOCK_RECORD
+  5
+A02
+330
+A01
+100
+AcDbSymbolTableRecord
+100
+AcDbBlockTableRecord
+  2
+*MODEL_SPACE
+  0
+BLOCK_RECORD
+  5
+A03
+330
+A01
+100
+AcDbSymbolTableRecord
+100
+AcDbBlockTableRecord
+  2
+*PAPER_SPACE
+  0
+ENDTAB
+  0
+ENDSEC
+  0
+SECTION
+  2
+BLOCKS
+  0
+BLOCK
+  5
+A04
+330
+A02
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockBegin
+  2
+*MODEL_SPACE
+ 70
+   0
+ 10
+0
+ 20
+0
+ 30
+0
+  3
+*MODEL_SPACE
+  1
+ 
+  0
+ENDBLK
+  5
+A05
+330
+A02
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockEnd
+  0
+BLOCK
+  5
+A06
+330
+A03
+100
+AcDbEntity
+ 67
+1
+  8
+0
+100
+AcDbBlockBegin
+  2
+*PAPER_SPACE
+ 70
+   0
+ 10
+0
+ 20
+0
+ 30
+0
+  3
+*PAPER_SPACE
+  1
+ 
+  0
+ENDBLK
+  5
+A07
+330
+A03
+100
+AcDbEntity
+ 67
+    1
+  8
+0
+100
+AcDbBlockEnd
+  0
+ENDSEC
+  0
+SECTION
+  2
+ENTITIES
+  0
+LINE
+  5
+A08
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+138.271
+ 20
+108.742
+ 30
+0
+ 11
+138.329
+ 21
+105.496
+ 31
+0
+  0
+LINE
+  5
+A09
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+81.111
+ 20
+93.4618
+ 30
+0
+ 11
+80.6898
+ 21
+117.136
+ 31
+0
+  0
+ELLIPSE
+  5
+A0A
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+82.847
+ 20
+93.8269
+ 30
+0
+ 11
+0.401688
+ 21
+2.46752
+ 31
+0
+ 40
+0.68467
+ 41
+-3.14159
+ 42
+-2.883
+  0
+ELLIPSE
+  5
+A0B
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+82.847
+ 20
+93.8269
+ 30
+0
+ 11
+0.401688
+ 21
+2.46752
+ 31
+0
+ 40
+0.68467
+ 41
+-4.45379
+ 42
+-3.14159
+  0
+LINE
+  5
+A0C
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+80.6898
+ 20
+117.136
+ 30
+0
+ 11
+83.3149
+ 21
+117.688
+ 31
+0
+  0
+LINE
+  5
+A0D
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+136.637
+ 20
+102.675
+ 30
+0
+ 11
+82.8907
+ 21
+91.3711
+ 31
+0
+  0
+ELLIPSE
+  5
+A0E
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+136.593
+ 20
+105.131
+ 30
+0
+ 11
+0.401688
+ 21
+2.46752
+ 31
+0
+ 40
+0.68467
+ 41
+-2.883
+ 42
+-1.3122
+  0
+ELLIPSE
+  5
+A0F
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+97.7917
+ 20
+100.027
+ 30
+0
+ 11
+0.200844
+ 21
+1.23376
+ 31
+0
+ 40
+0.68467
+ 41
+-0
+ 42
+-6.02459
+  0
+ELLIPSE
+  5
+A10
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+97.7917
+ 20
+100.027
+ 30
+0
+ 11
+0.200844
+ 21
+1.23376
+ 31
+0
+ 40
+0.68467
+ 41
+-3.14159
+ 42
+-0
+  0
+ELLIPSE
+  5
+A11
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+97.7917
+ 20
+100.027
+ 30
+0
+ 11
+0.200844
+ 21
+1.23376
+ 31
+0
+ 40
+0.68467
+ 41
+-6.02459
+ 42
+-3.14159
+  0
+ELLIPSE
+  5
+A12
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+123.345
+ 20
+105.401
+ 30
+0
+ 11
+0.200844
+ 21
+1.23376
+ 31
+0
+ 40
+0.68467
+ 41
+-0
+ 42
+-6.02459
+  0
+ELLIPSE
+  5
+A13
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+123.345
+ 20
+105.401
+ 30
+0
+ 11
+0.200844
+ 21
+1.23376
+ 31
+0
+ 40
+0.68467
+ 41
+-3.14159
+ 42
+-0
+  0
+ELLIPSE
+  5
+A14
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+123.345
+ 20
+105.401
+ 30
+0
+ 11
+0.200844
+ 21
+1.23376
+ 31
+0
+ 40
+0.68467
+ 41
+-6.02459
+ 42
+-3.14159
+  0
+ELLIPSE
+  5
+A15
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+115.179
+ 20
+109.994
+ 30
+0
+ 11
+-0.289215
+ 21
+-1.77661
+ 31
+0
+ 40
+0.68467
+ 41
+1.82939
+ 42
+3.14159
+  0
+ELLIPSE
+  5
+A16
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+115.179
+ 20
+109.994
+ 30
+0
+ 11
+-0.289215
+ 21
+-1.77661
+ 31
+0
+ 40
+0.68467
+ 41
+3.14159
+ 42
+0
+  0
+ELLIPSE
+  5
+A17
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+115.179
+ 20
+109.994
+ 30
+0
+ 11
+-0.289215
+ 21
+-1.77661
+ 31
+0
+ 40
+0.68467
+ 41
+0
+ 42
+1.82939
+  0
+ELLIPSE
+  5
+A18
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+138.627
+ 20
+129.053
+ 30
+0
+ 11
+-0.514553
+ 21
+2.44647
+ 31
+0
+ 40
+0.704619
+ 41
+6.0174
+ 42
+0
+  0
+LINE
+  5
+A19
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+80.0319
+ 20
+93.6374
+ 30
+0
+ 11
+79.6107
+ 21
+117.311
+ 31
+0
+  0
+ELLIPSE
+  5
+A1A
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+81.7679
+ 20
+94.0026
+ 30
+0
+ 11
+0.401688
+ 21
+2.46752
+ 31
+0
+ 40
+0.68467
+ 41
+-4.45379
+ 42
+-3.14159
+  0
+ELLIPSE
+  5
+A1B
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+96.7126
+ 20
+100.202
+ 30
+0
+ 11
+0.200844
+ 21
+1.23376
+ 31
+0
+ 40
+0.68467
+ 41
+-2.44876
+ 42
+-0.692833
+  0
+ELLIPSE
+  5
+A1C
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+122.266
+ 20
+105.577
+ 30
+0
+ 11
+0.200844
+ 21
+1.23376
+ 31
+0
+ 40
+0.68467
+ 41
+-2.44876
+ 42
+-0.692833
+  0
+ELLIPSE
+  5
+A1D
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+114.099
+ 20
+110.17
+ 30
+0
+ 11
+-0.289215
+ 21
+-1.77661
+ 31
+0
+ 40
+0.68467
+ 41
+1.82939
+ 42
+2.68203
+  0
+ELLIPSE
+  5
+A1E
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+114.099
+ 20
+110.17
+ 30
+0
+ 11
+-0.289215
+ 21
+-1.77661
+ 31
+0
+ 40
+0.68467
+ 41
+0.459562
+ 42
+1.82939
+  0
+LINE
+  5
+A1F
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+79.6107
+ 20
+117.311
+ 30
+0
+ 11
+80.6898
+ 21
+117.136
+ 31
+0
+  0
+ELLIPSE
+  5
+A20
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+81.4092
+ 20
+117.019
+ 30
+0
+ 11
+-0.205821
+ 21
+0.97859
+ 31
+0
+ 40
+0.704619
+ 41
+6.0174
+ 42
+0
+  0
+ELLIPSE
+  5
+A21
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+81.4092
+ 20
+117.019
+ 30
+0
+ 11
+-0.205821
+ 21
+0.97859
+ 31
+0
+ 40
+0.704619
+ 41
+0
+ 42
+1.30501
+  0
+ELLIPSE
+  5
+A22
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+81.4092
+ 20
+117.019
+ 30
+0
+ 11
+-0.514553
+ 21
+2.44647
+ 31
+0
+ 40
+0.704619
+ 41
+6.0174
+ 42
+0
+  0
+ELLIPSE
+  5
+A23
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+81.4092
+ 20
+117.019
+ 30
+0
+ 11
+-0.514553
+ 21
+2.44647
+ 31
+0
+ 40
+0.704619
+ 41
+0
+ 42
+1.30501
+  0
+LINE
+  5
+A24
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+81.3655
+ 20
+119.474
+ 30
+0
+ 11
+138.583
+ 21
+131.509
+ 31
+0
+  0
+LINE
+  5
+A25
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+138.583
+ 20
+131.509
+ 30
+0
+ 11
+215.126
+ 21
+119.048
+ 31
+0
+  0
+LINE
+  5
+A26
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+81.3917
+ 20
+118.001
+ 30
+0
+ 11
+81.3655
+ 21
+119.474
+ 31
+0
+  0
+LINE
+  5
+A27
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+157.934
+ 20
+105.541
+ 30
+0
+ 11
+81.3917
+ 21
+118.001
+ 31
+0
+  0
+LINE
+  5
+A28
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+215.126
+ 20
+119.048
+ 30
+0
+ 11
+157.908
+ 21
+107.014
+ 31
+0
+  0
+LINE
+  5
+A29
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+157.908
+ 20
+107.014
+ 30
+0
+ 11
+81.3655
+ 21
+119.474
+ 31
+0
+  0
+ELLIPSE
+  5
+A2A
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+169.041
+ 20
+112.845
+ 30
+0
+ 11
+1.59975
+ 21
+0.0284627
+ 31
+0
+ 40
+0.186384
+ 41
+5.51215
+ 42
+0
+  0
+ELLIPSE
+  5
+A2B
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+169.041
+ 20
+112.845
+ 30
+0
+ 11
+1.59975
+ 21
+0.0284627
+ 31
+0
+ 40
+0.186384
+ 41
+1.11022e-16
+ 42
+3.14159
+  0
+ELLIPSE
+  5
+A2C
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+169.041
+ 20
+112.845
+ 30
+0
+ 11
+1.59975
+ 21
+0.0284627
+ 31
+0
+ 40
+0.186384
+ 41
+3.14159
+ 42
+5.51215
+  0
+ELLIPSE
+  5
+A2D
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+173.207
+ 20
+113.721
+ 30
+0
+ 11
+1.59975
+ 21
+0.0284627
+ 31
+0
+ 40
+0.186384
+ 41
+5.51215
+ 42
+0
+  0
+ELLIPSE
+  5
+A2E
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+173.207
+ 20
+113.721
+ 30
+0
+ 11
+1.59975
+ 21
+0.0284627
+ 31
+0
+ 40
+0.186384
+ 41
+1.11022e-16
+ 42
+3.14159
+  0
+ELLIPSE
+  5
+A2F
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+173.207
+ 20
+113.721
+ 30
+0
+ 11
+1.59975
+ 21
+0.0284627
+ 31
+0
+ 40
+0.186384
+ 41
+3.14159
+ 42
+5.51215
+  0
+ELLIPSE
+  5
+A30
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+177.373
+ 20
+114.597
+ 30
+0
+ 11
+1.59975
+ 21
+0.0284627
+ 31
+0
+ 40
+0.186384
+ 41
+5.51215
+ 42
+0
+  0
+ELLIPSE
+  5
+A31
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+177.373
+ 20
+114.597
+ 30
+0
+ 11
+1.59975
+ 21
+0.0284627
+ 31
+0
+ 40
+0.186384
+ 41
+1.11022e-16
+ 42
+3.14159
+  0
+ELLIPSE
+  5
+A32
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+177.373
+ 20
+114.597
+ 30
+0
+ 11
+1.59975
+ 21
+0.0284627
+ 31
+0
+ 40
+0.186384
+ 41
+3.14159
+ 42
+5.51215
+  0
+ELLIPSE
+  5
+A33
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+215.17
+ 20
+116.593
+ 30
+0
+ 11
+0.514553
+ 21
+-2.44647
+ 31
+0
+ 40
+0.704619
+ 41
+-4.97817
+ 42
+-3.40738
+  0
+LINE
+  5
+A34
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+157.908
+ 20
+107.014
+ 30
+0
+ 11
+157.934
+ 21
+105.541
+ 31
+0
+  0
+ELLIPSE
+  5
+A35
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+157.952
+ 20
+104.558
+ 30
+0
+ 11
+0.205821
+ 21
+-0.97859
+ 31
+0
+ 40
+0.704619
+ 41
+-4.97817
+ 42
+-3.40738
+  0
+ELLIPSE
+  5
+A36
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+157.952
+ 20
+104.558
+ 30
+0
+ 11
+0.514553
+ 21
+-2.44647
+ 31
+0
+ 40
+0.704619
+ 41
+-4.97817
+ 42
+-3.40738
+  0
+LINE
+  5
+A37
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+159.75
+ 20
+104.265
+ 30
+0
+ 11
+216.968
+ 21
+116.3
+ 31
+0
+  0
+LINE
+  5
+A38
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+217.389
+ 20
+92.6259
+ 30
+0
+ 11
+216.968
+ 21
+116.3
+ 31
+0
+  0
+LINE
+  5
+A39
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+158.671
+ 20
+104.441
+ 30
+0
+ 11
+159.75
+ 21
+104.265
+ 31
+0
+  0
+LINE
+  5
+A3A
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+158.671
+ 20
+104.441
+ 30
+0
+ 11
+159.092
+ 21
+80.7672
+ 31
+0
+  0
+ELLIPSE
+  5
+A3B
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+160.828
+ 20
+81.1323
+ 30
+0
+ 11
+0.401688
+ 21
+2.46752
+ 31
+0
+ 40
+0.68467
+ 41
+-4.45379
+ 42
+-3.14159
+  0
+ELLIPSE
+  5
+A3C
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+175.773
+ 20
+87.3321
+ 30
+0
+ 11
+-0.200844
+ 21
+-1.23376
+ 31
+0
+ 40
+0.68467
+ 41
+0.692833
+ 42
+2.44876
+  0
+ELLIPSE
+  5
+A3D
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+201.327
+ 20
+92.7067
+ 30
+0
+ 11
+-0.200844
+ 21
+-1.23376
+ 31
+0
+ 40
+0.68467
+ 41
+0.692833
+ 42
+2.44876
+  0
+LINE
+  5
+A3E
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+159.75
+ 20
+104.265
+ 30
+0
+ 11
+160.171
+ 21
+80.5915
+ 31
+0
+  0
+ELLIPSE
+  5
+A3F
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+161.907
+ 20
+80.9567
+ 30
+0
+ 11
+0.401688
+ 21
+2.46752
+ 31
+0
+ 40
+0.68467
+ 41
+-3.14159
+ 42
+-2.883
+  0
+ELLIPSE
+  5
+A40
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+161.907
+ 20
+80.9567
+ 30
+0
+ 11
+0.401688
+ 21
+2.46752
+ 31
+0
+ 40
+0.68467
+ 41
+-4.45379
+ 42
+-3.14159
+  0
+LINE
+  5
+A41
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+161.951
+ 20
+78.5009
+ 30
+0
+ 11
+215.697
+ 21
+89.8049
+ 31
+0
+  0
+ELLIPSE
+  5
+A42
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+215.653
+ 20
+92.2607
+ 30
+0
+ 11
+0.401688
+ 21
+2.46752
+ 31
+0
+ 40
+0.68467
+ 41
+-2.883
+ 42
+-1.3122
+  0
+ELLIPSE
+  5
+A43
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+176.852
+ 20
+87.1565
+ 30
+0
+ 11
+-0.200844
+ 21
+-1.23376
+ 31
+0
+ 40
+0.68467
+ 41
+0.258594
+ 42
+3.14159
+  0
+ELLIPSE
+  5
+A44
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+176.852
+ 20
+87.1565
+ 30
+0
+ 11
+-0.200844
+ 21
+-1.23376
+ 31
+0
+ 40
+0.68467
+ 41
+3.14159
+ 42
+0
+  0
+ELLIPSE
+  5
+A45
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+176.852
+ 20
+87.1565
+ 30
+0
+ 11
+-0.200844
+ 21
+-1.23376
+ 31
+0
+ 40
+0.68467
+ 41
+0
+ 42
+0.258594
+  0
+ELLIPSE
+  5
+A46
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+202.406
+ 20
+92.531
+ 30
+0
+ 11
+-0.200844
+ 21
+-1.23376
+ 31
+0
+ 40
+0.68467
+ 41
+0.258594
+ 42
+3.14159
+  0
+ELLIPSE
+  5
+A47
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+202.406
+ 20
+92.531
+ 30
+0
+ 11
+-0.200844
+ 21
+-1.23376
+ 31
+0
+ 40
+0.68467
+ 41
+3.14159
+ 42
+0
+  0
+ELLIPSE
+  5
+A48
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbEllipse
+ 10
+202.406
+ 20
+92.531
+ 30
+0
+ 11
+-0.200844
+ 21
+-1.23376
+ 31
+0
+ 40
+0.68467
+ 41
+0
+ 42
+0.258594
+  0
+LINE
+  5
+A49
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+82.4453
+ 20
+91.3594
+ 30
+0
+ 11
+81.3662
+ 21
+91.535
+ 31
+0
+  0
+LINE
+  5
+A4A
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+138.113
+ 20
+131.499
+ 30
+0
+ 11
+80.8946
+ 21
+119.465
+ 31
+0
+  0
+LINE
+  5
+A4B
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+160.426
+ 20
+78.6648
+ 30
+0
+ 11
+161.506
+ 21
+78.4891
+ 31
+0
+  0
+LINE
+  5
+A4C
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+81.111
+ 20
+93.4618
+ 30
+0
+ 11
+80.0319
+ 21
+93.6374
+ 31
+0
+  0
+LINE
+  5
+A4D
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+159.092
+ 20
+80.7672
+ 30
+0
+ 11
+160.171
+ 21
+80.5915
+ 31
+0
+  0
+LINE
+  5
+A4E
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+115.349
+ 20
+110.433
+ 30
+0
+ 11
+116.428
+ 21
+110.257
+ 31
+0
+  0
+LINE
+  5
+A4F
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+176.874
+ 20
+85.9286
+ 30
+0
+ 11
+176.442
+ 21
+85.9989
+ 31
+0
+  0
+LINE
+  5
+A50
+330
+A02
+100
+AcDbEntity
+  8
+View014
+100
+AcDbLine
+ 10
+202.427
+ 20
+91.3031
+ 30
+0
+ 11
+201.995
+ 21
+91.3735
+ 31
+0
+  0
+ENDSEC
+  0
+SECTION
+  2
+OBJECTS
+  0
+DICTIONARY
+  5
+F000
+330
+0
+100
+AcDbDictionary
+  3
+ACAD_GROUP
+350
+F001
+  0
+DICTIONARY
+  5
+F001
+330
+F000
+100
+AcDbDictionary
+  0
+ENDSEC
+  0
+EOF
