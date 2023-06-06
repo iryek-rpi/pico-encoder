@@ -14,13 +14,17 @@ import ubinascii
 import ujson
 
 from w5500 import w5x00_init
+import utils
 
-default_led = Pin('LED', Pin.OUT)
-default_led_timer = Timer()
-red_led = Pin(14, Pin.OUT)
-red_led.on()
-green_led = Pin(15, Pin.OUT)
-green_led.on()
+led = Pin('LED', Pin.OUT)
+led.off()
+led_timer = Timer()
+yellow = Pin(14, Pin.OUT)
+yellow.off()
+red = Pin(14, Pin.OUT)
+red.on()
+green = Pin(15, Pin.OUT)
+green.off()
 
 print('Starting W5500 script')
 
@@ -32,10 +36,7 @@ def init_serial():
     uart0 = UART(0, tx=Pin(0), rx=Pin(1))
     uart0.init(baudrate=9600, bits=8, parity=None, stop=1, timeout=SERIAL1_TIMEOUT)
 
-    uart1 = UART(1, tx=Pin(4), rx=Pin(5))
-    uart1.init(baudrate=9600, bits=8, parity=None, stop=1, timeout=SERIAL1_TIMEOUT)
-    
-    return uart0, uart1
+    return uart0
 
 def receive_settings(sp):
     while True:
@@ -65,15 +66,45 @@ def receive_settings(sp):
     print(json_settings)
     return json_settings
 
+def send_settings(sp, json_settings):
+    len_json = bytes(f'{len(json_settings)}\n', 'utf-8')
+    print(len_json)
+
+    while True:
+        nw = sp.write(json_settings)
+        sp.flush()
+        print(f'written: {nw}')
+        utime.sleep(1)
+        #nw = sp.write(bytes('hello','utf-8'))
+
+        srecv = sp.readline()
+        print(srecv)
+        if srecv:
+            try:
+                ready = srecv.decode('utf-8')
+                if ready=='READY_0\n':
+                    break
+            except Exception as e:
+                print(e)
+        utime.sleep(0.05)
+    
 def main():
-    s0, s1 = init_serial()
-    json_settings = receive_settings(s1)
-    settings = ujson.loads(json_settings)
+
+    json_settings = utils.load_json_settings()
+    print(json_settings)
+
+    s0 = init_serial()
+    #json_settings = receive_settings(s1)
+    #settings = ujson.loads(json_settings)
     #settings['mode'] = 'ETH' #'SER"
-    print(settings)
+    #print(settings)
+
+    send_settings(s0, json_settings)
+    led.on()
+
+temp = '''
 
     ip = w5x00_init(settings['ip'])
-    default_led.on()
 
     server_sock = socket() #network.AF_INET, network.SOCK_STREAM)
     server_sock.bind((ip, settings['port']))
@@ -158,7 +189,7 @@ def main():
                 server_sock.close()
                 remote_sock.send(b64)
                 remote_sock.close()
-    
+                '''
 
 if __name__ == '__main__':
     main()
