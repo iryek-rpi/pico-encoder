@@ -8,25 +8,23 @@ from machine import UART
 
 import utime
 from usocket import socket
+import _thread
 
 import network
 import ubinascii
 import ujson
 
+from led import *
 from w5500 import w5x00_init
 import utils
 
-led = Pin('LED', Pin.OUT)
-led.off()
-led_timer = Timer()
-yellow = Pin(14, Pin.OUT)
-yellow.off()
-red = Pin(14, Pin.OUT)
-red.on()
-green = Pin(15, Pin.OUT)
-green.off()
-
 print('Starting W5500 script')
+led_onoff(led, False)
+led_onoff(yellow, False)
+led_onoff(green, False)
+led_onoff(red, True)
+led_onoff(yellow, True)
+led_onoff(green, True)
 
 SERIAL1_TIMEOUT = 20 # ms
 UART1_DELAY = 0.05 # 50ms
@@ -100,7 +98,13 @@ def main():
     #print(settings)
 
     send_settings(s0, json_settings)
-    led.on()
+    ip = w5x00_init('192.168.2.13')
+    if ip:
+        print(f'IP assigned: {ip}')
+        led.on()
+    else:
+        print('No IP assigned')
+        led.off()
 
 temp = '''
 
