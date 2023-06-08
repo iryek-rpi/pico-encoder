@@ -13,10 +13,12 @@ def w5x00_init(ip):
     if not ip:
         nic.ifconfig('dhcp')
     else:
-        nic.ifconfig((ip,'255.255.255.0','192.168.1.1','8.8.8.8'))
+        nic.ifconfig((ip,'255.255.255.0', ip,'8.8.8.8'))
 
     while not nic.isconnected():
-        time.sleep(1)
         print(nic.regs())
-    print(nic.ifconfig())
-    return nic.ifconfig()[0]
+        print('Waiting for Link...')
+        time.sleep(1)
+    ifc = nic.ifconfig()
+    print(ifc)
+    return ifc[0]
