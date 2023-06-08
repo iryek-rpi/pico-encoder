@@ -1,64 +1,90 @@
 from machine import Pin, Timer
-from machine import SPI
-from machine import UART
-from usocket import socket
-import network
-import ubinascii
 
 import time
 
-default_led = None
-default_led_timer = None
+led = Pin('LED', Pin.OUT)
+yellow = Pin(13, Pin.OUT)
+green = Pin(14, Pin.OUT)
+red = Pin(15, Pin.OUT)
 
-
-led_red = Pin(15, Pin.OUT)
-led_green = Pin(14, Pin.OUT)
-timer_red = Timer()
-timer_green = Timer()
+timer_led = None
+timer_yellow = None
+timer_red = None
+timer_green = None
     
-def blink_led(led, led_timer):
-    global default_led
-    global default_led_timer
-    
-    default_led = led
-    default_led_timer = led_timer
-    led_timer.init(freq=0.2, mode=Timer.PERIODIC, callback=blink_led)
+def blink_led(_led, freq):
+    global timer_led, timer_yellow, timer_green, timer_red
 
-def blink_led(timer):
-    default_led.toggle()
+    if _led==led:
+        timer_led.deinit()
+        timer_led = None
+        timer_led = Timer()
+        timer_led.init(freq=freq, mode=Timer.PERIODIC, callback=blink_default_led)
+    elif _led==yellow:
+        timer_yellow.deinit()
+        timer_yellow = None
+        timer_yellow = Timer()
+        timer_yellow.init(freq=freq, mode=Timer.PERIODIC, callback=blink_yellow)
+    elif _led==green:
+        timer_green.deinit()
+        timer_green = None
+        timer_green = Timer()
+        timer_green.init(freq=freq, mode=Timer.PERIODIC, callback=blink_green)
+    elif _led==red:
+        timer_red.deinit()
+        timer_red = None
+        timer_red = Timer()
+        timer_red.init(freq=freq, mode=Timer.PERIODIC, callback=blink_red)
+    else:
+        print('Error: unknown led')
 
-def led_on():
-    default_led_timer.deinit()
-    default_led.on()
 
-def led_off():
-    default_led_timer.deinit()
-    default_led.off()
+def blink_default_led(timer):
+    led.toggle()
 
-def blink_red(timer):
-    led_red.toggle()
+def blink_yellow(timer):
+    yellow.toggle()
 
 def blink_green(timer):
-    led_green.toggle()
+    green.toggle()
 
-def led_blink_red():
-    timer_red.init(freq=1.5, mode=Timer.PERIODIC, callback=blink_red)
+def blink_red(timer):
+    red.toggle()
 
-def led_blink_green():
-    timer_red.init(freq=1.5, mode=Timer.PERIODIC, callback=blink_green)
+def led_onoff(_led, onoff):
+    global timer_led, timer_yellow, timer_green, timer_red
 
-def led_on_red():
-    timer_red.deinit()
-    led_red.on()
-
-def led_on_green():
-    timer_red.deinit()
-    led_green.on()
-
-def led_off_red():
-    timer_red.deinit()
-    led_red.off()
-
-def led_off_green():
-    timer_red.deinit()
-    led_green.off()
+    if _led==led:
+        if timer_led:
+            timer_led.deinit()
+            timer_led = None
+        if onoff:
+            led.on()
+        else:
+            led.off()
+    elif _led==yellow:
+        if timer_yellow:
+            timer_yellow.deinit()
+            timer_yellow = None
+        if onoff:
+            yellow.on()
+        else:
+            yellow.off()
+    elif _led==green:
+        if timer_green:
+            timer_green.deinit()
+            timer_green = None
+        if onoff:
+            green.on()
+        else:
+            green.off()
+    elif _led==red:
+        if timer_red:
+            timer_red.deinit()
+            timer_red = None
+        if onoff:
+            red.on()
+        else:
+            red.off()
+    else:
+        print('Error: unknown led')
