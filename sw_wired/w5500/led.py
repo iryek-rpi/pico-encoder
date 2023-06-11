@@ -51,6 +51,18 @@ def blink_green(timer):
 def blink_red(timer):
     red.toggle()
 
+def all_led_onoff(onoff):
+    if onoff:
+        led_onoff(led, True)
+        led_onoff(yellow, True)
+        led_onoff(green, True)
+        led_onoff(red, True)
+    else:
+        led_onoff(led, False)
+        led_onoff(yellow, False)
+        led_onoff(green, False)
+        led_onoff(red, False)
+
 def led_onoff(_led, onoff):
     global timer_led, timer_yellow, timer_green, timer_red
 
