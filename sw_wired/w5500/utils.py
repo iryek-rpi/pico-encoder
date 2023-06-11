@@ -24,14 +24,15 @@ REMOTE_PORT = 'remote_port'
 PLC_IP = 'plc_ip'
 PLC_PORT = 'plc_port'
 
-CRYPTO_KEY = 'crypto_key'
+KEY = 'key'
 
 DEFAUlT_SETTINGS = {
+    DHCP : 0,
     IP : '192.168.1.10',
     PORT : 8501,
     GATEWAY : '192.168.0.1',
     SUBNET : '255.255.255.0',
-    CRYPTO_KEY:'12345678'
+    KEY:'12345678'
 }
 
 SETTING_FILE = 'settings.json'
@@ -47,7 +48,8 @@ def init_settings():
 def save_settings(settings):
     #save the settings to the file
     f = open(SETTING_FILE, 'w', encoding='utf-8')
-    f.write(ujson.dumps(settings))
+    #f.write(ujson.dumps(settings))
+    f.write(settings)
     f.close()
 
 def validate_settings(settings):
@@ -90,8 +92,8 @@ def validate_settings(settings):
     else:
         ns[PLC_PORT] = int(settings[PLC_PORT])
 
-    if len(ns[CRYPTO_KEY]) != 8:
-        msg += f'암호키 오류: {settings[CRYPTO_KEY]} 암호키는 8자리로 지정해야 합니다<br>'
+    if len(ns[KEY]) != 8:
+        msg += f'암호키 오류: {settings[KEY]} 암호키는 8자리로 지정해야 합니다<br>'
 
     if msg != '':
         msg = f'<p style="color:Tomato;">설정 오류<br>{msg}</p>'
@@ -142,7 +144,7 @@ def get_setting(key):
     settings = load_settings()
     return settings[key]
 
-def load_json_settings():
+def load_settings():
     try:
         f = open(SETTING_FILE, 'r', encoding='utf-8')
     except OSError:
@@ -153,9 +155,9 @@ def load_json_settings():
     f.close()
     return json_settings
 
-def load_settings():
-    json_settings = load_json_settings()
-    return ujson.loads(json_settings)
+def load_json_settings():
+    _settings = load_settings()
+    return ujson.loads(_settings)
 
 def file_exists(filename):
     try:
