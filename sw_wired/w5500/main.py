@@ -23,12 +23,11 @@ led_onoff(led, False)
 led_onoff(yellow, False)
 led_onoff(green, False)
 led_onoff(red, True)
-led_onoff(yellow, True)
-led_onoff(green, True)
 
-SERIAL1_TIMEOUT = 20 # ms
+SERIAL1_TIMEOUT = 300 # ms
 UART1_DELAY = 0.05 # 50ms
-SIG = '*x?!926'
+
+serial_thread_status = True
 
 def init_serial():
     uart0 = UART(0, tx=Pin(0), rx=Pin(1))
@@ -64,6 +63,32 @@ def receive_settings(sp):
     print(json_settings)
     return json_settings
 
+def serial_thread():
+    u0 = init_serial()
+
+    while serial_thread_status:
+        sm = u0.readline()
+        if sm:
+            try:
+                sm = sm.decode('utf-8')
+                print(sm)
+                cmd = sm[:7]
+                if cmd=='CNF_REQ':
+                    json_settings = utils.load_json_settings()
+                    print(f'{len(json_settings)}bytes : {json_settings}')
+                    msg = bytes(f'CNF_JSN{json_settings}CNF_END', 'utf-8')
+                    u0.write(msg)
+                elif cmd=='CONFSND' and sm[-7:]=='CONFEND':
+                    json_settings = sm[7:-7]
+                    print(json_settings)
+                    settings = ujson.loads(json_settings)
+                    print(settings)
+                else:
+                    print('Unknown command')
+            except Exception as e:
+                print(e)
+    u0.deinit()
+
 def send_settings(sp, json_settings):
     len_json = bytes(f'{len(json_settings)}\n', 'utf-8')
     print(len_json)
@@ -87,24 +112,31 @@ def send_settings(sp, json_settings):
         utime.sleep(0.05)
     
 def main():
+    global serial_thread_status
+    
+    _thread.start_new_thread(serial_thread, ())
 
     json_settings = utils.load_json_settings()
     print(json_settings)
 
-    s0 = init_serial()
+    #s0 = init_serial()
     #json_settings = receive_settings(s1)
     #settings = ujson.loads(json_settings)
     #settings['mode'] = 'ETH' #'SER"
     #print(settings)
 
-    send_settings(s0, json_settings)
+    #send_settings(s0, json_settings)
     ip = w5x00_init('192.168.2.13')
     if ip:
         print(f'IP assigned: {ip}')
-        led.on()
+        blue.on()
     else:
         print('No IP assigned')
         led.off()
+
+    serial_thread_status = False
+    usleep(3)
+    print("Exit from main thread")
 
 temp = '''
 
