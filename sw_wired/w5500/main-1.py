@@ -45,7 +45,7 @@ def serial_thread_func():
 
     print('Serial Thread starting...')
     
-    while True: #serial_thread_status:
+    while serial_thread_running:
         sm = u0.readline()
         if sm:
             try:
@@ -68,8 +68,8 @@ def serial_thread_func():
                     settings = sm[7:-7]
                     print(f'Received settings: {settings}')
                     utils.save_settings(settings)
-                    print('Resetting the machine')
-                    machine.reset()
+                    serial_thread_running = False
+                    break
                 else:
                     print('Unknown command')
             except Exception as e:
@@ -78,7 +78,9 @@ def serial_thread_func():
             print(sm)
             utime.sleep(0.5)
             
+
 def run_server(ip, port, key):
+    global serial_thread_running
 
     server_sock = socket()#network.AF_INET, network.SOCK_STREAM)
     server_sock.bind((ip, int(port)))
@@ -91,32 +93,56 @@ def run_server(ip, port, key):
     keyb = key.encode()
     keyb = keyb + coder.KEY[len(keyb):]
 
-    while True:
-        print('Waiting for connection...')
-        conn, addr = server_sock.accept()
-        print('Connected by ', conn, ' from ', addr)
+    print('Waiting for connection...')
+    conn, addr = server_sock.accept()
+    print('Connected by ', conn, ' from ', addr)
+
+
+    while serial_thread_running:
         b64 = conn.recv(64)
         print('data received: ', b64)
         print('type(b64): ', type(b64))
 
         if len(b64) > 4:
-            msg = b64.decode('utf-8')
-            cmd, msg = msg[:4], msg[4:]
+            #msg = b64.decode('utf-8')
+            #cmd, msg = msg[:4], msg[4:]
+            cmd, msg = b64[:4], b64[4:]
+            cmd = cmd.decode('utf-8')
             print(f'cmd: {cmd}')
 
             if cmd == 'TEXT':
                 print(f'msg: {msg}')
                 IV = aes.generate_IV(16)
                 cipher = aes.new(keyb, aes.MODE_CBC, IV)
-                cipher.encrypt(msg)
+                #msg = cipher.encrypt(msg.encode())
+                msg = cipher.encrypt(msg)
                 iv_c = IV + msg
+                print('IV: ')
+                print(IV)
+                print('msg: ')
+                print(msg)
                 conn.send(iv_c)
             elif cmd == 'CIPH':
                 print(f'msg: {msg}')
                 IV, msg = msg[:16], msg[16:]
+                print('IV: ')
+                print(IV)
+                print('msg: ')
+                print(msg)
+                msga = bytearray(msg)
                 cipher = aes.new(keyb, aes.MODE_CBC, IV)
-                plaintext = cipher.decrypt(msg)
+                plaintext = cipher.decrypt(msga)
                 conn.send(plaintext)
+
+    if conn:
+        conn.close()
+    if server_sock:
+        server_sock.close()
+
+    utime.sleep(1)
+
+    print('Resetting the machine')
+    machine.reset()
 
 def main():
     global serial_thread_running
