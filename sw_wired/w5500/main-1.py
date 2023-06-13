@@ -13,10 +13,14 @@ import _thread
 import network
 import ubinascii
 import ujson
+import mpyaes as aes
 
+import coder
 from led import *
 from w5500 import w5x00_init
 import utils
+
+KEY = b'aD\xd8\x11e\xdcy`\t\xdc\xe4\xa7\x1f\x11\x94\x93'
 
 print('Starting W5500 script')
 led_onoff(led, False)
@@ -74,13 +78,18 @@ def serial_thread_func():
             print(sm)
             utime.sleep(0.5)
             
-def run_server(ip, port):
+def run_server(ip, port, key):
 
     server_sock = socket()#network.AF_INET, network.SOCK_STREAM)
     server_sock.bind((ip, int(port)))
     
     print('Listening on socket: ', server_sock)
     server_sock.listen(3)
+
+    if len(key) > len(coder.KEY):
+        key = key[:len(coder.KEY)]
+    keyb = key.encode()
+    keyb = keyb + coder.KEY[len(keyb):]
 
     while True:
         print('Waiting for connection...')
@@ -97,8 +106,17 @@ def run_server(ip, port):
 
             if cmd == 'TEXT':
                 print(f'msg: {msg}')
+                IV = aes.generate_IV(16)
+                cipher = aes.new(keyb, aes.MODE_CBC, IV)
+                cipher.encrypt(msg)
+                iv_c = IV + msg
+                conn.send(iv_c)
             elif cmd == 'CIPH':
                 print(f'msg: {msg}')
+                IV, msg = msg[:16], msg[16:]
+                cipher = aes.new(keyb, aes.MODE_CBC, IV)
+                plaintext = cipher.decrypt(msg)
+                conn.send(plaintext)
 
 def main():
     global serial_thread_running
@@ -124,7 +142,7 @@ def main():
 
         led_onoff(green, True)
 
-        run_server(json_settings['ip'], json_settings['port'])
+        run_server(json_settings['ip'], json_settings['port'], json_settings['key'])
 
         
     else:
