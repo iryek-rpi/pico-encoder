@@ -8,12 +8,15 @@ from machine import UART
 
 import utime
 from usocket import socket
+import uselect
 import _thread
+import gc
 
 import network
 import ubinascii
 import ujson
 import mpyaes as aes
+import usocket
 
 import coder
 from led import *
@@ -31,7 +34,17 @@ led_onoff(red, True)
 SERIAL1_TIMEOUT = 300 # ms
 UART1_DELAY = 0.05 # 50ms
 
-serial_thread_running = True
+serial_thread_running = False
+
+btn = Pin(9, Pin.IN, Pin.PULL_UP)
+
+def btn_callback(btn):
+    global serial_thread_running
+    led_onoff(yellow, True)
+    print('Button pressed')
+    serial_thread_running = False
+
+btn.irq(trigger=Pin.IRQ_FALLING, handler=btn_callback)
 
 def init_serial():
     uart0 = UART(0, tx=Pin(0), rx=Pin(1))
@@ -77,12 +90,14 @@ def serial_thread_func():
         else:
             print(sm)
             utime.sleep(0.5)
-            
+    print('Exit from UART thread')
 
 def run_server(ip, port, key):
     global serial_thread_running
 
     server_sock = socket()#network.AF_INET, network.SOCK_STREAM)
+    #server_sock.setsockopt(usocket.SOL_SOCKET, usocket.SO_REUSEADDR, 1)
+
     server_sock.bind((ip, int(port)))
     
     print('Listening on socket: ', server_sock)
@@ -93,17 +108,46 @@ def run_server(ip, port, key):
     keyb = key.encode()
     keyb = keyb + coder.KEY[len(keyb):]
 
+    p1 = uselect.poll()
+    p1.register(server_sock, uselect.POLLIN)
+
     print('Waiting for connection...')
-    conn, addr = server_sock.accept()
-    print('Connected by ', conn, ' from ', addr)
-
-
+    conn = None
     while serial_thread_running:
-        b64 = conn.recv(64)
+        res = p1.poll(500)
+        if not res:
+            print('no client at server_sock')
+            continue
+        print('client available')
+        conn, addr = server_sock.accept()
+        print('Connected by ', conn, ' from ', addr)
+        break
+
+    if not serial_thread_running:
+        if conn:
+            conn.close()
+        server_sock.close()
+        return
+        
+    poller = uselect.poll()
+    poller.register(conn, uselect.POLLIN)
+    
+    while serial_thread_running:
+        res = poller.poll(500)
+        if not res:
+            print('no data from conn')
+            continue
+        print('data arrived at conn')
+    #while serial_thread_running:
+        b64 = conn.recv(128)
         print('data received: ', b64)
         print('type(b64): ', type(b64))
-
-        if len(b64) > 4:
+        
+        if len(b64) <= 4:
+            print('irregular data. Exit')
+            serial_thread_running=False
+            utime.sleep(2)
+        else:
             #msg = b64.decode('utf-8')
             #cmd, msg = msg[:4], msg[4:]
             cmd, msg = b64[:4], b64[4:]
@@ -134,26 +178,28 @@ def run_server(ip, port, key):
                 plaintext = cipher.decrypt(msga)
                 conn.send(plaintext)
 
+    serial_thread_running = False
+    
     if conn:
         conn.close()
     if server_sock:
         server_sock.close()
 
-    utime.sleep(1)
+    utime.sleep(2)
 
     print('Resetting the machine')
     machine.reset()
 
 def main():
     global serial_thread_running
-    
-    serial_thread_running = True
-    
-    serial_thread = _thread.start_new_thread(serial_thread_func, ())
 
     json_settings = utils.load_json_settings()
     print(json_settings)
 
+    utime.sleep(1)
+    serial_thread_running = True
+    serial_thread = _thread.start_new_thread(serial_thread_func, ())
+    
     if json_settings['dhcp']:
         net_info = w5x00_init(None)
     else:
@@ -169,54 +215,16 @@ def main():
         led_onoff(green, True)
 
         run_server(json_settings['ip'], json_settings['port'], json_settings['key'])
-
         
     else:
         print('No IP assigned')
         led_onoff(yellow, True)
 
     serial_thread_status = False
-    print("Waiting for 15 sec")
-    utime.sleep(15)
+    print("Waiting for 2 sec")
+    utime.sleep(2)
     
     print("Exit from main thread")
-
-temp = '''
-    else:
-        while True:
-            server_sock.listen()
-            print('Listening on socket: ', server_sock)
-
-            conn, addr = server_sock.accept()
-            print('Connected by ', conn, ' from ', addr)
-            b64 = conn.recv(32)
-            print('data received: ', b64)
-            print('type(b64): ', type(b64))
-            if addr != settings['remote_ip']:
-                print('Not from remote')
-                remote_sock = socket()
-                print(f'connecting to remote {settings['remote_ip']}:{settings['remote_port']}')
-                remote_sock.connect((settings['remote_ip'], settings['remote_port']))
-                remote_sock.send(b64)
-                client_sock = conn
-                client_addr = addr
-                b64 = remote_sock.recv(32)
-                remote_sock.close()
-                client_sock.send(b64)
-                client_sock.close()
-            else:
-                print('From remote')
-                remote_sock = conn
-                remote_addr = addr
-                server_sock = socket()
-                print(f'connecting to server {settings['server_ip']}:{settings['server_port']}')
-                server_sock.connect((settings['server_ip'], settings['server_port']))
-                server_sock.send(b64)
-                b64 = server_sock.recv(32)
-                server_sock.close()
-                remote_sock.send(b64)
-                remote_sock.close()
-                '''
 
 if __name__ == '__main__':
     main()
