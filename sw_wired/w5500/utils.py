@@ -92,8 +92,8 @@ def validate_settings(settings):
     else:
         ns[PLC_PORT] = int(settings[PLC_PORT])
 
-    if len(ns[KEY]) != 8:
-        msg += f'암호키 오류: {settings[KEY]} 암호키는 8자리로 지정해야 합니다<br>'
+    if len(ns[CRYPTO_KEY]) != 8:
+        msg += f'암호키 오류: {settings[CRYPTO_KEY]} 암호키는 8자리로 지정해야 합니다<br>'
 
     if msg != '':
         msg = f'<p style="color:Tomato;">설정 오류<br>{msg}</p>'

@@ -4,8 +4,8 @@ import time
 
 led = Pin('LED', Pin.OUT)
 yellow = Pin(13, Pin.OUT)
-green = Pin(14, Pin.OUT)
-red = Pin(15, Pin.OUT)
+red = Pin(14, Pin.OUT)
+green = Pin(15, Pin.OUT)
 
 timer_led = None
 timer_yellow = None
@@ -95,6 +95,7 @@ def led_onoff(_led, onoff):
             timer_red.deinit()
             timer_red = None
         if onoff:
+            print('red on')
             red.on()
         else:
             red.off()
