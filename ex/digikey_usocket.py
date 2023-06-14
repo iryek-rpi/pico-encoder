@@ -2,7 +2,10 @@ import usocket
 
 socketObject = usocket.socket(usocket.AF_INET, usocket.SOCK_STREAM)
 address = ("www.micropython.org", 80)
+print(address)
+
 socketObject.connect(address)
+
 print("\nSetting socket timeout to 5 seconds.")
 socketObject.settimeout(5)
 print("Calling RECV- this will timeout since no data was requested.\n")
