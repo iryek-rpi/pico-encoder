@@ -90,19 +90,32 @@ def do_serial(u0):
         
     return
 
+async def handler(reader, writer):
+    b64 = await reader.readline()
+    print('Data received from stream reader: ', b64)
+    print('type(b64): ', type(b64))    
+    
 async def run_server_async(ip, port, key, u0):
     global serial_running
     conn = None
     server_sock = None
     u0 = None
     
-    tcp_reader, tcp_writer = await uasyncio.open_connection(ip, int(port))
+    #tcp_reader, tcp_writer = await uasyncio.open_connection(ip, int(port))
     
+    server = await uasyncio.start_server(handler, ip, int(port))
+    async with server:
+        await server.serve_forever()
+        
+    return
+
     while 1:
         b64 = await tcp_reader.readline()
         print('Data received from stream reader: ', b64)
         print('type(b64): ', type(b64))
         
+        break
+    
         if len(b64) <= 4:
             print('irregular data. Exit')
             break
@@ -144,6 +157,12 @@ async def run_server_async(ip, port, key, u0):
         server_sock.close()
     if u0:
         u0.deinit()
+
+    if tcp_reader:
+        tcp_reader.close()
+    
+    if tcp_writer:
+        tcp_writer.close()
 
     utime.sleep(2)
 
