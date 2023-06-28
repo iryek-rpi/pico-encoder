@@ -44,7 +44,6 @@ def blink_default_led(timer):
     led.toggle()
 
 def blink_yellow(timer):
-    print('toggle yellow')
     yellow.toggle()
 
 def blink_green(timer):
