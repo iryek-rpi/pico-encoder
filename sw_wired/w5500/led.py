@@ -1,7 +1,5 @@
 from machine import Pin, Timer
 
-import time
-
 led = Pin('LED', Pin.OUT)
 yellow = Pin(13, Pin.OUT)
 red = Pin(14, Pin.OUT)
@@ -12,7 +10,7 @@ timer_yellow = None
 timer_red = None
 timer_green = None
     
-def blink_led(_led, freq):
+def blink_led(_led, freq):  # freq = Hz
     global timer_led, timer_yellow, timer_green, timer_red
 
     if _led==led:
@@ -21,17 +19,20 @@ def blink_led(_led, freq):
         timer_led = Timer()
         timer_led.init(freq=freq, mode=Timer.PERIODIC, callback=blink_default_led)
     elif _led==yellow:
-        timer_yellow.deinit()
+        if timer_yellow:
+          timer_yellow.deinit()
         timer_yellow = None
         timer_yellow = Timer()
         timer_yellow.init(freq=freq, mode=Timer.PERIODIC, callback=blink_yellow)
     elif _led==green:
-        timer_green.deinit()
+        if timer_green:
+          timer_green.deinit()
         timer_green = None
         timer_green = Timer()
         timer_green.init(freq=freq, mode=Timer.PERIODIC, callback=blink_green)
     elif _led==red:
-        timer_red.deinit()
+        if timer_red:
+          timer_red.deinit()
         timer_red = None
         timer_red = Timer()
         timer_red.init(freq=freq, mode=Timer.PERIODIC, callback=blink_red)
@@ -43,6 +44,7 @@ def blink_default_led(timer):
     led.toggle()
 
 def blink_yellow(timer):
+    print('toggle yellow')
     yellow.toggle()
 
 def blink_green(timer):
