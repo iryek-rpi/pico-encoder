@@ -203,11 +203,35 @@ def run_server_single(ip, port, key, u0):
     #machine.reset()
     return
 
+def run_server_serial(u0):
+    global serial_thread_running  # reset button flag
+
+    time_start = utime.ticks_ms()
+
+    while serial_thread_running:
+        do_serial(u0)
+        print('.', end='')
+        time_now = utime.ticks_ms()
+        runtime = utime.ticks_diff(time_now, time_start)
+        if runtime > 25000:
+            print(runtime)
+            gc.collect()
+            time_start = time_now
+        continue
+
+    if u0:
+        u0.deinit()
+
+    utime.sleep(2)
+
+    return
+
 def main_single():
     global serial_thread_running
 
     led_onoff(red, True)
     blink_led(green, 2)
+    blink_led(yellow, 2)
 
     json_settings = utils.load_json_settings()
     print(json_settings)
@@ -231,9 +255,9 @@ def main_single():
         run_server_single(json_settings['ip'], json_settings['port'], json_settings['key'], u0)
     else:
         print('No IP assigned')
-        led_onoff(green, False)
-        led_onoff(yellow, True)
-
+        led_onoff(green, True)
+        blink_led(yellow, 2)
+        run_server_serial(u0)
 
     led_onoff(green, False)
     print("Waiting for 2 sec")
