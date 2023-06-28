@@ -1,0 +1,1 @@
+ pyinstaller --noconfirm --onedir --windowed --add-data "c:\tools\miniconda3\envs\tkinter\lib\site-packages/customtkinter;customtkinter/" "c:\dev\pico-encoder\epc\kc\k2.py"
