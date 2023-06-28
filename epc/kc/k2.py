@@ -73,7 +73,7 @@ class App(ctk.CTk):
         self.receive_ciphertext_thread = None
         self.data_to_send = None
 
-        self.title("데이터암호화 모듈 테스트 프로그램")
+        self.title("데이터암호화 모듈 테스트 프로그램 2023.6.29")
         self.geometry(f"{1400}x{700}")
 
         self.grid_columnconfigure((0, 1, 2), weight=1)
@@ -253,10 +253,14 @@ class App(ctk.CTk):
     def apply_ui_options(self, options):
         app.entry_serial_port.delete(0, "end")
         app.entry_serial_port.insert(0, options["comm"])
-        if options['dhcp']:
+
+        if options['dhcp'] and self.switch_var.get() == "NO-DHCP":
             self.switch_var.set("DHCP")
-        else:
+            self.dhcp_event()
+        elif not options['dhcp'] and self.switch_var.get() == "DHCP":
             self.switch_var.set("NO-DHCP")
+            self.dhcp_event()
+
         self.entry_ip.delete(0, "end")
         self.entry_ip.insert(0, options["ip"])
         self.entry_subnet.delete(0, "end")
