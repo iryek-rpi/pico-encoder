@@ -17,10 +17,14 @@ def w5x00_init(net_config):
     else:
         nic.ifconfig((net_config[0], net_config[1], net_config[2],'8.8.8.8'))
 
+    wait_count = 0
     while not nic.isconnected():
         print(nic.regs())
         print('Waiting for Link...')
         time.sleep(1)
+        wait_count += 1
+        if wait_count > 20:
+            return None
     
     ifc = nic.ifconfig()
     print(ifc)
