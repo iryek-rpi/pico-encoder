@@ -23,7 +23,7 @@ def w5x00_init(net_config):
         print('Waiting for Link...')
         time.sleep(1)
         wait_count += 1
-        if wait_count > 20:
+        if wait_count > 10:
             return None
     
     ifc = nic.ifconfig()
