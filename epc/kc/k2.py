@@ -1,5 +1,6 @@
 import sys
 import time
+import datetime
 import threading
 from threading import Thread
 from threading import current_thread
@@ -60,6 +61,12 @@ class App(ctk.CTk):
     def __init__(self):
         super().__init__()
 
+        self.repeat_operation = True # for kc test
+        self.elapsed_time = 0
+        self.start_time = time.time()
+        self.start_clear = time.time()
+        self.elapsed_clear = 0
+
         self.comm_port = ''
         self.comm_thread=None
         self.cipher = "AES"
@@ -73,7 +80,7 @@ class App(ctk.CTk):
         self.receive_ciphertext_thread = None
         self.data_to_send = None
 
-        self.title("데이터암호화 모듈 테스트 프로그램 2023.6.29")
+        self.title("데이터암호화 모듈 테스트 프로그램 2023.6.30")
         self.geometry(f"{1400}x{700}")
 
         self.grid_columnconfigure((0, 1, 2), weight=1)
@@ -268,9 +275,9 @@ class App(ctk.CTk):
             self.entry_subnet.delete(0, "end")
             self.entry_subnet.insert(0, options["subnet"])
 
-            self.entry_ip.configure(state='disabled')
-            self.entry_gateway.configure(state='disabled')
-            self.entry_subnet.configure(state='disabled')
+            #self.entry_ip.configure(state='disabled')
+            #self.entry_gateway.configure(state='disabled')
+            #self.entry_subnet.configure(state='disabled')
         elif not options['dhcp'] and self.switch_var.get() == "DHCP":
             self.switch_var.set("NO-DHCP")
             self.dhcp_event()
@@ -293,9 +300,9 @@ class App(ctk.CTk):
             self.entry_subnet.delete(0, "end")
             self.entry_subnet.insert(0, options["subnet"])
 
-            self.entry_ip.configure(state='disabled')
-            self.entry_gateway.configure(state='disabled')
-            self.entry_subnet.configure(state='disabled')
+            #self.entry_ip.configure(state='disabled')
+            #self.entry_gateway.configure(state='disabled')
+            #self.entry_subnet.configure(state='disabled')
 
         self.entry_port.delete(0, "end")
         self.entry_port.insert(0, options["port"])
@@ -335,14 +342,14 @@ class App(ctk.CTk):
             f.write("key:" + options["key"] + "\n")
 
     def dhcp_event(self):
-        if self.switch_var.get() == 'DHCP':
-            self.entry_ip.configure(state='disabled')
-            self.entry_gateway.configure(state='disabled')
-            self.entry_subnet.configure(state='disabled')
-        else:
-            self.entry_ip.configure(state='normal')
-            self.entry_gateway.configure(state='normal')
-            self.entry_subnet.configure(state='normal')
+        #if self.switch_var.get() == 'DHCP':
+            #self.entry_ip.configure(state='disabled')
+            #self.entry_gateway.configure(state='disabled')
+            #self.entry_subnet.configure(state='disabled')
+        #else:
+        self.entry_ip.configure(state='normal')
+        self.entry_gateway.configure(state='normal')
+        self.entry_subnet.configure(state='normal')
         self.add_status_msg(f"DHCP 설정 변경됨: DHCP={self.switch_var.get()}")
         print("switch toggled, current value:", self.switch_var.get())
 
@@ -479,6 +486,10 @@ class App(ctk.CTk):
         self.history_textbox.configure(state='normal')
         self.history_textbox.insert('0.0', '응답: ')
         self.history_textbox.insert('1.7', self.ciphertext)
+        self.history_textbox.insert('0.0', '\n')
+        elapsed = str(datetime.timedelta(seconds=int(self.elapsed_time)))
+        self.history_textbox.insert('0.0', '암호화 경과시간: ')
+        self.history_textbox.insert('1.10', elapsed)
         self.history_textbox.insert('0.0', '\n\n')
         self.history_textbox.configure(state='disabled')
 
@@ -514,6 +525,10 @@ class App(ctk.CTk):
 
         self.history_textbox.configure(state='normal')
         self.history_textbox.insert('0.0', '응답: ' + plaintext.decode('utf-8'))
+        self.history_textbox.insert('0.0', '\n')
+        elapsed = str(datetime.timedelta(seconds=int(self.elapsed_time)))
+        self.history_textbox.insert('0.0', '복호화 경과시간: ')
+        self.history_textbox.insert('1.10', elapsed)
         self.history_textbox.insert('0.0', '\n\n')
         self.history_textbox.configure(state='disabled')
 
@@ -530,8 +545,19 @@ class App(ctk.CTk):
                 self.add_status_msg("네트워크 연결에 실패했습니다")
                 return
 
+        self.elapsed_time = time.time() - self.start_time
         self.send_plaintext(plaintext)
+        self.after(2000, self.enc_button_event)
 
+        self.elapsed_clear = time.time() - self.start_clear
+        if self.elapsed_clear > 600:
+            self.errortextbox.configure(state='normal')
+            self.errortextbox.delete("1.0", "end-1c")
+            self.errortextbox.configure(state='disabled')
+            self.history_textbox.configure(state='normal')
+            self.history_textbox.delete("1.0", "end-1c")
+            self.history_textbox.configure(state='disabled')
+            self.start_clear = time.time()
 
     def dec_button_event(self):
         #ciphertext = self.ciphertextbox.get("1.0", "end-1c")
@@ -547,7 +573,19 @@ class App(ctk.CTk):
                 self.add_status_msg("네트워크 연결에 실패했습니다")
                 return
 
+        self.elapsed_time = time.time() - self.start_time
         self.send_ciphertext(ciphertext)
+        self.after(2000, self.dec_button_event)
+
+        self.elapsed_clear = time.time - self.start_clear
+        if self.elapsed_clear > 600:
+            self.errortextbox.configure(state='normal')
+            self.errortextbox.delete("1.0", "end-1c")
+            self.errortextbox.configure(state='disabled')
+            self.history_textbox.configure(state='normal')
+            self.history_textbox.delete("1.0", "end-1c")
+            self.history_textbox.configure(state='disabled')
+            self.start_clear = time.time()
 
     def history_clear_event(self):
         self.history_textbox.configure(state='normal')
