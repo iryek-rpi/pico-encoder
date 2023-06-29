@@ -257,16 +257,46 @@ class App(ctk.CTk):
         if options['dhcp'] and self.switch_var.get() == "NO-DHCP":
             self.switch_var.set("DHCP")
             self.dhcp_event()
+            self.entry_ip.configure(state='normal')
+            self.entry_gateway.configure(state='normal')
+            self.entry_subnet.configure(state='normal')
+
+            self.entry_ip.delete(0, "end")
+            self.entry_ip.insert(0, options["ip"])
+            self.entry_gateway.delete(0, "end")
+            self.entry_gateway.insert(0, options["gateway"])
+            self.entry_subnet.delete(0, "end")
+            self.entry_subnet.insert(0, options["subnet"])
+
+            self.entry_ip.configure(state='disabled')
+            self.entry_gateway.configure(state='disabled')
+            self.entry_subnet.configure(state='disabled')
         elif not options['dhcp'] and self.switch_var.get() == "DHCP":
             self.switch_var.set("NO-DHCP")
             self.dhcp_event()
 
-        self.entry_ip.delete(0, "end")
-        self.entry_ip.insert(0, options["ip"])
-        self.entry_subnet.delete(0, "end")
-        self.entry_subnet.insert(0, options["subnet"])
-        self.entry_gateway.delete(0, "end")
-        self.entry_gateway.insert(0, options["gateway"])
+            self.entry_ip.delete(0, "end")
+            self.entry_ip.insert(0, options["ip"])
+            self.entry_gateway.delete(0, "end")
+            self.entry_gateway.insert(0, options["gateway"])
+            self.entry_subnet.delete(0, "end")
+            self.entry_subnet.insert(0, options["subnet"])
+        else:
+            self.entry_ip.configure(state='normal')
+            self.entry_gateway.configure(state='normal')
+            self.entry_subnet.configure(state='normal')
+
+            self.entry_ip.delete(0, "end")
+            self.entry_ip.insert(0, options["ip"])
+            self.entry_gateway.delete(0, "end")
+            self.entry_gateway.insert(0, options["gateway"])
+            self.entry_subnet.delete(0, "end")
+            self.entry_subnet.insert(0, options["subnet"])
+
+            self.entry_ip.configure(state='disabled')
+            self.entry_gateway.configure(state='disabled')
+            self.entry_subnet.configure(state='disabled')
+
         self.entry_port.delete(0, "end")
         self.entry_port.insert(0, options["port"])
         self.entry_key.delete(0, "end")
@@ -317,8 +347,8 @@ class App(ctk.CTk):
         print("switch toggled, current value:", self.switch_var.get())
 
     def read_option_event(self):
+        options = self.read_ui_options()
         self.read_device_options()
-
         options = self.read_ui_options()
         self.write_options_file(options)
 
