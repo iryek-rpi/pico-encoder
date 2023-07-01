@@ -2,7 +2,10 @@ import usocket as socket
 import uasyncio as asyncio
 import uselect as select
 import ujson
-from heartbeat import heartbeat  # Optional LED flash
+from led import *
+
+def heartbeat(interval):
+    blink_led(red, 1/interbal)
 
 class Server:
 
@@ -15,8 +18,11 @@ class Server:
     async def run(self):
         print('Awaiting client connection.')
         self.cid = 0
-        asyncio.create_task(heartbeat(100))
+        print("run1")
+        #asyncio.create_task(heartbeat(100))
+        print("run2")
         self.server = await asyncio.start_server(self.run_client, self.host, self.port, self.backlog)
+        print("server: ", self.server)
         while True:
             await asyncio.sleep(100)
 
