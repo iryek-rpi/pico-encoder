@@ -12,7 +12,7 @@ def main():
     ser = init('/dev/ttyUSB0')
     while True:
         print("Sending data to Pico: 1234567890")
-        ser.write(b'1234567890')
+        ser.write(b'1234567890\n')
         #data = ser.read(8)
         #data = ser.readline()
         # convert bytestring  to unicode transformation format -8 bit
