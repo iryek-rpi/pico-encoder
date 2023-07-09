@@ -3,13 +3,10 @@ import serial
 import time
 
 
-def init(port):
-    ser = serial.Serial(port, 9600, timeout=1)
-    return ser
-
+PORT = 'COM16'
 def main():
-    # read two bytes of data
-    ser = init('/dev/ttyUSB0')
+    ser = serial.Serial(PORT, 9600, timeout=1)
+    #ser = init('/dev/ttyUSB0')
     while True:
         print("Sending data to Pico: 1234567890")
         ser.write(b'1234567890\n')

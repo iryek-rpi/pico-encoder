@@ -1,5 +1,8 @@
+from machine import Pin, UART
 import uasyncio as asyncio
-from machine import UART
+
+uart = UART(0, tx=Pin(0), rx=Pin(1))  # w5500-evb-pico
+uart.init(baudrate=9600, bits=8, parity=None, stop=1, timeout=10)
 
 async def uart_sender(uart):
     writer = asyncio.StreamWriter(uart, {})
@@ -15,7 +18,6 @@ async def uart_receiver(uart):
         print('uart_receiver recieved:', message)
 
 async def main():
-    uart = UART(1)
     asyncio.create_task(uart_receiver(uart))
     asyncio.create_task(uart_sender(uart))
     await asyncio.sleep(10)
