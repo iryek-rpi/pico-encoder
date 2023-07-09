@@ -38,17 +38,6 @@ led_onoff(red, False)
 
 serial_running = False
 
-btn = Pin(9, Pin.IN, Pin.PULL_UP)
-
-def btn_callback(btn):
-    global serial_running
-    led_onoff(yellow, True)
-    led_onoff(green, False)
-    print('Button pressed')
-    serial_running = False
-
-btn.irq(trigger=Pin.IRQ_FALLING, handler=btn_callback)
-
 def init_serial():
     uart0 = UART(0, tx=Pin(0), rx=Pin(1))
     uart0.init(baudrate=BAUD_RATE, bits=8, parity=None, stop=1, timeout=SERIAL1_TIMEOUT)
@@ -329,8 +318,8 @@ async def main_async():
     json_settings = utils.load_json_settings()
     print(json_settings)
 
-    serial_running = True
     u0 = init_serial()
+    serial_running = True
     
     if json_settings['dhcp']:
         net_info = w5x00_init(None)
@@ -362,5 +351,4 @@ async def main_async():
 
 
 if __name__ == '__main__':
-    #main_single()
     uasyncio.run(main_async())
