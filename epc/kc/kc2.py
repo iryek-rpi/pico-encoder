@@ -316,7 +316,7 @@ class App(ctk.CTk):
             lines = f.readlines()
             options['comm'] = lines[0].split("comm:")[1].strip()
             dhcp =  lines[1].split("dhcp:")[1].strip()
-            if dhcp == 'ture':
+            if dhcp == 'true':
                 options['dhcp'] = 1
             else:
                 options['dhcp'] = 0
