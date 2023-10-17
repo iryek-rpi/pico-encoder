@@ -20,27 +20,21 @@ import usocket
 
 import coder
 from led import *
-from w5500 import w5x00_init
 import utils
+import pico_net as pn
 
 KEY = b'aD\xd8\x11e\xdcy`\t\xdc\xe4\xa7\x1f\x11\x94\x93'
 
-#BAUD_RATE = 19200
-BAUD_RATE = 9600
+BAUD_RATE = 9600  #19200
 if BAUD_RATE == 9600:
     SERIAL1_TIMEOUT = 200 # ms
 else:
     SERIAL1_TIMEOUT = 100 # ms
 
 print('Starting W5500 script')
-led_onoff(led, False)
-led_onoff(yellow, False)
-led_onoff(green, False)
-led_onoff(red, False)
-
-serial_thread_running = False
-
+led_init()
 btn = Pin(9, Pin.IN, Pin.PULL_UP)
+serial_thread_running = False
 
 def btn_callback(btn):
     global serial_thread_running
@@ -57,9 +51,9 @@ def init_serial():
 
     return uart0
 
-def do_serial(u0):
+def do_serial(uart):
     global serial_thread_running
-    sm = u0.readline()
+    sm = uart.readline()
     if sm:
         try:
             sm = sm.decode('utf-8')
@@ -69,19 +63,19 @@ def do_serial(u0):
             print(f'cmd: {cmd}')
             print(f'sm[-7:]: {sm[-7:]}')
             if cmd=='CNF_REQ':
-                json_settings = utils.load_json_settings()
-                print('json_settings: ', json_settings)
-                print('type(json_settings): ', type(json_settings))
-                settings = ujson.dumps(json_settings)
-                print(len(settings), ' bytes : ', settings)
-                msg = bytes('CNF_JSN', 'utf-8') + bytes(settings, 'utf-8') + bytes('CNF_END\n', 'utf-8')
-                u0.write(msg)
+                saved_settings = utils.load_json_settings()
+                print('saved_settings: ', saved_settings)
+                print('type(saved_settings): ', type(saved_settings))
+                str_settings = ujson.dumps(saved_settings)
+                print(len(str_settings), ' bytes : ', str_settings)
+                msg = bytes('CNF_JSN', 'utf-8') + bytes(str_settings, 'utf-8') + bytes('CNF_END\n', 'utf-8')
+                uart.write(msg)
             elif cmd=='CNF_WRT' and sm[-7:]=='CNF_END':
-                u0.deinit()
-                u0 = None
-                settings = sm[7:-7]
-                print(f'Received settings: {settings}')
-                utils.save_settings(settings)
+                uart.deinit()
+                uart = None
+                received_settings = sm[7:-7]
+                print(f'Received settings: {received_settings}')
+                utils.save_settings(received_settings)
                 serial_thread_running = False
                 return
             else:
@@ -91,12 +85,11 @@ def do_serial(u0):
         
     return
 
-def run_server_single(ip, port, key, u0):
+def run_hybrid_server(ip, port, key, uart):
     global serial_thread_running  # reset button flag
 
     server_sock = socket()
     server_sock.bind((ip, int(port)))
-    
     print('Listening on socket: ', server_sock)
     server_sock.listen(4)
 
@@ -116,7 +109,7 @@ def run_server_single(ip, port, key, u0):
     while serial_thread_running:
         res = p1.poll(100)
         if not res:
-            do_serial(u0)
+            do_serial(uart)
             print('.', end='')
             time_now = utime.ticks_ms()
             runtime = utime.ticks_diff(time_now, time_start)
@@ -144,7 +137,7 @@ def run_server_single(ip, port, key, u0):
     while serial_thread_running:
         res = poller.poll(100)
         if not res:
-            do_serial(u0)
+            do_serial(uart)
             print('no data from conn')
             time_now = utime.ticks_ms()
             runtime = utime.ticks_diff(time_now, time_start)
@@ -195,21 +188,21 @@ def run_server_single(ip, port, key, u0):
         conn.close()
     if server_sock:
         server_sock.close()
-    if u0:
-        u0.deinit()
+    if uart:
+        uart.deinit()
 
     utime.sleep(2)
 
     #machine.reset()
     return
 
-def run_server_serial(u0):
+def run_server_serial(uart):
     global serial_thread_running  # reset button flag
 
     time_start = utime.ticks_ms()
 
     while serial_thread_running:
-        do_serial(u0)
+        do_serial(uart)
         print('.', end='')
         time_now = utime.ticks_ms()
         runtime = utime.ticks_diff(time_now, time_start)
@@ -219,8 +212,8 @@ def run_server_serial(u0):
             time_start = time_now
         continue
 
-    if u0:
-        u0.deinit()
+    if uart:
+        uart.deinit()
 
     utime.sleep(2)
 
@@ -229,35 +222,24 @@ def run_server_serial(u0):
 def main_single():
     global serial_thread_running
 
-    led_onoff(red, True)
-    blink_led(green, 2)
-    blink_led(yellow, 2)
-
-    json_settings = utils.load_json_settings()
-    print(json_settings)
+    led_start()
+    settings = utils.load_json_settings()
+    print(settings)
 
     serial_thread_running = True
-    u0 = init_serial()
-    
-    if json_settings['dhcp']:
-        net_info = w5x00_init(None)
-    else:
-        net_info = w5x00_init((json_settings['ip'], json_settings['subnet'], json_settings['gateway']))
+    uart = init_serial()
+    net_info = pn.pico_net_init(settings['dhcp'], settings['ip'], settings['subnet'], settings['gateway'])
 
     if net_info and net_info[0]:
-        led_onoff(green, True)
-        led_onoff(yellow, False)        
+        led_state_good()
         print('IP assigned: ', net_info[0])
-        json_settings['ip'] = net_info[0]
-        json_settings['subnet'] = net_info[1]
-        json_settings['gateway'] = net_info[2]
-        utils.save_settings(ujson.dumps(json_settings))
-        run_server_single(json_settings['ip'], json_settings['port'], json_settings['key'], u0)
+        settings['ip'], settings['subnet'], settings['gateway'] = net_info[0], net_info[1], net_info[2]
+        utils.save_settings(ujson.dumps(settings))
+        run_hybrid_server(settings['ip'], settings['port'], settings['key'], uart)
     else:
         print('No IP assigned')
-        led_onoff(green, True)
-        blink_led(yellow, 2)
-        run_server_serial(u0)
+        led_state_no_ip()
+        run_serial_server(uart)
 
     led_onoff(green, False)
     print("Waiting for 2 sec")
