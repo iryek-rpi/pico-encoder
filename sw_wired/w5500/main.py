@@ -83,37 +83,46 @@ def do_serial(uart):
         except Exception as e:
             print(e)
         
+    print('.', end='')
+
     return
+
+gc_start_time = utime.ticks_ms()
+
+def garbage_collect():
+    global gc_start_time
+
+    time_now = utime.ticks_ms()
+    runtime = utime.ticks_diff(time_now, gc_start_time)
+    if runtime > 25000:
+        print(runtime)
+        gc.collect()
+        gc_start_time = time_now
 
 def run_hybrid_server(ip, port, key, uart):
     global serial_thread_running  # reset button flag
+    global gc_start_time
+
+    keyb = coder.fix_len_and_encode_key(key)
 
     server_sock = socket()
     server_sock.bind((ip, int(port)))
     print('Listening on socket: ', server_sock)
     server_sock.listen(4)
 
-    keyb = coder.fix_len_and_encode_key(key)
-
-    p1 = uselect.poll()
-    p1.register(server_sock, uselect.POLLIN)
+    sock_poll = uselect.poll()
+    sock_poll.register(server_sock, uselect.POLLIN)
 
     print('Waiting for connection...')
     conn = None
 
-    time_start = utime.ticks_ms()
+    gc_start_time = utime.ticks_ms()
 
     while serial_thread_running:
-        res = p1.poll(100)
-        if not res:
+        poll_response = sock_poll.poll(100)
+        if not poll_response:
             do_serial(uart)
-            print('.', end='')
-            time_now = utime.ticks_ms()
-            runtime = utime.ticks_diff(time_now, time_start)
-            if runtime > 25000:
-                print(runtime)
-                gc.collect()
-                time_start = time_now
+            garbage_collect()
             continue
         print('client available')
         conn, addr = server_sock.accept()
@@ -129,19 +138,14 @@ def run_hybrid_server(ip, port, key, uart):
     poller = uselect.poll()
     poller.register(conn, uselect.POLLIN)
     
-    time_start = utime.ticks_ms()
+    gc_start_time = utime.ticks_ms()
 
     while serial_thread_running:
         res = poller.poll(100)
         if not res:
             do_serial(uart)
             print('no data from conn')
-            time_now = utime.ticks_ms()
-            runtime = utime.ticks_diff(time_now, time_start)
-            if runtime > 25000:
-                print(runtime)
-                gc.collect()
-                time_start = time_now
+            garbage_collect()
             continue
 
         print('data arrived at conn')
@@ -193,20 +197,15 @@ def run_hybrid_server(ip, port, key, uart):
     #machine.reset()
     return
 
-def run_server_serial(uart):
+def run_serial_server(uart):
     global serial_thread_running  # reset button flag
+    global gc_start_time
 
-    time_start = utime.ticks_ms()
+    gc_start_time = utime.ticks_ms()
 
     while serial_thread_running:
         do_serial(uart)
-        print('.', end='')
-        time_now = utime.ticks_ms()
-        runtime = utime.ticks_diff(time_now, time_start)
-        if runtime > 25000:
-            print(runtime)
-            gc.collect()
-            time_start = time_now
+        garbage_collect()
         continue
 
     if uart:
