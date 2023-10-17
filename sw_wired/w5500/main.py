@@ -104,16 +104,7 @@ def run_hybrid_server(ip, port, key, uart):
     global gc_start_time
 
     keyb = coder.fix_len_and_encode_key(key)
-
-    server_sock = socket()
-    server_sock.bind((ip, int(port)))
-    print('Listening on socket: ', server_sock)
-    server_sock.listen(4)
-
-    sock_poll = uselect.poll()
-    sock_poll.register(server_sock, uselect.POLLIN)
-
-    print('Waiting for connection...')
+    server_sock, sock_poll = pn.pico_init_socket(ip, port)
     conn = None
 
     gc_start_time = utime.ticks_ms()
