@@ -93,10 +93,7 @@ def run_hybrid_server(ip, port, key, uart):
     print('Listening on socket: ', server_sock)
     server_sock.listen(4)
 
-    if len(key) > len(coder.KEY):
-        key = key[:len(coder.KEY)]
-    keyb = key.encode()
-    keyb = keyb + coder.KEY[len(keyb):]
+    keyb = coder.fix_len_and_encode_key(key)
 
     p1 = uselect.poll()
     p1.register(server_sock, uselect.POLLIN)
