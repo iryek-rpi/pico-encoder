@@ -10,6 +10,29 @@ timer_yellow = None
 timer_red = None
 timer_green = None
     
+def led_init():
+    led_onoff(led, False)
+    led_onoff(yellow, False)
+    led_onoff(green, False)
+    led_onoff(red, False)
+
+def led_start():
+    led_onoff(red, True)
+    blink_led(green, 2)
+    blink_led(yellow, 2)
+
+def led_state_good():
+    led_onoff(green, True)
+    led_onoff(yellow, False)        
+
+def led_state_error():
+    led_onoff(green, True)
+    blink_led(yellow, 2)
+
+def led_state_no_ip():
+    led_onoff(green, True)
+    blink_led(yellow, 2)
+
 def blink_led(_led, freq):  # freq = Hz
     global timer_led, timer_yellow, timer_green, timer_red
 
