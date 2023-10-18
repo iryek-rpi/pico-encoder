@@ -12,18 +12,21 @@ PARITY = 'parity'
 DATASIZE = 'datasize'
 STOPBITS = 'stopbits'
 
+#{"speed": "9600", "parity": "N", "databit": "8", "stopbit": "1", "dhcp": 0, "ip": "192.168.0.5", "subnet": "255.255.255.0", "gateway": "192.168.0.1", "port": "8501", "peer_ip": "192.168.0.6", "peer_port": "8502", "host_ip": "192.168.0.2", "host_port": "8503", "key": "12345678"}
+
 DHCP = 'dhcp'
 IP = 'ip'
 PORT = 'port'
 GATEWAY = 'gateway'
 SUBNET = 'subnet'
-
-REMOTE_IP = 'remote_ip'
-REMOTE_PORT = 'remote_port'
-
-PLC_IP = 'plc_ip'
-PLC_PORT = 'plc_port'
-
+PEER_IP = 'peer_ip'
+PEER_PORT = 'peer_port'
+HOST_IP = 'host_ip'
+HOST_PORT = 'host_port'
+SPEED = 'speed'
+PARITY = 'parity'
+DATABIT = 'databit'
+STOPBIT = 'stopbit'
 KEY = 'key'
 
 DEFAUlT_SETTINGS = {
@@ -32,6 +35,14 @@ DEFAUlT_SETTINGS = {
     PORT : 8501,
     GATEWAY : '192.168.0.1',
     SUBNET : '255.255.255.0',
+    PEER_IP : '192.168.0.5',
+    PEER_PORT : 8502,
+    HOST_IP : '192.168.0.6',
+    HOST_PORT : 8503,
+    SPEED : 9600,
+    PARITY : 'N',   #N, E, O
+    DATABIT : 8,
+    STOPBIT : 1,
     KEY:'12345678'
 }
 
@@ -76,24 +87,24 @@ def validate_settings(settings):
     if not validate_ip_string(settings[GATEWAY]):
         msg += f'게이트웨이 오류: {settings[GATEWAY]}<br>'
     
-    if not validate_ip_string(settings[REMOTE_IP]):
-        msg += f'원격 단말 IP 주소 오류: {settings[REMOTE_IP]}<br>'
+    if not validate_ip_string(settings[PEER_IP]):
+        msg += f'상대 단말 IP 주소 오류: {settings[PEER_IP]}<br>'
 
-    if not validate_port_string(settings[REMOTE_PORT]):
-        msg += f'원격 단말 포트 오류: {settings[REMOTE_PORT]} 1023<포트번호<65536<br>'
+    if not validate_port_string(settings[PEER_PORT]):
+        msg += f'상대 단말 포트 오류: {settings[PEER_PORT]} 1023<포트번호<65536<br>'
     else:
-        ns[REMOTE_PORT] = int(settings[REMOTE_PORT])
+        ns[PEER_PORT] = int(settings[PEER_PORT])
 
-    if not validate_ip_string(settings[PLC_IP]):
-        msg += f'PLC IP 주소 오류: {settings[PLC_IP]}<br>'
+    if not validate_ip_string(settings[HOST_IP]):
+        msg += f'호스트 IP 주소 오류: {settings[HOST_IP]}<br>'
 
-    if not validate_port_string(settings[PLC_PORT]):
-        msg += f'PLC 포트 오류: {settings[PLC_PORT]} 1023<포트번호<65536<br>'
+    if not validate_port_string(settings[HOST_PORT]):
+        msg += f'호스트 포트 오류: {settings[HOST_PORT]} 1023<포트번호<65536<br>'
     else:
-        ns[PLC_PORT] = int(settings[PLC_PORT])
+        ns[HOST_PORT] = int(settings[HOST_PORT])
 
-    if len(ns[CRYPTO_KEY]) != 8:
-        msg += f'암호키 오류: {settings[CRYPTO_KEY]} 암호키는 8자리로 지정해야 합니다<br>'
+    if len(ns[KEY]) != 8:
+        msg += f'암호키 오류: {settings[KEY]} 암호키는 8자리로 지정해야 합니다<br>'
 
     if msg != '':
         msg = f'<p style="color:Tomato;">설정 오류<br>{msg}</p>'
