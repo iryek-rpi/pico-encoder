@@ -23,6 +23,18 @@ print('Starting W5500 script')
 led_init()
 btn = Pin(9, Pin.IN, Pin.PULL_UP)
 global_run_flag = False
+gc_start_time = utime.ticks_ms()
+
+def garbage_collect():
+    global gc_start_time
+
+    time_now = utime.ticks_ms()
+    runtime = utime.ticks_diff(time_now, gc_start_time)
+    print('===== gc.mem_free(): ', gc.mem_free(), ' at ', runtime)
+    if runtime > 500_000:
+        gc.collect()
+        gc_start_time = time_now
+        print('+++++ gc.mem_free(): ', gc.mem_free())
 
 def btn_callback(btn):
     global global_run_flag
@@ -74,20 +86,7 @@ def process_serial_msg(uart):
 
     return
 
-gc_start_time = utime.ticks_ms()
-
-def garbage_collect():
-    global gc_start_time
-
-    time_now = utime.ticks_ms()
-    runtime = utime.ticks_diff(time_now, gc_start_time)
-    print('===== gc.mem_free(): ', gc.mem_free(), ' at ', runtime)
-    if runtime > 500_000:
-        gc.collect()
-        gc_start_time = time_now
-        print('+++++ gc.mem_free(): ', gc.mem_free())
-
-def process_secret_msg(conn, fixed_binary_key):
+def process_tcp_msg(conn, fixed_binary_key):
     b64 = conn.recv(128)
     print('data received: ', b64)
     print('type(b64): ', type(b64))
@@ -101,23 +100,17 @@ def process_secret_msg(conn, fixed_binary_key):
         print(f'cmd: {cmd}')
 
         if cmd == 'TEXT':
-            print(f'msg: {msg}')
+            print('msg: ', msg)
             IV = aes.generate_IV(16)
             cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
             msg = cipher.encrypt(msg)
             iv_c = IV + msg
-            print('IV: ')
-            print(IV)
-            print('msg: ')
-            print(msg)
+            print('IV: ', IV, ' msg: ', msg)
             conn.send(iv_c)
         elif cmd == 'CIPH':
-            print(f'msg: {msg}')
+            print('msg: ', msg)
             IV, msg = msg[:16], msg[16:]
-            print('IV: ')
-            print(IV)
-            print('msg: ')
-            print(msg)
+            print('IV: ', IV, ' msg: ', msg)
             msga = bytearray(msg)
             cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
             plaintext = cipher.decrypt(msga)
@@ -149,7 +142,7 @@ def run_hybrid_server(settings, uart):
             conn, addr, poller = pn.pico_init_connection(server_sock)
         else:
             print('data arrived at conn')
-            if not process_secret_msg(conn, fixed_binary_key):
+            if not process_tcp_msg(conn, fixed_binary_key):
                 break
 
     server_sock.close()
