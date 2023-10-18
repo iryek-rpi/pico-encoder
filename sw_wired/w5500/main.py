@@ -22,14 +22,14 @@ else:
 print('Starting W5500 script')
 led_init()
 btn = Pin(9, Pin.IN, Pin.PULL_UP)
-serial_thread_running = False
+global_run_flag = False
 
 def btn_callback(btn):
-    global serial_thread_running
+    global global_run_flag
     led_onoff(yellow, True)
     led_onoff(green, False)
     print('Button pressed')
-    serial_thread_running = False
+    global_run_flag = False
 
 btn.irq(trigger=Pin.IRQ_FALLING, handler=btn_callback)
 
@@ -39,7 +39,7 @@ def init_serial():
     return uart0
 
 def process_serial_msg(uart):
-    global serial_thread_running
+    global global_run_flag
     sm = uart.readline()
     if sm:
         try:
@@ -63,7 +63,7 @@ def process_serial_msg(uart):
                 received_settings = sm[7:-7]
                 print(f'Received settings: {received_settings}')
                 utils.save_settings(received_settings)
-                serial_thread_running = False
+                global_run_flag = False
                 return
             else:
                 print('Unknown command')
@@ -126,7 +126,7 @@ def process_secret_msg(conn, fixed_binary_key):
         return msg
 
 def run_hybrid_server(ip, port, key, uart):
-    global serial_thread_running  # reset button flag
+    global global_run_flag  # reset button flag
     global gc_start_time
 
     fixed_binary_key = coder.fix_len_and_encode_key(key)
@@ -135,7 +135,7 @@ def run_hybrid_server(ip, port, key, uart):
     conn = None
     server_sock, poller = pn.pico_init_socket(ip, port)
 
-    while serial_thread_running:
+    while global_run_flag:
         if not poller.poll(100):
             process_serial_msg(uart)
             garbage_collect()
@@ -159,12 +159,12 @@ def run_hybrid_server(ip, port, key, uart):
     return
 
 def run_serial_server(uart):
-    global serial_thread_running  # reset button flag
+    global global_run_flag  # reset button flag
     global gc_start_time
 
     gc_start_time = utime.ticks_ms()
 
-    while serial_thread_running:
+    while global_run_flag:
         process_serial_msg(uart)
         garbage_collect()
         continue
@@ -177,13 +177,13 @@ def run_serial_server(uart):
     return
 
 def main_single():
-    global serial_thread_running
+    global global_run_flag
 
     led_start()
     settings = utils.load_json_settings()
     print(settings)
 
-    serial_thread_running = True
+    global_run_flag = True
     uart = init_serial()
     net_info = pn.pico_net_init(settings['dhcp'], settings['ip'], settings['subnet'], settings['gateway'])
 
