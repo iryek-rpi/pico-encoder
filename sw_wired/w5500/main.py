@@ -5,7 +5,6 @@ import machine
 from machine import Pin
 from machine import UART
 import utime
-import uselect
 import gc
 import ujson
 import mpyaes as aes
@@ -82,12 +81,13 @@ def garbage_collect():
 
     time_now = utime.ticks_ms()
     runtime = utime.ticks_diff(time_now, gc_start_time)
-    if runtime > 25000:
-        print(runtime)
+    print('===== gc.mem_free(): ', gc.mem_free(), ' at ', runtime)
+    if runtime > 500_000:
         gc.collect()
         gc_start_time = time_now
+        print('+++++ gc.mem_free(): ', gc.mem_free())
 
-def process_secret_msg(conn):
+def process_secret_msg(conn, fixed_binary_key):
     b64 = conn.recv(128)
     print('data received: ', b64)
     print('type(b64): ', type(b64))
@@ -103,7 +103,7 @@ def process_secret_msg(conn):
         if cmd == 'TEXT':
             print(f'msg: {msg}')
             IV = aes.generate_IV(16)
-            cipher = aes.new(keyb, aes.MODE_CBC, IV)
+            cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
             msg = cipher.encrypt(msg)
             iv_c = IV + msg
             print('IV: ')
@@ -119,7 +119,7 @@ def process_secret_msg(conn):
             print('msg: ')
             print(msg)
             msga = bytearray(msg)
-            cipher = aes.new(keyb, aes.MODE_CBC, IV)
+            cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
             plaintext = cipher.decrypt(msga)
             conn.send(plaintext)
 
@@ -129,7 +129,7 @@ def run_hybrid_server(ip, port, key, uart):
     global serial_thread_running  # reset button flag
     global gc_start_time
 
-    keyb = coder.fix_len_and_encode_key(key)
+    fixed_binary_key = coder.fix_len_and_encode_key(key)
 
     gc_start_time = utime.ticks_ms()
     conn = None
@@ -145,7 +145,7 @@ def run_hybrid_server(ip, port, key, uart):
             conn, addr, poller = pn.pico_init_connection(server_sock)
         else:
             print('data arrived at conn')
-            if not process_secret_msg(conn):
+            if not process_secret_msg(conn, fixed_binary_key):
                 break
 
     server_sock.close()
