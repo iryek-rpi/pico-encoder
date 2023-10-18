@@ -3,27 +3,16 @@ W5500
 '''
 import machine
 from machine import Pin
-from machine import Timer
 from machine import UART
-
 import utime
-from usocket import socket
 import uselect
-import _thread
 import gc
-
-import network
-import ubinascii
 import ujson
 import mpyaes as aes
-import usocket
-
 import coder
 from led import *
 import utils
 import pico_net as pn
-
-KEY = b'aD\xd8\x11e\xdcy`\t\xdc\xe4\xa7\x1f\x11\x94\x93'
 
 BAUD_RATE = 9600  #19200
 if BAUD_RATE == 9600:
@@ -48,10 +37,9 @@ btn.irq(trigger=Pin.IRQ_FALLING, handler=btn_callback)
 def init_serial():
     uart0 = UART(0, tx=Pin(0), rx=Pin(1))
     uart0.init(baudrate=BAUD_RATE, bits=8, parity=None, stop=1, timeout=SERIAL1_TIMEOUT)
-
     return uart0
 
-def do_serial(uart):
+def process_serial_msg(uart):
     global serial_thread_running
     sm = uart.readline()
     if sm:
@@ -112,7 +100,7 @@ def run_hybrid_server(ip, port, key, uart):
     while serial_thread_running:
         poll_response = sock_poll.poll(100)
         if not poll_response:
-            do_serial(uart)
+            process_serial_msg(uart)
             garbage_collect()
             continue
         print('client available')
@@ -134,7 +122,7 @@ def run_hybrid_server(ip, port, key, uart):
     while serial_thread_running:
         res = poller.poll(100)
         if not res:
-            do_serial(uart)
+            process_serial_msg(uart)
             print('no data from conn')
             garbage_collect()
             continue
@@ -195,7 +183,7 @@ def run_serial_server(uart):
     gc_start_time = utime.ticks_ms()
 
     while serial_thread_running:
-        do_serial(uart)
+        process_serial_msg(uart)
         garbage_collect()
         continue
 
