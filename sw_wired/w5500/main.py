@@ -125,9 +125,13 @@ def process_secret_msg(conn, fixed_binary_key):
 
         return msg
 
-def run_hybrid_server(ip, port, key, uart):
+def run_hybrid_server(settings, uart):
     global global_run_flag  # reset button flag
     global gc_start_time
+
+    ip, port, peer_ip, peer_port = settings['ip'], settings['port'], settings['peer_ip'], settings['peer_port']
+    host_ip, host_port = settings['host_ip'], settings['host_port']
+    key = settings['key']
 
     fixed_binary_key = coder.fix_len_and_encode_key(key)
 
@@ -192,7 +196,7 @@ def main_single():
         print('IP assigned: ', net_info[0])
         settings['ip'], settings['subnet'], settings['gateway'] = net_info[0], net_info[1], net_info[2]
         utils.save_settings(ujson.dumps(settings))
-        run_hybrid_server(settings['ip'], settings['port'], settings['key'], uart)
+        run_hybrid_server(settings, uart)
     else:
         print('No IP assigned')
         led_state_no_ip()
