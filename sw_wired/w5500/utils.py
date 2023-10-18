@@ -27,6 +27,7 @@ SPEED = 'speed'
 PARITY = 'parity'
 DATABIT = 'databit'
 STOPBIT = 'stopbit'
+CHANNEL = 'channel'
 KEY = 'key'
 
 DEFAUlT_SETTINGS = {
@@ -43,6 +44,7 @@ DEFAUlT_SETTINGS = {
     PARITY : 'N',   #N, E, O
     DATABIT : 8,
     STOPBIT : 1,
+    CHANNEL : 0, # 0=tcp, 1=serial
     KEY:'12345678'
 }
 
