@@ -87,92 +87,74 @@ def garbage_collect():
         gc.collect()
         gc_start_time = time_now
 
+def process_secret_msg(conn):
+    b64 = conn.recv(128)
+    print('data received: ', b64)
+    print('type(b64): ', type(b64))
+    
+    if len(b64) <= 4:
+        print('irregular data. Exit')
+        return None
+    else:
+        cmd, msg = b64[:4], b64[4:]
+        cmd = cmd.decode('utf-8')
+        print(f'cmd: {cmd}')
+
+        if cmd == 'TEXT':
+            print(f'msg: {msg}')
+            IV = aes.generate_IV(16)
+            cipher = aes.new(keyb, aes.MODE_CBC, IV)
+            msg = cipher.encrypt(msg)
+            iv_c = IV + msg
+            print('IV: ')
+            print(IV)
+            print('msg: ')
+            print(msg)
+            conn.send(iv_c)
+        elif cmd == 'CIPH':
+            print(f'msg: {msg}')
+            IV, msg = msg[:16], msg[16:]
+            print('IV: ')
+            print(IV)
+            print('msg: ')
+            print(msg)
+            msga = bytearray(msg)
+            cipher = aes.new(keyb, aes.MODE_CBC, IV)
+            plaintext = cipher.decrypt(msga)
+            conn.send(plaintext)
+
+        return msg
+
 def run_hybrid_server(ip, port, key, uart):
     global serial_thread_running  # reset button flag
     global gc_start_time
 
     keyb = coder.fix_len_and_encode_key(key)
-    server_sock, sock_poll = pn.pico_init_socket(ip, port)
+
+    gc_start_time = utime.ticks_ms()
     conn = None
-
-    gc_start_time = utime.ticks_ms()
+    server_sock, poller = pn.pico_init_socket(ip, port)
 
     while serial_thread_running:
-        poll_response = sock_poll.poll(100)
-        if not poll_response:
+        if not poller.poll(100):
             process_serial_msg(uart)
             garbage_collect()
             continue
-        print('client available')
-        conn, addr = server_sock.accept()
-        print('Connected by ', conn, ' from ', addr)
-        break
-
-    if not serial_thread_running:
-        if conn:
-            conn.close()
-        server_sock.close()
-        return
-        
-    poller = uselect.poll()
-    poller.register(conn, uselect.POLLIN)
-    
-    gc_start_time = utime.ticks_ms()
-
-    while serial_thread_running:
-        res = poller.poll(100)
-        if not res:
-            process_serial_msg(uart)
-            print('no data from conn')
-            garbage_collect()
-            continue
-
-        print('data arrived at conn')
-
-        b64 = conn.recv(128)
-        print('data received: ', b64)
-        print('type(b64): ', type(b64))
-        
-        if len(b64) <= 4:
-            print('irregular data. Exit')
-            break
+        print('client or data available')
+        if not conn:
+            conn, addr, poller = pn.pico_init_connection(server_sock)
         else:
-            cmd, msg = b64[:4], b64[4:]
-            cmd = cmd.decode('utf-8')
-            print(f'cmd: {cmd}')
+            print('data arrived at conn')
+            if not process_secret_msg(conn):
+                break
 
-            if cmd == 'TEXT':
-                print(f'msg: {msg}')
-                IV = aes.generate_IV(16)
-                cipher = aes.new(keyb, aes.MODE_CBC, IV)
-                msg = cipher.encrypt(msg)
-                iv_c = IV + msg
-                print('IV: ')
-                print(IV)
-                print('msg: ')
-                print(msg)
-                conn.send(iv_c)
-            elif cmd == 'CIPH':
-                print(f'msg: {msg}')
-                IV, msg = msg[:16], msg[16:]
-                print('IV: ')
-                print(IV)
-                print('msg: ')
-                print(msg)
-                msga = bytearray(msg)
-                cipher = aes.new(keyb, aes.MODE_CBC, IV)
-                plaintext = cipher.decrypt(msga)
-                conn.send(plaintext)
-
+    server_sock.close()
     if conn:
         conn.close()
-    if server_sock:
-        server_sock.close()
     if uart:
         uart.deinit()
 
     utime.sleep(2)
-
     #machine.reset()
     return
 
