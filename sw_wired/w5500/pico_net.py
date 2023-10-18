@@ -11,15 +11,25 @@ def pico_net_init(is_dhcp, ip, subnet, gateway):
 
     return net_info
 
+def get_poller(polled):
+    poller = uselect.poll()
+    poller.register(polled, uselect.POLLIN)
+    return poller
+
 def pico_init_socket(ip, port):
     sock = socket()
     sock.bind((ip, int(port)))
     print('Listening on socket: ', sock)
     sock.listen(2)
 
-    sock_poll = uselect.poll()
-    sock_poll.register(sock, uselect.POLLIN)
-
+    sock_poll = get_poller(sock)
     print('Waiting for connection...')
 
     return sock, sock_poll
+
+def pico_init_conn(server_sock):
+    conn, addr = server_sock.accept()
+    print('Connected by ', conn, ' from ', addr)
+    sock_data_poll = get_poller(conn)
+
+    return conn, addr, sock_data_poll
