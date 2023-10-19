@@ -118,36 +118,84 @@ def process_tcp_msg(conn, fixed_binary_key):
 
         return msg
 
-def run_hybrid_server(settings, uart):
+def process_tcp_text(b64 fixed_binary_key):
+    print('data received: ', b64)
+    print('type(b64): ', type(b64))
+    
+    if len(b64) <= 4:
+        print('irregular data. Exit')
+        return None
+    else:
+        print('msg: ', b64)
+        IV = aes.generate_IV(16)
+        cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
+        msg = cipher.encrypt(b64)
+        print('IV:', IV, ' msg:', msg)
+        return IV + msg
+
+def process_tcp_crypto(b64, fixed_binary_key):
+    print('data received: ', b64)
+    print('type(b64): ', type(b64))
+    
+    if len(b64) <= 4:
+        print('irregular data. Exit')
+        return None
+    else:
+        print('b64: ', b64)
+        IV, msg = b64[:16], b64[16:]
+        print('IV:', IV, ' msg:', msg)
+        msg_ba = bytearray(msg)
+        cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
+        return cipher.decrypt(msg_ba)
+
+def run_hybrid_server(settings, uart, fixed_binary_key):
     global global_run_flag  # reset button flag
     global gc_start_time
 
-    ip, port, peer_ip, peer_port = settings['ip'], settings['port'], settings['peer_ip'], settings['peer_port']
+    ip, port, crypto_port = settings['ip'], settings['port'], 6005 #settings['crypto_port']
+    peer_ip, peer_port = settings['peer_ip'], settings['peer_port']
     host_ip, host_port = settings['host_ip'], settings['host_port']
-    key = settings['key']
-
-    fixed_binary_key = coder.fix_len_and_encode_key(key)
 
     gc_start_time = utime.ticks_ms()
-    conn = None
-    server_sock, poller = pn.pico_init_socket(ip, port)
+    serv_sock_text, serv_sock_crypto, tcp_poller = pn.init_server_sockets(ip, port, crypto_port)
+    conn_text, conn_crypto = None, None
 
     while global_run_flag:
-        if not poller.poll(100):
+        tcp_polled = tcp_poller.poll(50)
+        if not tcp_polled:
             process_serial_msg(uart)
             garbage_collect()
-            continue
-        print('client or data available')
-        if not conn:
-            conn, addr, poller = pn.pico_init_connection(server_sock)
         else:
-            print('data arrived at conn')
-            if not process_tcp_msg(conn, fixed_binary_key):
-                break
+            if tcp_polled[0][0] == serv_sock_text:
+                print('pc is connecting...')
+                conn_text, addr, tcp_poller = pn.init_connection(serv_sock_text, tcp_poller)
+            elif tcp_polled[0][0] == serv_sock_crypto:
+                print('peer is connecting...')
+                conn_crypto, addr, tcp_poller = pn.init_connection(serv_sock_crypto, tcp_poller)
+            elif tcp_polled[0][0] == conn_text:
+                print('data available from PC...')
+                b64 = conn_text.recv(128)
+                if b64:
+                    crypto_msg = process_tcp_text(b64, fixed_binary_key)
+                    pn.send_data(crypto_msg, peer_ip, peer_port)
+                else:
+                    print('Empty data received from PC. Close connection')
+                    conn_text.close()
+                    tcp_poller.unregister(conn_text)
+                    conn_text = None
+            elif tcp_polled[0][0] == conn_crypto:
+                print('data available from peer...')
+                b64 = conn_crypto.recv(128)
+                if b64:
+                    text_msg = process_tcp_crypto(b64, fixed_binary_key)
+                    pn.send_data(text_msg, host_ip, host_port)
+                else:
+                    print('Empty data received from peer. Close connection')
+                    conn_crypto.close()
+                    tcp_poller.unregister(conn_crypto)
+                    conn_crypto = None
 
-    server_sock.close()
-    if conn:
-        conn.close()
+    pn.close_sockets(serv_sock_text, serv_sock_crypto, conn_text, conn_crypto)
     if uart:
         uart.deinit()
 
@@ -155,7 +203,7 @@ def run_hybrid_server(settings, uart):
     #machine.reset()
     return
 
-def run_serial_server(uart):
+def run_serial_server(uart, fixed_binary_key):
     global global_run_flag  # reset button flag
     global gc_start_time
 
@@ -180,20 +228,23 @@ def main_single():
     settings = utils.load_json_settings()
     print(settings)
 
+    key = settings['key']
+    fixed_binary_key = coder.fix_len_and_encode_key(key)
+
     global_run_flag = True
     uart = init_serial()
-    net_info = pn.pico_net_init(settings['dhcp'], settings['ip'], settings['subnet'], settings['gateway'])
+    net_info = pn.init_ip(settings['dhcp'], settings['ip'], settings['subnet'], settings['gateway'])
 
     if net_info and net_info[0]:
         led_state_good()
         print('IP assigned: ', net_info[0])
         settings['ip'], settings['subnet'], settings['gateway'] = net_info[0], net_info[1], net_info[2]
         utils.save_settings(ujson.dumps(settings))
-        run_hybrid_server(settings, uart)
+        run_hybrid_server(settings, uart, fixed_binary_key)
     else:
         print('No IP assigned')
         led_state_no_ip()
-        run_serial_server(uart)
+        run_serial_server(uart, fixed_binary_key)
 
     led_onoff(green, False)
     print("Waiting for 2 sec")
