@@ -17,6 +17,7 @@ STOPBITS = 'stopbits'
 DHCP = 'dhcp'
 IP = 'ip'
 PORT = 'port'
+CRYPTO_PORT = 'crypto_port'
 GATEWAY = 'gateway'
 SUBNET = 'subnet'
 PEER_IP = 'peer_ip'
@@ -34,6 +35,7 @@ DEFAUlT_SETTINGS = {
     DHCP : 0,
     IP : '192.168.1.10',
     PORT : 8501,
+    CRYPTO_PORT : 8502,
     GATEWAY : '192.168.0.1',
     SUBNET : '255.255.255.0',
     PEER_IP : '192.168.0.5',
