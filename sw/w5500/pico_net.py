@@ -36,7 +36,7 @@ def init_server_sockets(ip, port, port2):
 
 def send_data(data, peer_ip, peer_port):
     sock = socket()
-    sock.connect((peer_ip, peer_port)
+    sock.connect((peer_ip, peer_port))
     print('Sending data: ', data, ' to ', peer_ip, ':', peer_port)
     sock.send(data)
 
