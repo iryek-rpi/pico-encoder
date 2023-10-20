@@ -148,6 +148,19 @@ def process_tcp_crypto(b64, fixed_binary_key):
         cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
         return cipher.decrypt(msg_ba)
 
+def process_tcp_msg(conn, handler, dest_ip, dest_port, poller):
+    b64 = conn.recv(128)
+    if b64:
+        processed_msg = handler(b64, fixed_binary_key)
+        pn.send_data(processed_msg, dest_ip, dest_port)
+    else:
+        print('Empty data received. Close connection')
+        conn.close()
+        poller.unregister(conn)
+        return None
+    
+    return conn
+
 def run_hybrid_server(settings, uart, fixed_binary_key):
     global global_run_flag  # reset button flag
     global gc_start_time
@@ -174,26 +187,10 @@ def run_hybrid_server(settings, uart, fixed_binary_key):
                 conn_crypto, addr, tcp_poller = pn.init_connection(serv_sock_crypto, tcp_poller)
             elif tcp_polled[0][0] == conn_text:
                 print('data available from PC...')
-                b64 = conn_text.recv(128)
-                if b64:
-                    crypto_msg = process_tcp_text(b64, fixed_binary_key)
-                    pn.send_data(crypto_msg, peer_ip, peer_port)
-                else:
-                    print('Empty data received from PC. Close connection')
-                    conn_text.close()
-                    tcp_poller.unregister(conn_text)
-                    conn_text = None
+                conn_text = process_tcp_msg(conn_text, process_tcp_text, peer_ip, peer_port, tcp_poller)
             elif tcp_polled[0][0] == conn_crypto:
                 print('data available from peer...')
-                b64 = conn_crypto.recv(128)
-                if b64:
-                    text_msg = process_tcp_crypto(b64, fixed_binary_key)
-                    pn.send_data(text_msg, host_ip, host_port)
-                else:
-                    print('Empty data received from peer. Close connection')
-                    conn_crypto.close()
-                    tcp_poller.unregister(conn_crypto)
-                    conn_crypto = None
+                conn_crypto = process_tcp_msg(conn_crypto, process_tcp_crypto, host_ip, host_port, tcp_poller)
 
     pn.close_sockets(serv_sock_text, serv_sock_crypto, conn_text, conn_crypto)
     if uart:
@@ -228,8 +225,7 @@ def main_single():
     settings = utils.load_json_settings()
     print(settings)
 
-    key = settings['key']
-    fixed_binary_key = coder.fix_len_and_encode_key(key)
+    fixed_binary_key = coder.fix_len_and_encode_key(settings['key'])
 
     global_run_flag = True
     uart = init_serial()
