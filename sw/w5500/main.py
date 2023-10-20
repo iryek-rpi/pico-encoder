@@ -118,7 +118,7 @@ def process_tcp_msg(conn, fixed_binary_key):
 
         return msg
 
-def process_tcp_text(b64 fixed_binary_key):
+def process_tcp_text(b64, fixed_binary_key):
     print('data received: ', b64)
     print('type(b64): ', type(b64))
     
@@ -148,7 +148,7 @@ def process_tcp_crypto(b64, fixed_binary_key):
         cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
         return cipher.decrypt(msg_ba)
 
-def process_tcp_msg(conn, handler, dest_ip, dest_port, poller):
+def process_tcp_msg(conn, handler, dest_ip, dest_port, poller, fixed_binary_key):
     b64 = conn.recv(128)
     if b64:
         processed_msg = handler(b64, fixed_binary_key)
@@ -187,10 +187,10 @@ def run_hybrid_server(settings, uart, fixed_binary_key):
                 conn_crypto, addr, tcp_poller = pn.init_connection(serv_sock_crypto, tcp_poller)
             elif tcp_polled[0][0] == conn_text:
                 print('data available from PC...')
-                conn_text = process_tcp_msg(conn_text, process_tcp_text, peer_ip, peer_port, tcp_poller)
+                conn_text = process_tcp_msg(conn_text, process_tcp_text, peer_ip, peer_port, tcp_poller, fixed_binary_key)
             elif tcp_polled[0][0] == conn_crypto:
                 print('data available from peer...')
-                conn_crypto = process_tcp_msg(conn_crypto, process_tcp_crypto, host_ip, host_port, tcp_poller)
+                conn_crypto = process_tcp_msg(conn_crypto, process_tcp_crypto, host_ip, host_port, tcp_poller, fixed_binary_key)
 
     pn.close_sockets(serv_sock_text, serv_sock_crypto, conn_text, conn_crypto)
     if uart:
@@ -250,4 +250,4 @@ def main_single():
     machine.reset()
 
 if __name__ == '__main__':
-    main_single()
+    main()
