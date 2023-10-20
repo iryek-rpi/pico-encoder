@@ -1,0 +1,156 @@
+!-- 
+		simple lightweigt  pure css html skelet
+			 webapp hybridapp responsive
+				
+				Aysad Kozanoglu
+			   email: k.a@tuta.io
+-->
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Webapp html skelett pure css&html 2</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">		
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<style type="text/css">
+	/* Generic pane rules */
+	html {	-webkit-text-size-adjust: none;
+		-webkit-touch-callout: none; /* iOS Safari */ 
+		-webkit-user-select: none;   /* Chrome/Safari/Opera */
+		-khtml-user-select: none;    /* Konqueror */
+		-moz-user-select: none;      /* Firefox */
+		-ms-user-select: none;       /* Internet Explorer/Edge */
+		overflow: hidden;
+		}
+	body {
+		font-family: verdana;
+		font-size: 1em;
+		background: #bef2a5;
+		color:#eeeeee;
+	}
+
+	h2 {
+		margin: 0;
+		padding: 0;
+		color: white;
+	}
+
+	.content {padding: 10px;}
+
+	#top 	{background: #339933;}
+
+	#main 	{background: #426142;}
+
+	body {
+		overflow: hidden;
+		padding: 0;
+		margin: 0;
+		width: 100%;
+		height: 100%;
+	}
+
+	#top {
+		padding: 0;
+		margin: 0;
+		position: absolute;
+		top: 0px;	
+		left: 0px;
+		width: 100%;
+		height: 40px;
+		overflow: hidden;
+	}
+
+	#main {
+		padding: 0;
+		margin: 0;
+		position: absolute;	
+		top: 40px;
+		left: 0px;
+		right: 0px;
+		bottom: 0px;
+		overflow: auto;
+	}
+	.divSamplecontent{margin-left:5px; margin-top:5px; width:100px;height:100px; border: 2px solid #73AD21;float:left}
+	.divCategory{margin-left:15px;margin-top:5px; padding-top:5px; border: 1px solid #73AD21}
+	.divItem{margin-left:0px; margin-right:15px; margin-top:5px; padding-top:5px; border: 1px solid #73AD21; float:left}
+	</style>
+</head>
+<body>
+	<div id="top">
+		<div class="content">
+			<h2>암호화 단말 설정</h2>
+		</div>
+	</div>
+
+	<div id="main">
+		<div class="content">
+			<h2>단말: {unit-id}</h2>
+			<p></p>
+			<div class="divCategory"> 시리얼 통신 설정 
+				<div class="divCategory"> 속도: 
+					<div>
+						<input type="radio" id="9600" name="serial-speed" value="sp9600" checked>
+						<label for="9600">9600</label>
+					</div>
+					<div>
+					<input type="radio" id="19200" name="serial-speed" value="sp19200">
+					<label for="19200">19200</label>
+					</div>
+
+					<div>
+					<input type="radio" id="115200" name="serial-speed" value="sp115200">
+					<label for="115200">115200</label>
+					</div>
+				</div> 
+				<div class="divItem">패리티비트: None</div>
+				<div class="divItem">데이터 비트: 8</div> 
+				<div class="divCategory">
+				<div class="divItem">패리티비트: None</div>
+				<div class="divItem">데이터 비트: 8</div> 
+				<div class="divItem">패리티비트: None</div>
+				<div class="divItem">데이터 비트: 8</div> 
+				<div class="divItem">스톱 비트: 1</div> 
+				</div>
+				<div style="clear:both"></div>
+			</div> 
+			<div class="divCategory"> 네트워크 설정 
+				<div class="divCategory"> 속도: 
+					<div>
+						<input type="radio" id="9600" name="serial-speed" value="sp9600" checked>
+						<label for="9600">9600</label>
+					</div>
+					<div>
+					<input type="radio" id="19200" name="serial-speed" value="sp19200">
+					<label for="19200">19200</label>
+					</div>
+
+					<div>
+					<input type="radio" id="115200" name="serial-speed" value="sp115200">
+					<label for="115200">115200</label>
+					</div>
+				</div> 
+				<div class="divItem">패리티비트: None</div>
+				<div class="divItem">데이터 비트: 8</div> 
+				<div class="divCategory">
+				<div class="divItem">패리티비트: None</div>
+				<div class="divItem">데이터 비트: 8</div> 
+				<div class="divItem">패리티비트: None</div>
+				<div class="divItem">데이터 비트: 8</div> 
+				<div class="divItem">스톱 비트: 1</div> 
+				</div>
+				<div style="clear:both"></div>
+			</div> 
+			<div class="divSamplecontent"> 게이크웨이(공유기) 주소: </div> 
+			<div class="divSamplecontent"> 게이크웨이(공유기) 주소: </div> 
+			<div style="clear:both"></div>
+			<div class="divCategory"> 게이크웨이(공유기) 주소: </div> 
+			<!-- <div class="divSamplecontent"> another div in content </div> 
+			-->
+			<div style="clear:both"></div>
+			<div class="divCategory"> 시리얼 포트: </div> 
+			<div class="divCategory"> 시리얼 포트: </div> 
+			<div class="divCategory"> 시리얼 포트: </div> 
+		</div>
+	</div>
+</body>
+</html>
