@@ -1,7 +1,10 @@
 from usocket import socket
 import uselect
+import uasyncio
 
 from w5500 import w5x00_init
+
+ASYNC_SLEEP_MS = 30
 
 def init_ip(is_dhcp, ip, subnet, gateway):
     if is_dhcp:
@@ -34,11 +37,17 @@ def init_server_sockets(ip, port, port2):
 
     return sock, sock2, sock_poller
 
-def send_data(data, peer_ip, peer_port):
+async def send_data(data, peer_ip, peer_port):
     sock = socket()
     sock.connect((peer_ip, peer_port))
     print('Sending data: ', data, ' to ', peer_ip, ':', peer_port)
-    sock.send(data)
+    msg_len = len(data)
+    while msg_len>0:
+        sent = sock.write(data)
+        msg_len -= sent
+        data = data[sent:]
+        uasyncio.sleep_ms(ASYNC_SLEEP_MS)
+    sock.close()
 
 def init_connection(server_sock, poller):
     conn, addr = server_sock.accept()

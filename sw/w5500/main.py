@@ -7,11 +7,17 @@ from machine import UART
 import utime
 import gc
 import ujson
+import uasyncio
+
+import config_web as cw
+
 import mpyaes as aes
 import coder
 from led import *
 import utils
 import pico_net as pn
+
+ASYNC_SLEEP_MS = pn.ASYNC_SLEEP_MS
 
 BAUD_RATE = 9600  #19200
 if BAUD_RATE == 9600:
@@ -28,6 +34,7 @@ gc_start_time = utime.ticks_ms()
 def garbage_collect():
     global gc_start_time
 
+    return 
     time_now = utime.ticks_ms()
     runtime = utime.ticks_diff(time_now, gc_start_time)
     print('===== gc.mem_free(): ', gc.mem_free(), ' at ', runtime)
@@ -148,11 +155,11 @@ def process_tcp_crypto(b64, fixed_binary_key):
         cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
         return cipher.decrypt(msg_ba)
 
-def process_tcp_msg(conn, handler, dest_ip, dest_port, poller, fixed_binary_key):
+async def process_tcp_msg(conn, handler, dest_ip, dest_port, poller, fixed_binary_key):
     b64 = conn.recv(128)
     if b64:
         processed_msg = handler(b64, fixed_binary_key)
-        pn.send_data(processed_msg, dest_ip, dest_port)
+        await pn.send_data(processed_msg, dest_ip, dest_port)
     else:
         print('Empty data received. Close connection')
         conn.close()
@@ -161,7 +168,7 @@ def process_tcp_msg(conn, handler, dest_ip, dest_port, poller, fixed_binary_key)
     
     return conn
 
-def run_hybrid_server(settings, uart, fixed_binary_key):
+async def run_hybrid_server(settings, uart, fixed_binary_key):
     global global_run_flag  # reset button flag
     global gc_start_time
 
@@ -174,10 +181,11 @@ def run_hybrid_server(settings, uart, fixed_binary_key):
     conn_text, conn_crypto = None, None
 
     while global_run_flag:
-        tcp_polled = tcp_poller.poll(50)
+        tcp_polled = tcp_poller.poll(0)
         if not tcp_polled:
             process_serial_msg(uart)
             garbage_collect()
+            await uasyncio.sleep_ms(ASYNC_SLEEP_MS)
         else:
             if tcp_polled[0][0] == serv_sock_text:
                 print('pc is connecting...')
@@ -200,7 +208,7 @@ def run_hybrid_server(settings, uart, fixed_binary_key):
     #machine.reset()
     return
 
-def run_serial_server(uart, fixed_binary_key):
+async def run_serial_server(uart, fixed_binary_key):
     global global_run_flag  # reset button flag
     global gc_start_time
 
@@ -208,6 +216,7 @@ def run_serial_server(uart, fixed_binary_key):
 
     while global_run_flag:
         process_serial_msg(uart)
+        await uasyncio.sleep_ms(ASYNC_SLEEP_MS)
         garbage_collect()
         continue
 
@@ -218,7 +227,28 @@ def run_serial_server(uart, fixed_binary_key):
 
     return
 
-def main_single():
+async def main_single(net_info, uart, fixed_binary_key, settings):
+    global global_run_flag
+
+    if net_info and net_info[0]:
+        led_state_good()
+        print('IP assigned: ', net_info[0])
+        settings['ip'], settings['subnet'], settings['gateway'] = net_info[0], net_info[1], net_info[2]
+        utils.save_settings(ujson.dumps(settings))
+        await run_hybrid_server(settings, uart, fixed_binary_key)
+    else:
+        print('No IP assigned')
+        led_state_no_ip()
+        await run_serial_server(uart, fixed_binary_key)
+
+    led_onoff(green, False)
+    print("Waiting for 2 sec")
+    utime.sleep(2)
+    print("Exit from main function")
+
+    machine.reset()
+
+def main():
     global global_run_flag
 
     led_start()
@@ -231,23 +261,12 @@ def main_single():
     uart = init_serial()
     net_info = pn.init_ip(settings['dhcp'], settings['ip'], settings['subnet'], settings['gateway'])
 
-    if net_info and net_info[0]:
-        led_state_good()
-        print('IP assigned: ', net_info[0])
-        settings['ip'], settings['subnet'], settings['gateway'] = net_info[0], net_info[1], net_info[2]
-        utils.save_settings(ujson.dumps(settings))
-        run_hybrid_server(settings, uart, fixed_binary_key)
-    else:
-        print('No IP assigned')
-        led_state_no_ip()
-        run_serial_server(uart, fixed_binary_key)
+    cw.prepare_web()
+    loop = uasyncio.get_event_loop()
+    loop.create_task(main_single(net_info, uart, fixed_binary_key, settings))
+    loop.create_task(uasyncio.start_server(cw.server._handle_request, '0.0.0.0', 80))
+    loop.run_forever()
 
-    led_onoff(green, False)
-    print("Waiting for 2 sec")
-    utime.sleep(2)
-    print("Exit from main function")
-
-    machine.reset()
 
 if __name__ == '__main__':
     main()
