@@ -1,23 +1,24 @@
 import sys
 import time
-import datetime
-import threading
 from threading import Thread
-from threading import current_thread
 import logging
 
 import json
 import serial
-import tkinter
-import tkinter.filedialog as fdlg
-import tkinter.messagebox
 import customtkinter as ctk
-#from CTkMessagebox import CTkMessagebox
 import socket
+import select
 
 from layout import *
 import device_options as do
 from crypto_ex import *
+
+TEXT_PORT = 8501
+ENC_PORT = 8502
+
+global_serial_device = None
+global_serial_sending = False
+app = None
 
 # config a logger using default logger
 logging.basicConfig(filename='app.log', filemode='w', level=logging.DEBUG)
@@ -39,29 +40,117 @@ ctk.set_appearance_mode(
 ctk.set_default_color_theme(
     "green")  # Themes: "blue" (standard), "green", "dark-blue"
 
-class StoppableThread(threading.Thread):
-    """Thread class with a stop() method. The thread itself has to check
-    regularly for the stopped() condition."""
+class ReceiveTCPTextThread(Thread):
+    global app
+    def __init__(self, ip, port):
+        super().__init__()
 
-    def __init__(self,  *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._stop_event = threading.Event()
+        self.plaintext = None
+        self.text_socket = None
+        self.ip = ip
+        self.port = port
+        self.name = 'TCP Text Thread'
 
-    def stop(self):
-        self._stop_event.set()
+    def run(self):
+        try:
+            self.text_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.text_socket.bind((self.ip, int(self.port)))
+            self.text_socket.listen(1)
+            while True:
+                print('Waiting for tcp connection...', self.ip, self.port)
+                conn, addr = self.text_socket.accept()
+                print('Connected by ', conn, ' from ', addr)
+                while True:
+                    print('Waiting for tcp data...')
+                    data = conn.recv(1024)
+                    if not data:
+                        break
+                    print('PlainText received through socket: ', data)
+                    self.plaintext = data.decode('utf-8')
+                    #app.entry_dectext.configure(state='normal')
+                    #app.entry_dectext.delete(0, "end")
+                    #app.entry_dectext.insert(0, data)
+                    #app.entry_dectext.configure(state='disabled')
+                    app.add_status_msg(f'복호화 데이터 수신: {data}')
+                conn.close()
+            
+        except Exception as e:
+            print('Exception: ', e)
 
-    def stopped(self):
-        return self._stop_event.is_set()
+class ReceiveSerialTextThread(Thread):
+    def __init__(self):
+        super().__init__()
+
+        self.plaintext = None
+        self.name = 'Serial Text Thread'
+
+    def run(self):
+        global app
+        global global_serial_device
+        global global_serial_sending
+        while True:
+            try:
+                if not global_serial_sending and not global_serial_device:
+                    global_serial_device = serial.Serial(port=app.comm_port, baudrate=BAUD_RATE, bytesize=8, parity='N', stopbits=1, timeout=SERIAL1_TIMEOUT, write_timeout=SERIAL1_TIMEOUT) 
+                    app.add_status_msg(f"시리얼 연결됨: COM 포트({app.comm_port}) 속도:{BAUD_RATE}bps 데이터:{8}bit 패리티:{'N'} 정지:{1}bit")
+            except serial.serialutil.SerialException as e:
+                #CTkMessagebox(title="Info", message=f"시리얼 연결 오류: COM 포트({self.comm_port})를 확인하세요.")
+                self.add_status_msg(f"시리얼 연결 오류: COM 포트({self.comm_port})를 확인하세요.")
+                logging.debug('시리얼 예외 발생: ', e)
+            else:
+                if not global_serial_sending:
+                    msg = global_serial_device.readline()
+
+                    if msg:
+                        logging.debug(f'수신: {msg}')
+                        msg = msg.decode('utf-8')
+                        self.plaintext = msg.strip()
+                        logging.debug(f'수신 decoded: {self.plaintext}')
+                        global_serial_device.reset_input_buffer()
+                    #else:
+                        #logging.debug('수신: No Data in serial')
+                        #CTkMessagebox(title="Info", message=f"단말에서 정보를 읽어올 수 없습니다.")
+                        #app.add_status_msg(f"단말의 시리얼 포트에 도착한 복호 데이터가 없습니다.")
 
 class App(ctk.CTk):
 
     def __init__(self):
         super().__init__()
         init_ui(self)
+        self.c_socket = None
+
+    def start_text_receive_thread(self):
+        tcp_thread = ReceiveTCPTextThread(self.entry_host_ip.get(), self.entry_host_port.get())
+        tcp_thread.start()
+        self.monitor(tcp_thread)
+
+        serial_thread = ReceiveSerialTextThread()
+        serial_thread.start()
+        self.monitor(serial_thread)
+
+    def monitor(self, thread):
+        #print('monitoring thread:`', thread.name)
+        if thread.plaintext:
+            self.entry_dectext.configure(state='normal')
+            self.entry_dectext.delete(0, "end")
+            self.entry_dectext.insert(0, thread.plaintext)
+            self.entry_dectext.configure(state='disabled')
+            self.add_status_msg(f'복호화 데이터 수신: {thread.plaintext}')
+            thread.plaintext = None
+
+        if thread.is_alive():
+            # check the thread every 50ms
+            self.after(50, lambda: self.monitor(thread))
 
     def add_status_msg(self, msg):
+        self.clear_status_msg()
         self.errortextbox.configure(state='normal')
         self.errortextbox.insert('0.0', "\n" + msg + "\n")
+        self.errortextbox.configure(state='disabled')
+
+    def clear_status_msg(self):
+        self.errortextbox.configure(state='normal')
+        self.errortextbox.delete("1.0", "end-1c")
         self.errortextbox.configure(state='disabled')
 
     def limit_key(self, sv):
@@ -90,62 +179,37 @@ class App(ctk.CTk):
         return do.read_ui_options(self)
 
     def apply_ui_options(self, options):
-        app.entry_serial_port.delete(0, "end")
-        app.entry_serial_port.insert(0, options["comm"])
-
         do.apply_ui_options(self, options)
 
     def read_options_file(self):
-        options = {}
-
-        with open("k2_config.txt", "r") as f:
-            lines = f.readlines()
-            options['comm'] = lines[0].split("comm:")[1].strip()
-            dhcp =  lines[1].split("dhcp:")[1].strip()
-            if dhcp == 'true':
-                options['dhcp'] = 1
-            else:
-                options['dhcp'] = 0
-            options['ip'] = lines[2].split("ip:")[1].strip()
-            options['gateway'] = lines[3].split("gateway:")[1].strip()
-            options['subnet'] = lines[4].split("subnet:")[1].strip()
-            options['port'] = lines[5].split("port:")[1].strip()
-            options['key'] = lines[6].split("key:")[1].strip()
-
-        return options
+        return do.read_options_file(self)
 
     def write_options_file(self, options):
-        with open('k2_config.txt', 'w') as f:
-            f.write("comm:" + options["comm"] + "\n")
-            if options["dhcp"]:
-                f.write("dhcp:" + 'true' + "\n")
-            else:
-                f.write("dhcp:" + 'false' + "\n")
-            f.write("ip:" + options["ip"] + "\n")
-            f.write("gateway:" + options["gateway"] + "\n")
-            f.write("subnet:" + options["subnet"] + "\n")
-            f.write("port:" + options["port"] + "\n")
-            f.write("key:" + options["key"] + "\n")
+        do.write_options_file(self, options)
 
     def dhcp_event(self):
-        #if self.switch_var.get() == 'DHCP':
-            #self.entry_ip.configure(state='disabled')
-            #self.entry_gateway.configure(state='disabled')
-            #self.entry_subnet.configure(state='disabled')
-        #else:
-        self.entry_ip.configure(state='normal')
-        self.entry_gateway.configure(state='normal')
-        self.entry_subnet.configure(state='normal')
-        self.add_status_msg(f"DHCP 설정 변경됨: DHCP={self.switch_var.get()}")
-        print("switch toggled, current value:", self.switch_var.get())
+        if self.dhcp_var.get() == 'DHCP':
+            self.entry_ip.configure(state='disabled')
+            self.entry_gateway.configure(state='disabled')
+            self.entry_subnet.configure(state='disabled')
+        else:
+            self.entry_ip.configure(state='normal')
+            self.entry_gateway.configure(state='normal')
+            self.entry_subnet.configure(state='normal')
+        self.add_status_msg(f"DHCP 설정 변경됨: DHCP={self.dhcp_var.get()}")
+        print("switch toggled, current value:", self.dhcp_var.get())
 
-    def read_option_event(self):
+    def channel_event(self):
+        self.add_status_msg(f"주 통신 방식 변경됨: {self.channel_var.get()}")
+        print("switch toggled, current value:", self.channel_var.get())
+
+    def read_device_option_event(self):
         options = self.read_ui_options()
         self.read_device_options()
         options = self.read_ui_options()
         self.write_options_file(options)
 
-    def apply_option_event(self):
+    def apply_device_option_event(self):
         if self.c_socket:
             self.c_socket.close()
             self.c_socket = None
@@ -156,10 +220,16 @@ class App(ctk.CTk):
         self.write_options_file(options)
 
     def read_device_options(self):
+        global global_serial_device
+        global global_serial_sending
+
+        self.comm_port = self.entry_serial_port.get()
+        while global_serial_device:
+            time.sleep(0.02)
+
         try:
-            device = None
-            self.comm_port = self.entry_serial_port.get()
-            device = serial.Serial(port=self.comm_port, baudrate=BAUD_RATE, bytesize=8, parity='N', stopbits=1, timeout=SERIAL1_TIMEOUT, write_timeout=SERIAL1_TIMEOUT) 
+            global_serial_sending = True
+            global_serial_device = serial.Serial(port=self.comm_port, baudrate=BAUD_RATE, bytesize=8, parity='N', stopbits=1, timeout=SERIAL1_TIMEOUT, write_timeout=SERIAL1_TIMEOUT) 
             self.add_status_msg(f"시리얼 연결됨: COM 포트({self.comm_port}) 속도:{BAUD_RATE}bps 데이터:{8}bit 패리티:{'N'} 정지:{1}bit")
         except serial.serialutil.SerialException as e:
             #CTkMessagebox(title="Info", message=f"시리얼 연결 오류: COM 포트({self.comm_port})를 확인하세요.")
@@ -167,8 +237,8 @@ class App(ctk.CTk):
             logging.debug('시리얼 예외 발생: ', e)
         else:
             #while not current_thread().stopped() or not app.stop_thread:
-            device.write('CNF_REQ\n'.encode())
-            msg = device.readline()
+            global_serial_device.write('CNF_REQ\n'.encode())
+            msg = global_serial_device.readline()
 
             if msg:
                 logging.debug(f'수신: {msg}')
@@ -182,7 +252,7 @@ class App(ctk.CTk):
                     self.apply_ui_options(options)
                     self.add_status_msg(f'수신: {msg}')
                     logging.debug(f'수신: {msg}')
-                    device.reset_input_buffer()
+                    global_serial_device.reset_input_buffer()
                 else:
                     self.add_status_msg(f'Partial msg received: {msg}')
             else:
@@ -191,15 +261,22 @@ class App(ctk.CTk):
                 self.add_status_msg(f"단말에서 정보를 읽어올 수 없습니다. msg:{msg}")
 
         finally:
-            if device:
-                device.close()
-                device = None
+            if global_serial_device:
+                global_serial_device.close()
+                global_serial_device = None
+            global_serial_sending = False
 
     def write_device_options(self):
+        global global_serial_device
+        global global_serial_sending
+
+        self.comm_port = self.entry_serial_port.get()
+        while global_serial_device:
+            time.sleep(0.02)
 
         try:
-            self.comm_port = self.entry_serial_port.get()
-            device = serial.Serial(port=self.comm_port, baudrate=BAUD_RATE, bytesize=8, parity='N', stopbits=1, timeout=SERIAL1_TIMEOUT, write_timeout=SERIAL1_TIMEOUT) 
+            global_serial_sending = True
+            global_serial_device = serial.Serial(port=self.comm_port, baudrate=BAUD_RATE, bytesize=8, parity='N', stopbits=1, timeout=SERIAL1_TIMEOUT, write_timeout=SERIAL1_TIMEOUT) 
             self.add_status_msg(f"시리얼 연결됨: COM 포트({self.comm_port}) 속도:{BAUD_RATE}bps 데이터:{8}bit 패리티:{'N'} 정지:{1}bit")
         except serial.serialutil.SerialException as e:
             #CTkMessagebox(title="Info", message=f"시리얼 연결 오류: COM 포트({self.comm_port})를 확인하세요.")
@@ -211,30 +288,37 @@ class App(ctk.CTk):
             str_options = json.dumps(options)
 
             msg = bytes(f"CNF_WRT{str_options}CNF_END\n", encoding='utf-8')
-            written=device.write(msg)
+            written=global_serial_device.write(msg)
             logging.debug(f'송신: {msg}')
             logging.debug(f'송신: {written} bytes')
             self.add_status_msg(f'디바이스에 설정 송신: {written}bytes => {msg}')
             time.sleep(0.3)
         finally:
-            device.close()
-            device = None
+            if global_serial_device:
+                global_serial_device.close()
+                global_serial_device = None
+            global_serial_sending = False
 
-    def find_host_ip():
-        hostname = socket.gethostname()
-        ip_address = socket.gethostbyname(hostname)
-        print(f"Hostname: {hostname}")
-        print(f"IP Address: {ip_address}")
+    def find_host_ip(self):
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.settimeout(0)
+        try:
+            # doesn't even have to be reachable
+            s.connect(('10.254.254.254', 1))
+            IP = s.getsockname()[0]
+        except Exception:
+            IP = '127.0.0.1'
+        finally:
+            s.close()
+        return IP
 
-    def init_connection(self):
+    def init_connection(self, ip, port):
         try:
             if self.c_socket:
                 self.c_socket.close()
                 self.c_socket = None
-            _ip = self.entry_ip.get()
-            _port = self.entry_port.get()
             self.c_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.c_socket.connect((_ip, int(_port)))  # connect to the server
+            self.c_socket.connect((ip, port))  # connect to the server
         except socket.error:
             if self.c_socket:
                 self.c_socket.close()
@@ -249,53 +333,14 @@ class App(ctk.CTk):
             return self.c_socket
 
     def send_plaintext(self, plaintext):
-        msg = f'TEXT{plaintext}'
-        self.history_textbox.configure(state='normal')
-        self.history_textbox.insert('0.0', '요청: ' + plaintext)
-        self.history_textbox.insert('0.0', '\n')
-        self.history_textbox.configure(state='disabled')
+        #msg = f'TEXT{plaintext}'
+        msg = plaintext
 
         encoded_msg = msg.encode()
         self.c_socket.send(encoded_msg)
         self.add_status_msg(f'암호화 송신: {encoded_msg}')
 
-        iv_c = self.c_socket.recv(64)
-        self.add_status_msg(f'암호화 수신: {iv_c}')
-
-        #self.c_socket.close()
-        #self.c_socket = None
-
-        print('iv_c: ')
-        print(iv_c)
-        print(type(iv_c))
-
-        self.ciphertext = iv_c
-        self.ciphertextbox.configure(state='normal')
-        self.ciphertextbox.delete("1.0", "end-1c")
-        self.ciphertextbox.insert(tkinter.END, iv_c)
-        self.ciphertextbox.configure(state='disabled')
-
-        self.history_textbox.configure(state='normal')
-        self.history_textbox.insert('0.0', '응답: ')
-        self.history_textbox.insert('1.7', self.ciphertext)
-        self.history_textbox.insert('0.0', '\n')
-        elapsed = str(datetime.timedelta(seconds=int(self.elapsed_time)))
-        self.history_textbox.insert('0.0', '암호화 경과시간: ')
-        self.history_textbox.insert('1.10', elapsed)
-        self.history_textbox.insert('0.0', '\n\n')
-        self.history_textbox.configure(state='disabled')
-
-        print('self.ciphertext: ')
-        print(self.ciphertext)
-        print(type(self.ciphertext))
-
     def send_ciphertext(self, ciphertext):
-        self.history_textbox.configure(state='normal')
-        self.history_textbox.insert('0.0', '요청: ')
-        self.history_textbox.insert('1.7', ciphertext)
-        self.history_textbox.insert('0.0', '\n')
-        self.history_textbox.configure(state='disabled')
-
         print(ciphertext)
         print(type(ciphertext))
         cmd = bytes('CIPH', 'utf-8')
@@ -304,87 +349,77 @@ class App(ctk.CTk):
         print(msg)
 
         self.c_socket.send(msg)
-        plaintext = self.c_socket.recv(1024)
-        self.add_status_msg(f'복호화 송신: {msg}')
-        self.add_status_msg(f'복호화 수신: {plaintext}')
-        #self.c_socket.close()
-        #self.c_socket = None
 
-        self.entry_dectext.configure(state='normal')
-        self.entry_dectext.delete(0, "end")
-        self.entry_dectext.insert(tkinter.END, plaintext.decode('utf-8'))
-        self.entry_dectext.configure(state='disabled')
-
-        self.history_textbox.configure(state='normal')
-        self.history_textbox.insert('0.0', '응답: ' + plaintext.decode('utf-8'))
-        self.history_textbox.insert('0.0', '\n')
-        elapsed = str(datetime.timedelta(seconds=int(self.elapsed_time)))
-        self.history_textbox.insert('0.0', '복호화 경과시간: ')
-        self.history_textbox.insert('1.10', elapsed)
-        self.history_textbox.insert('0.0', '\n\n')
-        self.history_textbox.configure(state='disabled')
+    def get_device_ip(self):
+        options = self.read_ui_options()
+        return options['ip']
 
     def enc_button_event(self):
         plaintext = self.entry_plaintext.get()
         if not plaintext:
-            #CTkMessagebox(title="Info", message="암호화할 평문(16글자 이내)를 입력하세요")
             self.add_status_msg("암호화할 평문(16글자 이내)를 입력하세요")
             return
 
         if not self.c_socket:
-            if not self.init_connection():
-                #CTkMessagebox(title="Error", message=f"네트워크 연결에 실패했습니다")
+            if not self.init_connection(self.get_device_ip(), TEXT_PORT):
                 self.add_status_msg("네트워크 연결에 실패했습니다")
                 return
 
-        self.elapsed_time = time.time() - self.start_time
         self.send_plaintext(plaintext)
-        self.after(2000, self.enc_button_event)
 
-        self.elapsed_clear = time.time() - self.start_clear
-        if self.elapsed_clear > 600:
-            self.errortextbox.configure(state='normal')
-            self.errortextbox.delete("1.0", "end-1c")
-            self.errortextbox.configure(state='disabled')
-            self.history_textbox.configure(state='normal')
-            self.history_textbox.delete("1.0", "end-1c")
-            self.history_textbox.configure(state='disabled')
-            self.start_clear = time.time()
+    def enc_serial_button_event(self):
+        global global_serial_device
+        global global_serial_sending
+
+        plaintext = self.entry_plaintext.get()
+        if not plaintext:
+            self.add_status_msg("암호화할 평문(16글자 이내)를 입력하세요")
+            return
+
+        self.comm_port = self.entry_serial_port.get()
+        while global_serial_device:
+            time.sleep(0.02)
+
+        try:
+            global_serial_sending = True
+            global_serial_device = serial.Serial(port=self.comm_port, baudrate=BAUD_RATE, bytesize=8, parity='N', stopbits=1, timeout=SERIAL1_TIMEOUT, write_timeout=SERIAL1_TIMEOUT) 
+            self.add_status_msg(f"시리얼 연결됨: COM 포트({self.comm_port}) 속도:{BAUD_RATE}bps 데이터:{8}bit 패리티:{'N'} 정지:{1}bit")
+        except serial.serialutil.SerialException as e:
+            #CTkMessagebox(title="Info", message=f"시리얼 연결 오류: COM 포트({self.comm_port})를 확인하세요.")
+            self.add_status_msg(f"시리얼 연결 오류: COM 포트({self.comm_port})를 확인하세요.")
+            logging.debug('시리얼 예외 발생: ', e)
+        else:
+            msg = bytes(f"TXT_WRT{plaintext}TXT_END\n", encoding='utf-8')
+            written=global_serial_device.write(msg)
+            logging.debug(f'송신: {msg}')
+            logging.debug(f'송신: {written} bytes')
+            self.add_status_msg(f'디바이스에 Plain Text 송신: {written}bytes => {msg}')
+            time.sleep(0.3)
+        finally:
+            if global_serial_device:
+                global_serial_device.close()
+                global_serial_device = None
+            global_serial_sending = False
 
     def dec_button_event(self):
         #ciphertext = self.ciphertextbox.get("1.0", "end-1c")
         ciphertext = self.ciphertext
         if not ciphertext:
-            #CTkMessagebox(title="Info", message=f"암호문이 존재하지 않습니다.")
             self.add_status_msg("암호문이 존재하지 않습니다.")
             return
 
         if not self.c_socket:
-            if not self.init_connection():
-                #CTkMessagebox(title="Error", message=f"네트워크 연결에 실패했습니다")
+            if not self.init_connection(self.get_device_ip(), ENC_PORT):
                 self.add_status_msg("네트워크 연결에 실패했습니다")
                 return
 
-        self.elapsed_time = time.time() - self.start_time
         self.send_ciphertext(ciphertext)
-        self.after(2000, self.dec_button_event)
-
-        self.elapsed_clear = time.time - self.start_clear
-        if self.elapsed_clear > 600:
-            self.errortextbox.configure(state='normal')
-            self.errortextbox.delete("1.0", "end-1c")
-            self.errortextbox.configure(state='disabled')
-            self.history_textbox.configure(state='normal')
-            self.history_textbox.delete("1.0", "end-1c")
-            self.history_textbox.configure(state='disabled')
-            self.start_clear = time.time()
-
-    def history_clear_event(self):
-        self.history_textbox.configure(state='normal')
-        self.history_textbox.delete("1.0", "end-1c")
-        self.history_textbox.configure(state='disabled')
 
     def clear_button_event(self):
+        print('server thread starting...')
+        self.start_text_receive_thread()
+
+    def clear_button_event_old(self):
         self.entry_plaintext.delete(0, "end")
         self.ciphertextbox.configure(state='normal')
         self.ciphertextbox.delete("1.0", "end-1c")
@@ -403,9 +438,9 @@ class App(ctk.CTk):
         new_scaling_float = int(new_scaling.replace("%", "")) / 100
         ctk.set_widget_scaling(new_scaling_float)
 
-
-if __name__ == "__main__":
-
+def main():
+    global app
+    
     app = App()
 
     options = app.read_options_file()
@@ -415,3 +450,6 @@ if __name__ == "__main__":
     app.mainloop()
 
     app.stop_thread = True
+
+if __name__ == "__main__":
+    main()

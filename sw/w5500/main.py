@@ -57,7 +57,7 @@ def init_serial():
     uart0.init(baudrate=BAUD_RATE, bits=8, parity=None, stop=1, timeout=SERIAL1_TIMEOUT)
     return uart0
 
-def process_serial_msg(uart):
+async def process_serial_msg(uart, fixed_binary_key, settings):
     global global_run_flag
     sm = uart.readline()
     if sm:
@@ -84,6 +84,18 @@ def process_serial_msg(uart):
                 utils.save_settings(received_settings)
                 global_run_flag = False
                 return
+            elif cmd=='TXT_WRT' and sm[-7:]=='TXT_END':
+                uart.deinit()
+                uart = None
+                received_msg = f'sm[7:-7]'
+                received_msg = bytes(received_msg.strip())
+                print(f'TXT_WRT Received msg: {received_msg}')
+                encoded_msg = process_tcp_text(received_msg, fixed_binary_key)
+                if not encoded_msg:
+                    print('Encryption result Empty')
+                    processed_msg = bytes('***BAD DATA***', 'utf-8')
+                pn.send_data_sync(processed_msg, settings['peer_ip'], utils.ENC_PORT)
+                return
             else:
                 print('Unknown command')
         except Exception as e:
@@ -93,39 +105,7 @@ def process_serial_msg(uart):
 
     return
 
-def process_tcp_msg(conn, fixed_binary_key):
-    b64 = conn.recv(128)
-    print('data received: ', b64)
-    print('type(b64): ', type(b64))
-    
-    if len(b64) <= 4:
-        print('irregular data. Exit')
-        return None
-    else:
-        cmd, msg = b64[:4], b64[4:]
-        cmd = cmd.decode('utf-8')
-        print(f'cmd: {cmd}')
-
-        if cmd == 'TEXT':
-            print('msg: ', msg)
-            IV = aes.generate_IV(16)
-            cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
-            msg = cipher.encrypt(msg)
-            iv_c = IV + msg
-            print('IV: ', IV, ' msg: ', msg)
-            conn.send(iv_c)
-        elif cmd == 'CIPH':
-            print('msg: ', msg)
-            IV, msg = msg[:16], msg[16:]
-            print('IV: ', IV, ' msg: ', msg)
-            msga = bytearray(msg)
-            cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
-            plaintext = cipher.decrypt(msga)
-            conn.send(plaintext)
-
-        return msg
-
-def process_tcp_text(b64, fixed_binary_key):
+def     process_tcp_text(b64, fixed_binary_key):
     print('data received: ', b64)
     print('type(b64): ', type(b64))
     
@@ -135,6 +115,7 @@ def process_tcp_text(b64, fixed_binary_key):
     else:
         print('msg: ', b64)
         IV = aes.generate_IV(16)
+        print('fixed_binary_key: ', fixed_binary_key, 'type(fixed_binary_key): ', type(fixed_binary_key))
         cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
         msg = cipher.encrypt(b64)
         print('IV:', IV, ' msg:', msg)
@@ -156,9 +137,15 @@ def process_tcp_crypto(b64, fixed_binary_key):
         return cipher.decrypt(msg_ba)
 
 async def process_tcp_msg(conn, handler, dest_ip, dest_port, poller, fixed_binary_key):
+    print('receiving data from ', conn)
     b64 = conn.recv(128)
+    print('plaintext received: ', b64)
     if b64:
         processed_msg = handler(b64, fixed_binary_key)
+        print('sending encoded msg: ', processed_msg, ' to ', dest_ip, ':', dest_port)
+        if not processed_msg:
+            print('TCP processed result Empty')
+            processed_msg = bytes('***BAD DATA***', 'utf-8')
         await pn.send_data(processed_msg, dest_ip, dest_port)
     else:
         print('Empty data received. Close connection')
@@ -172,8 +159,8 @@ async def run_hybrid_server(settings, uart, fixed_binary_key):
     global global_run_flag  # reset button flag
     global gc_start_time
 
-    ip, port, crypto_port = settings['ip'], settings['port'], 6005 #settings['crypto_port']
-    peer_ip, peer_port = settings['peer_ip'], settings['peer_port']
+    ip, port, crypto_port = settings['ip'], utils.TEXT_PORT, utils.ENC_PORT
+    peer_ip, peer_port = settings['peer_ip'], utils.ENC_PORT
     host_ip, host_port = settings['host_ip'], settings['host_port']
 
     gc_start_time = utime.ticks_ms()
@@ -183,7 +170,7 @@ async def run_hybrid_server(settings, uart, fixed_binary_key):
     while global_run_flag:
         tcp_polled = tcp_poller.poll(0)
         if not tcp_polled:
-            process_serial_msg(uart)
+            await process_serial_msg(uart, fixed_binary_key, settings)
             garbage_collect()
             await uasyncio.sleep_ms(ASYNC_SLEEP_MS)
         else:
@@ -195,10 +182,10 @@ async def run_hybrid_server(settings, uart, fixed_binary_key):
                 conn_crypto, addr, tcp_poller = pn.init_connection(serv_sock_crypto, tcp_poller)
             elif tcp_polled[0][0] == conn_text:
                 print('data available from PC...')
-                conn_text = process_tcp_msg(conn_text, process_tcp_text, peer_ip, peer_port, tcp_poller, fixed_binary_key)
+                conn_text = await process_tcp_msg(conn_text, process_tcp_text, peer_ip, peer_port, tcp_poller, fixed_binary_key)
             elif tcp_polled[0][0] == conn_crypto:
                 print('data available from peer...')
-                conn_crypto = process_tcp_msg(conn_crypto, process_tcp_crypto, host_ip, host_port, tcp_poller, fixed_binary_key)
+                conn_crypto = await process_tcp_msg(conn_crypto, process_tcp_crypto, host_ip, host_port, tcp_poller, fixed_binary_key)
 
     pn.close_sockets(serv_sock_text, serv_sock_crypto, conn_text, conn_crypto)
     if uart:
@@ -242,9 +229,9 @@ async def main_single(net_info, uart, fixed_binary_key, settings):
         await run_serial_server(uart, fixed_binary_key)
 
     led_onoff(green, False)
-    print("Waiting for 2 sec")
-    utime.sleep(2)
-    print("Exit from main function")
+    print("Waiting for 0.2 sec before reset")
+    utime.sleep(0.2)
+    print("Resetting...")
 
     machine.reset()
 
@@ -256,6 +243,7 @@ def main():
     print(settings)
 
     fixed_binary_key = coder.fix_len_and_encode_key(settings['key'])
+    print('fixed_binary_key: ', fixed_binary_key)
 
     global_run_flag = True
     uart = init_serial()

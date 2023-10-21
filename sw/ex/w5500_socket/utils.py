@@ -10,9 +10,9 @@ MODE = 'mode'
 BAUD = 'baud'
 PARITY = 'parity'
 DATASIZE = 'datasize'
-STOPBITS = 'stopbits'
+STOP = 'stop'
 
-#{"speed": "9600", "parity": "N", "databit": "8", "stopbit": "1", "dhcp": 0, "ip": "192.168.0.5", "subnet": "255.255.255.0", "gateway": "192.168.0.1", "port": "8501", "peer_ip": "192.168.0.6", "peer_port": "8502", "host_ip": "192.168.0.2", "host_port": "8503", "key": "12345678"}
+#{"speed": "9600", "parity": "N", "data": "8", "stop": "1", "dhcp": 0, "ip": "192.168.0.5", "subnet": "255.255.255.0", "gateway": "192.168.0.1", "port": "8501", "peer_ip": "192.168.0.6", "peer_port": "8502", "host_ip": "192.168.0.2", "host_port": "8503", "key": "12345678"}
 
 DHCP = 'dhcp'
 IP = 'ip'
@@ -25,8 +25,8 @@ HOST_IP = 'host_ip'
 HOST_PORT = 'host_port'
 SPEED = 'speed'
 PARITY = 'parity'
-DATABIT = 'databit'
-STOPBIT = 'stopbit'
+DATA = 'data'
+STOP = 'stop'
 CHANNEL = 'channel'
 KEY = 'key'
 
@@ -42,8 +42,8 @@ DEFAUlT_SETTINGS = {
     HOST_PORT : 8503,
     SPEED : 9600,
     PARITY : 'N',   #N, E, O
-    DATABIT : 8,
-    STOPBIT : 1,
+    DATA : 8,
+    STOP : 1,
     CHANNEL : 0, # 0=tcp, 1=serial
     KEY:'12345678'
 }
@@ -76,7 +76,7 @@ def validate_settings(settings):
         ns[PARITY] = int(ns[PARITY])
 
     ns[DATASIZE] = int(settings[DATASIZE])
-    ns[STOPBITS] = int(settings[STOPBITS])
+    ns[STOP] = int(settings[STOP])
 
     if not validate_ip_string(settings[IP]):
         msg += f'IP 주소 오류: {settings[IP]}<br>'

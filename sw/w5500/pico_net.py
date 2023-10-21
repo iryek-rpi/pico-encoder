@@ -28,6 +28,7 @@ def init_server_sockets(ip, port, port2):
     sock_poller = get_poller(sock, None)
     print('sock_poller: ', sock_poller)
 
+    print('port2: ', port2)
     sock2 = socket()
     sock2.bind((ip, int(port2)))
     print('Listening on socket: ', sock2, 'port:', port2)
@@ -39,7 +40,9 @@ def init_server_sockets(ip, port, port2):
 
 async def send_data(data, peer_ip, peer_port):
     sock = socket()
-    sock.connect((peer_ip, peer_port))
+    print('Connecting to: ', peer_ip, ':', peer_port)
+    print('type(peer_port): ', type(peer_port))
+    sock.connect((peer_ip, int(peer_port)))
     print('Sending data: ', data, ' to ', peer_ip, ':', peer_port)
     msg_len = len(data)
     while msg_len>0:
@@ -47,6 +50,19 @@ async def send_data(data, peer_ip, peer_port):
         msg_len -= sent
         data = data[sent:]
         uasyncio.sleep_ms(ASYNC_SLEEP_MS)
+    sock.close()
+
+def send_data_sync(data, peer_ip, peer_port):
+    sock = socket()
+    print('Connecting to: ', peer_ip, ':', peer_port)
+    print('type(peer_port): ', type(peer_port))
+    sock.connect((peer_ip, int(peer_port)))
+    print('Sending data: ', data, ' to ', peer_ip, ':', peer_port)
+    msg_len = len(data)
+    while msg_len>0:
+        sent = sock.write(data)
+        msg_len -= sent
+        data = data[sent:]
     sock.close()
 
 def init_connection(server_sock, poller):

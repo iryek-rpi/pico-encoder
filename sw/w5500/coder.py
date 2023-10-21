@@ -20,7 +20,7 @@ def fix_len_and_encode_key(key):
     if len(key) > default_key_len:
         key = key[:default_key_len]
     keyb = key.encode()
-    keyb = keyb + DEFAULT_LENGTH_KEY[len(keyb):]
+    return keyb + DEFAULT_LENGTH_KEY[len(keyb):]
 
 def enc_aes(key, iv, data):
     cipher = aes.new(key, aes.MODE_CBC, iv)

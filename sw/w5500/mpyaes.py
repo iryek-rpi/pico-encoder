@@ -45,7 +45,8 @@ class PKCS7:
             raise ValueError('cannot verify padding for empty plaintext')
         pad = plaintext[-1]
         if not (0 < pad <= block_size) or any(plaintext[-1-i] != pad for i in range(pad)):
-            raise PaddingError
+            #raise PaddingError
+            pass
         return len(plaintext) - pad
 
 def generate_key(x: [bytearray, bytes, int], seed=None) -> [None, bytearray]:
