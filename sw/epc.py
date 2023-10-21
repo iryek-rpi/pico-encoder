@@ -220,6 +220,12 @@ class App(ctk.CTk):
             device.close()
             device = None
 
+    def find_host_ip():
+        hostname = socket.gethostname()
+        ip_address = socket.gethostbyname(hostname)
+        print(f"Hostname: {hostname}")
+        print(f"IP Address: {ip_address}")
+
     def init_connection(self):
         try:
             if self.c_socket:
