@@ -87,7 +87,7 @@ async def process_serial_msg(uart, fixed_binary_key, settings):
             elif cmd=='TXT_WRT' and sm[-7:]=='TXT_END':
                 uart.deinit()
                 uart = None
-                received_msg = f'sm[7:-7]'
+                received_msg = f'{sm[7:-7]}'
                 received_msg = bytes(received_msg.strip())
                 print(f'TXT_WRT Received msg: {received_msg}')
                 encoded_msg = process_tcp_text(received_msg, fixed_binary_key)
