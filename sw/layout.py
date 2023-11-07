@@ -6,7 +6,7 @@ TITLE = "(주)위너스 암호화 단말 PC 클라이언트"
 PORT_ENC = 8501
 PORT_DEC = 9501
 WINDOW_WIDTH = 1100
-WINDOW_HEIGHT = 820
+WINDOW_HEIGHT = 780
 SIDE_BAR_WIDTH = 120
 SEND_FRAME_WIDTH = WINDOW_WIDTH - SIDE_BAR_WIDTH
 
@@ -46,14 +46,14 @@ def init_ui(self):
 
         #self.sidebar_frame.grid_rowconfigure(2, weight=1)
 
-        SECTION_Y = 20 
+        SECTION_Y = 10 
         PAD_X_LABEL = 10
         PAD_X_ENTRY = 140
         PAD_X_ENTRY2 = 20
         PAD_Y_ITEM = 1
         WIDGET_DX = 30
         CENTER_WIDGET_DX = 300
-        WIDGET_TOP = 40
+        WIDGET_TOP = 10
 
         self.option_button = ctk.CTkButton(self.sidebar_frame, fg_color='#CC6600', hover_color='#AA4400',
                                          command=self.read_device_option_event)
