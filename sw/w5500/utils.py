@@ -5,6 +5,9 @@ https://www.vaadata.com/blog/how-to-securely-store-passwords-in-database/
 import os
 import ujson
 
+CH_TCP = 0      # channel to host
+CH_SERIAL = 1
+
 TEXT_PORT = 8501
 ENC_PORT = 8502
 
@@ -18,7 +21,7 @@ STOP = 'stop'
 #{"speed": "9600", "parity": "N", "data": "8", "stop": "1", "dhcp": 0, "ip": "192.168.0.5", "subnet": "255.255.255.0", "gateway": "192.168.0.1", "port": "8501", "peer_ip": "192.168.0.6", "peer_port": "8502", "host_ip": "192.168.0.2", "host_port": "8503", "key": "12345678"}
 
 DHCP = 'dhcp'
-IP = 'ip'
+MY_IP = 'ip'
 CRYPTO_PORT = 'crypto_port'
 GATEWAY = 'gateway'
 SUBNET = 'subnet'
@@ -34,7 +37,7 @@ KEY = 'key'
 
 DEFAUlT_SETTINGS = {
     DHCP : 0,
-    IP : '192.168.1.10',
+    MY_IP : '192.168.1.10',
     CRYPTO_PORT : 8502,
     GATEWAY : '192.168.0.1',
     SUBNET : '255.255.255.0',
@@ -45,7 +48,7 @@ DEFAUlT_SETTINGS = {
     PARITY : 'N',   #N, E, O
     DATA : 8,
     STOP : 1,
-    CHANNEL : 0, # 0=tcp, 1=serial
+    CHANNEL : CH_TCP, # 0=tcp, 1=serial
     KEY:'12345678'
 }
 
