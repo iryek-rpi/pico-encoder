@@ -191,7 +191,7 @@ async def run_hybrid_server(settings, uart, fixed_binary_key):
     if uart:
         uart.deinit()
 
-    utime.sleep(2)
+    utime.sleep_ms(2000)
     #machine.reset()
     return
 
@@ -210,7 +210,7 @@ async def run_serial_server(uart, fixed_binary_key):
     if uart:
         uart.deinit()
 
-    utime.sleep(2)
+    utime.sleep_ms(100)
 
     return
 
@@ -230,7 +230,7 @@ async def main_single(net_info, uart, fixed_binary_key, settings):
 
     led_onoff(green, False)
     print("Waiting for 0.2 sec before reset")
-    utime.sleep(0.2)
+    utime.sleep_ms(200)
     print("Resetting...")
 
     machine.reset()

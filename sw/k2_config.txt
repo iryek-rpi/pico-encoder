@@ -1,0 +1,14 @@
+comm:COM33
+speed:9600
+parity:N
+data:8
+stop:1
+dhcp:0
+ip:192.168.0.110
+gateway:192.168.0.1
+subnet:255.255.255.0
+peer_ip:192.168.0.100
+host_ip:192.168.0.123
+host_port:8503
+channel:1
+key:12345678
