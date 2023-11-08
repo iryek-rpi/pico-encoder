@@ -22,6 +22,7 @@ def led_start():
     blink_led(yellow, 2)
 
 def led_state_good():
+    led_onoff(red, True)
     led_onoff(green, True)
     led_onoff(yellow, False)        
 
