@@ -52,7 +52,7 @@ def btn_callback(btn):
 
 btn.irq(trigger=Pin.IRQ_FALLING, handler=btn_callback)
 
-def init_serial():
+def init_serial(baud=9600, bits=8, parity=None, stop=1, timeout=SERIAL1_TIMEOUT):
     uart0 = UART(0, tx=Pin(0), rx=Pin(1))
     uart0.init(baudrate=BAUD_RATE, bits=8, parity=None, stop=1, timeout=SERIAL1_TIMEOUT)
     return uart0
@@ -246,7 +246,7 @@ def main():
     print('fixed_binary_key: ', fixed_binary_key)
 
     global_run_flag = True
-    uart = init_serial()
+    uart = init_serial(baud=9600, bits=8, parity=None, stop=1, timeout=SERIAL1_TIMEOUT)
     net_info = pn.init_ip(settings['dhcp'], settings['ip'], settings['subnet'], settings['gateway'])
 
     cw.prepare_web()
