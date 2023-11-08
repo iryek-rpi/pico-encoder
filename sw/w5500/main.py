@@ -159,12 +159,12 @@ async def run_hybrid_server(settings, uart, fixed_binary_key):
     global global_run_flag  # reset button flag
     global gc_start_time
 
-    ip, port, crypto_port = settings['ip'], utils.TEXT_PORT, utils.ENC_PORT
+    ip, port, crypto_port = settings[utils.MY_IP], utils.TEXT_PORT, utils.ENC_PORT
     peer_ip, peer_port = settings['peer_ip'], utils.ENC_PORT
     host_ip, host_port = settings['host_ip'], settings['host_port']
 
     gc_start_time = utime.ticks_ms()
-    serv_sock_text, serv_sock_crypto, tcp_poller = pn.init_server_sockets(ip, port, crypto_port)
+    serv_sock_text, serv_sock_crypto, tcp_poller = pn.init_server_sockets(settings, ip, port, crypto_port)
     conn_text, conn_crypto = None, None
 
     while global_run_flag:

@@ -1,6 +1,7 @@
 from usocket import socket
 import uselect
 import uasyncio
+import utils
 
 from w5500 import w5x00_init
 
@@ -20,23 +21,27 @@ def get_poller(polled, poller=None):
     poller.register(polled, uselect.POLLIN)
     return poller
 
-def init_server_sockets(ip, port, port2):
+def init_server_socket(ip, port, poller):
     sock = socket()
     sock.bind((ip, int(port)))
     print('Listening on socket: ', sock, 'port:', port)
     sock.listen(2)
-    sock_poller = get_poller(sock, None)
+    sock_poller = get_poller(sock, poller)
     print('sock_poller: ', sock_poller)
 
-    print('port2: ', port2)
-    sock2 = socket()
-    sock2.bind((ip, int(port2)))
-    print('Listening on socket: ', sock2, 'port:', port2)
-    sock2.listen(2)
-    sock_poller = get_poller(sock2, sock_poller)
-    print('sock_poller: ', sock_poller)
+    return sock, sock_poller
 
-    return sock, sock2, sock_poller
+def init_server_sockets(settings, ip, port, crypto_port):
+    poller = uselect.poll()
+    serv_sock_crypto, poller = init_server_socket(ip, crypto_port, poller)
+
+    serv_sock_text = None
+    if settings[utils.CHANNEL] == utils.CH_TCP:
+        serv_sock_text, poller = init_server_socket(ip, port, poller)
+    print('serv_sock_text: ', serv_sock_text, 'serv_sock_crypto: ', serv_sock_crypto)
+    print('poller: ', poller)
+
+    return serv_sock_text, serv_sock_crypto, poller
 
 async def send_data(data, peer_ip, peer_port):
     sock = socket()
