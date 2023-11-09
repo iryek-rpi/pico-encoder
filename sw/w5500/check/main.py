@@ -1,4 +1,4 @@
-'''Test code'''
+'''Hardware Test code'''
 import machine
 from machine import Pin
 from machine import UART
