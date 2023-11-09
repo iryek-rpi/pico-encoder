@@ -160,10 +160,7 @@ async def run_hybrid_server(settings, uart, fixed_binary_key):
     global gc_start_time
 
     gc_start_time = utime.ticks_ms()
-    ip, port, crypto_port = settings[utils.MY_IP], utils.TEXT_PORT, utils.ENC_PORT
-    peer_ip, peer_port = settings['peer_ip'], utils.ENC_PORT
-    host_ip, host_port = settings['host_ip'], settings['host_port']
-    serv_sock_text, serv_sock_crypto, tcp_poller = pn.init_server_sockets(settings, ip, port, crypto_port)
+    serv_sock_text, serv_sock_crypto, tcp_poller = pn.init_server_sockets(settings, settings[utils.MY_IP], utils.TEXT_PORT, utils.ENC_PORT)
     conn_text, conn_crypto = None, None
 
     while global_run_flag:
@@ -179,13 +176,13 @@ async def run_hybrid_server(settings, uart, fixed_binary_key):
                     conn_text, addr, tcp_poller = pn.init_connection(serv_sock_text, tcp_poller)
                 elif tcp_polled[0][0] == conn_text:
                     print('data available from PC...')
-                    conn_text = await process_tcp_msg(conn_text, process_tcp_text, peer_ip, peer_port, tcp_poller, fixed_binary_key)
+                    conn_text = await process_tcp_msg(conn_text, process_tcp_text, settings['peer_ip'], utils.ENC_PORT, tcp_poller, fixed_binary_key)
             elif tcp_polled[0][0] == serv_sock_crypto:
                 print('peer is connecting...')
                 conn_crypto, addr, tcp_poller = pn.init_connection(serv_sock_crypto, tcp_poller)
             elif tcp_polled[0][0] == conn_crypto:
                 print('data available from peer...')
-                conn_crypto = await process_tcp_msg(conn_crypto, process_tcp_crypto, host_ip, host_port, tcp_poller, fixed_binary_key)
+                conn_crypto = await process_tcp_msg(conn_crypto, process_tcp_crypto, settings['host_ip'], settings['host_port'], tcp_poller, fixed_binary_key)
 
     pn.close_sockets(serv_sock_text, serv_sock_crypto, conn_text, conn_crypto)
     if uart:
