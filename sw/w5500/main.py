@@ -159,11 +159,10 @@ async def run_hybrid_server(settings, uart, fixed_binary_key):
     global global_run_flag  # reset button flag
     global gc_start_time
 
+    gc_start_time = utime.ticks_ms()
     ip, port, crypto_port = settings[utils.MY_IP], utils.TEXT_PORT, utils.ENC_PORT
     peer_ip, peer_port = settings['peer_ip'], utils.ENC_PORT
     host_ip, host_port = settings['host_ip'], settings['host_port']
-
-    gc_start_time = utime.ticks_ms()
     serv_sock_text, serv_sock_crypto, tcp_poller = pn.init_server_sockets(settings, ip, port, crypto_port)
     conn_text, conn_crypto = None, None
 
@@ -172,17 +171,18 @@ async def run_hybrid_server(settings, uart, fixed_binary_key):
         if not tcp_polled:
             await process_serial_msg(uart, fixed_binary_key, settings)
             garbage_collect()
-            await uasyncio.sleep_ms(ASYNC_SLEEP_MS)
+            #await uasyncio.sleep_ms(ASYNC_SLEEP_MS)
         else:
-            if tcp_polled[0][0] == serv_sock_text:
-                print('pc is connecting...')
-                conn_text, addr, tcp_poller = pn.init_connection(serv_sock_text, tcp_poller)
+            if serv_sock_text:
+                if tcp_polled[0][0] == serv_sock_text:
+                    print('pc is connecting...')
+                    conn_text, addr, tcp_poller = pn.init_connection(serv_sock_text, tcp_poller)
+                elif tcp_polled[0][0] == conn_text:
+                    print('data available from PC...')
+                    conn_text = await process_tcp_msg(conn_text, process_tcp_text, peer_ip, peer_port, tcp_poller, fixed_binary_key)
             elif tcp_polled[0][0] == serv_sock_crypto:
                 print('peer is connecting...')
                 conn_crypto, addr, tcp_poller = pn.init_connection(serv_sock_crypto, tcp_poller)
-            elif tcp_polled[0][0] == conn_text:
-                print('data available from PC...')
-                conn_text = await process_tcp_msg(conn_text, process_tcp_text, peer_ip, peer_port, tcp_poller, fixed_binary_key)
             elif tcp_polled[0][0] == conn_crypto:
                 print('data available from peer...')
                 conn_crypto = await process_tcp_msg(conn_crypto, process_tcp_crypto, host_ip, host_port, tcp_poller, fixed_binary_key)
@@ -239,6 +239,7 @@ def main():
     global global_run_flag
 
     led_start()
+    utime.sleep_ms(1000)
     settings = utils.load_json_settings()
     print(settings)
 
