@@ -31,19 +31,24 @@ def init_server_socket(ip, port, poller):
 
     return sock, sock_poller
 
-def init_server_sockets(settings, ip, port, crypto_port):
+def close_server_socket(sock, poller):
+    sock.close()
+    poller.unregister(sock)
+    return None
+
+def init_server_sockets(settings, my_ip, text_port, crypto_port):
     poller = uselect.poll()
-    serv_sock_crypto, poller = init_server_socket(ip, crypto_port, poller)
+    serv_sock_crypto, poller = init_server_socket(my_ip, crypto_port, poller)
 
     serv_sock_text = None
     if settings[utils.CHANNEL] == utils.CH_TCP:
-        serv_sock_text, poller = init_server_socket(ip, port, poller)
+        serv_sock_text, poller = init_server_socket(my_ip, text_port, poller)
     print('serv_sock_text: ', serv_sock_text, 'serv_sock_crypto: ', serv_sock_crypto)
     print('poller: ', poller)
 
     return serv_sock_text, serv_sock_crypto, poller
 
-async def send_data(data, peer_ip, peer_port):
+def send_data(data, peer_ip, peer_port):
     sock = socket()
     print('Connecting to: ', peer_ip, ':', peer_port)
     print('type(peer_port): ', type(peer_port))
@@ -54,7 +59,7 @@ async def send_data(data, peer_ip, peer_port):
         sent = sock.write(data)
         msg_len -= sent
         data = data[sent:]
-        uasyncio.sleep_ms(ASYNC_SLEEP_MS)
+        #uasyncio.sleep_ms(ASYNC_SLEEP_MS)
     sock.close()
 
 def send_data_sync(data, peer_ip, peer_port):
