@@ -5,8 +5,8 @@ https://www.vaadata.com/blog/how-to-securely-store-passwords-in-database/
 import os
 import ujson
 
-CH_TCP = 0      # channel to host
-CH_SERIAL = 1
+CH_TCP = 1      # channel to host
+CH_SERIAL = 0
 
 TEXT_PORT = 8501
 ENC_PORT = 8502
