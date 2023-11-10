@@ -5,57 +5,60 @@ OPTIONS = {'comm': 'COM1','speed': '115200','parity': 'None','data': '8','stop':
            'channel': 0,
            'key': '12345678'}
 
-def read_ui_options(self):
+def get_current_channel(app):
+    return app.channel_var.get()
+
+def read_ui_options(app):
     options = {}
-    options['comm'] = self.entry_serial_port.get()
-    options['speed'] = self.entry_serial_speed.get()
-    options['parity'] = self.entry_serial_parity.get()
-    options['data'] = self.entry_serial_data.get()
-    options['stop'] = self.entry_serial_stop.get()
+    options['comm'] = app.entry_serial_port.get()
+    options['speed'] = app.entry_serial_speed.get()
+    options['parity'] = app.entry_serial_parity.get()
+    options['data'] = app.entry_serial_data.get()
+    options['stop'] = app.entry_serial_stop.get()
 
-    options['ip'] = self.entry_ip.get()
-    options['subnet'] = self.entry_subnet.get()
-    options['gateway'] = self.entry_gateway.get()
+    options['ip'] = app.entry_ip.get()
+    options['subnet'] = app.entry_subnet.get()
+    options['gateway'] = app.entry_gateway.get()
 
-    options['peer_ip'] = self.entry_peer_ip.get()
-    options['host_ip'] = self.entry_host_ip.get()
-    options['host_port'] = self.entry_host_port.get()
+    options['peer_ip'] = app.entry_peer_ip.get()
+    options['host_ip'] = app.entry_host_ip.get()
+    options['host_port'] = app.entry_host_port.get()
 
-    options['channel'] = 1 if self.channel_var.get() == "TCP" else 0
-    options['key'] = self.entry_key.get()
+    options['channel'] = 1 if app.channel_var.get() == "TCP" else 0
+    options['key'] = app.entry_key.get()
 
     return options
 
-def apply_ui_options(self, options):
-    self.entry_serial_port.delete(0, "end")
-    self.entry_serial_port.insert(0, options["comm"])
-    self.entry_serial_speed.delete(0, "end")
-    self.entry_serial_speed.insert(0, options["speed"])
-    self.entry_serial_parity.delete(0, "end")
-    self.entry_serial_parity.insert(0, options["parity"])
-    self.entry_serial_data.delete(0, "end")
-    self.entry_serial_data.insert(0, options["data"])
-    self.entry_serial_stop.delete(0, "end")
-    self.entry_serial_stop.insert(0, options["stop"])
+def apply_ui_options(app, options):
+    app.entry_serial_port.delete(0, "end")
+    app.entry_serial_port.insert(0, options["comm"])
+    app.entry_serial_speed.delete(0, "end")
+    app.entry_serial_speed.insert(0, options["speed"])
+    app.entry_serial_parity.delete(0, "end")
+    app.entry_serial_parity.insert(0, options["parity"])
+    app.entry_serial_data.delete(0, "end")
+    app.entry_serial_data.insert(0, options["data"])
+    app.entry_serial_stop.delete(0, "end")
+    app.entry_serial_stop.insert(0, options["stop"])
     
-    self.entry_ip.delete(0, "end")
-    self.entry_ip.insert(0, options["ip"])
-    self.entry_gateway.delete(0, "end")
-    self.entry_gateway.insert(0, options["gateway"])
-    self.entry_subnet.delete(0, "end")
-    self.entry_subnet.insert(0, options["subnet"])
+    app.entry_ip.delete(0, "end")
+    app.entry_ip.insert(0, options["ip"])
+    app.entry_gateway.delete(0, "end")
+    app.entry_gateway.insert(0, options["gateway"])
+    app.entry_subnet.delete(0, "end")
+    app.entry_subnet.insert(0, options["subnet"])
 
-    self.entry_peer_ip.delete(0, "end")
-    self.entry_peer_ip.insert(0, options["peer_ip"])
-    self.entry_host_ip.delete(0, "end")
-    self.entry_host_ip.insert(0, options["host_ip"])
-    self.entry_host_port.delete(0, "end")
-    self.entry_host_port.insert(0, options["host_port"])
+    app.entry_peer_ip.delete(0, "end")
+    app.entry_peer_ip.insert(0, options["peer_ip"])
+    app.entry_host_ip.delete(0, "end")
+    app.entry_host_ip.insert(0, options["host_ip"])
+    app.entry_host_port.delete(0, "end")
+    app.entry_host_port.insert(0, options["host_port"])
 
-    self.entry_key.delete(0, "end")
-    self.entry_key.insert(0, options["key"])
+    app.entry_key.delete(0, "end")
+    app.entry_key.insert(0, options["key"])
 
-def read_options_file(self):
+def read_options_file():
     options = {}
 
     with open("k2_config.txt", "r") as f:
@@ -80,7 +83,7 @@ def read_options_file(self):
 
     return options
 
-def write_options_file(self, options):
+def write_options_file(options):
     with open('k2_config.txt', 'w') as f:
         f.write("comm:" + options["comm"] + "\n")
         f.write("speed:" + options["speed"] + "\n")

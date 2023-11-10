@@ -182,10 +182,10 @@ class App(ctk.CTk):
         do.apply_ui_options(self, options)
 
     def read_options_file(self):
-        return do.read_options_file(self)
+        return do.read_options_file()
 
     def write_options_file(self, options):
-        do.write_options_file(self, options)
+        do.write_options_file(options)
 
     def channel_event(self):
         self.add_status_msg(f"주 통신 방식 변경됨: {self.channel_var.get()}")
