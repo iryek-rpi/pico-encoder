@@ -94,11 +94,6 @@ def init_ui(self):
         self.label_network = ctk.CTkLabel(self.sidebar_frame, text="단말 네트워크 설정")
         self.label_network.grid(row=9, column=0, padx=10+WIDGET_DX, pady=(SECTION_Y,1), sticky="nwe")
 
-        self.dhcp_var = ctk.StringVar(value="NO-DHCP")
-        self.dhcp = ctk.CTkSwitch(self.sidebar_frame, text="DHCP", command=self.dhcp_event,
-                                   variable=self.dhcp_var, onvalue="DHCP", offvalue="NO-DHCP")
-        self.dhcp.grid(row=10, column=0, padx=PAD_X_LABEL+WIDGET_DX, pady=(1,0), sticky="nw")
-
         self.label_ip = ctk.CTkLabel(self.sidebar_frame, text="IP 주소")
         self.label_ip.grid(row=11, column=0, padx=PAD_X_LABEL+WIDGET_DX, pady=(1,0), sticky="nw")
         self.entry_ip = ctk.CTkEntry(self.sidebar_frame)
@@ -166,9 +161,9 @@ def init_ui(self):
 
         #=================================================================================
         # Send Frame
-        self.clear_button = ctk.CTkButton(self.send_frame, width=20, command=self.clear_button_event)
-        self.clear_button.configure(text="데이터 송수신")
-        self.clear_button.grid(row=0, column=0, padx=(40,80), pady=(WIDGET_TOP, 5), sticky="we")
+        self.start_server_button = ctk.CTkButton(self.send_frame, width=20, command=self.start_server_button_event)
+        self.start_server_button.configure(text="데이터 송수신")
+        self.start_server_button.grid(row=0, column=0, padx=(40,80), pady=(WIDGET_TOP, 5), sticky="we")
 
         self.sv_plaintext = ctk.StringVar()
         self.sv_plaintext.trace("w", lambda name, index, mode, sv=self.sv_plaintext: self.limit_plaintext(sv))

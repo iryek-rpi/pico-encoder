@@ -187,18 +187,6 @@ class App(ctk.CTk):
     def write_options_file(self, options):
         do.write_options_file(self, options)
 
-    def dhcp_event(self):
-        if self.dhcp_var.get() == 'DHCP':
-            self.entry_ip.configure(state='disabled')
-            self.entry_gateway.configure(state='disabled')
-            self.entry_subnet.configure(state='disabled')
-        else:
-            self.entry_ip.configure(state='normal')
-            self.entry_gateway.configure(state='normal')
-            self.entry_subnet.configure(state='normal')
-        self.add_status_msg(f"DHCP 설정 변경됨: DHCP={self.dhcp_var.get()}")
-        print("switch toggled, current value:", self.dhcp_var.get())
-
     def channel_event(self):
         self.add_status_msg(f"주 통신 방식 변경됨: {self.channel_var.get()}")
         print("switch toggled, current value:", self.channel_var.get())

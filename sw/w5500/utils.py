@@ -18,9 +18,8 @@ PARITY = 'parity'
 DATASIZE = 'datasize'
 STOP = 'stop'
 
-#{"speed": "9600", "parity": "N", "data": "8", "stop": "1", "dhcp": 0, "ip": "192.168.0.5", "subnet": "255.255.255.0", "gateway": "192.168.0.1", "port": "8501", "peer_ip": "192.168.0.6", "peer_port": "8502", "host_ip": "192.168.0.2", "host_port": "8503", "key": "12345678"}
+#{"speed": "9600", "parity": "N", "data": "8", "stop": "1", "ip": "192.168.0.5", "subnet": "255.255.255.0", "gateway": "192.168.0.1", "port": "8501", "peer_ip": "192.168.0.6", "peer_port": "8502", "host_ip": "192.168.0.2", "host_port": "8503", "key": "12345678"}
 
-DHCP = 'dhcp'
 MY_IP = 'ip'
 CRYPTO_PORT = 'crypto_port'
 GATEWAY = 'gateway'
@@ -36,7 +35,6 @@ CHANNEL = 'channel'
 KEY = 'key'
 
 DEFAUlT_SETTINGS = {
-    DHCP : 0,
     MY_IP : '192.168.1.10',
     CRYPTO_PORT : 8502,
     GATEWAY : '192.168.0.1',

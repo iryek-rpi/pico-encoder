@@ -1,5 +1,5 @@
 
-OPTIONS = {'comm': 'COM1','speed': '115200','parity': 'None','data': '8','stop': '1','dhcp': 1,
+OPTIONS = {'comm': 'COM1','speed': '115200','parity': 'None','data': '8','stop': '1',
            'ip': '192.168.0.5', 'subnet': '255.255.255.0', 'gateway': '192.168.0.1', 
            'peer_ip': '192.168.0.6', 'host_ip': '192.168.0.2', 'host_port': '5000',
            'channel': 0,
@@ -13,10 +13,6 @@ def read_ui_options(self):
     options['data'] = self.entry_serial_data.get()
     options['stop'] = self.entry_serial_stop.get()
 
-    if self.dhcp_var.get() == "DHCP":
-        options['dhcp'] = 1
-    else:
-        options['dhcp'] = 0
     options['ip'] = self.entry_ip.get()
     options['subnet'] = self.entry_subnet.get()
     options['gateway'] = self.entry_gateway.get()
@@ -42,10 +38,6 @@ def apply_ui_options(self, options):
     self.entry_serial_stop.delete(0, "end")
     self.entry_serial_stop.insert(0, options["stop"])
     
-    dhcp = "DHCP" if options['dhcp'] else "NO-DHCP"
-    self.dhcp_var.set(dhcp)
-    self.dhcp_event()
-
     self.entry_ip.delete(0, "end")
     self.entry_ip.insert(0, options["ip"])
     self.entry_gateway.delete(0, "end")
@@ -74,11 +66,6 @@ def read_options_file(self):
         options['data'] = lines[3].split("data:")[1].strip()
         options['stop'] = lines[4].split("stop:")[1].strip()
 
-        dhcp =  lines[5].split("dhcp:")[1].strip()
-        if dhcp == '1':
-            options['dhcp'] = 1
-        else:
-            options['dhcp'] = 0
         options['ip'] = lines[6].split("ip:")[1].strip()
         options['gateway'] = lines[7].split("gateway:")[1].strip()
         options['subnet'] = lines[8].split("subnet:")[1].strip()
@@ -101,10 +88,6 @@ def write_options_file(self, options):
         f.write("data:" + options["data"] + "\n")
         f.write("stop:" + options["stop"] + "\n")
 
-        if options["dhcp"]:
-            f.write("dhcp:" + '1' + "\n")
-        else:
-            f.write("dhcp:" + '0' + "\n")
         f.write("ip:" + options["ip"] + "\n")
         f.write("gateway:" + options["gateway"] + "\n")
         f.write("subnet:" + options["subnet"] + "\n")

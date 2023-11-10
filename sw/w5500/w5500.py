@@ -11,11 +11,7 @@ def w5x00_init(net_config):
     nic = network.WIZNET5K(spi,Pin(17),Pin(20)) #spi,cs,reset pin
     
     nic.active(True)
-    
-    if not net_config:
-        nic.ifconfig('dhcp')
-    else:
-        nic.ifconfig((net_config[0], net_config[1], net_config[2],'8.8.8.8'))
+    nic.ifconfig((net_config[0], net_config[1], net_config[2],'8.8.8.8'))
 
     wait_count = 0
     while not nic.isconnected():

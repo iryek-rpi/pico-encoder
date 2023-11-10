@@ -3,7 +3,6 @@ speed:9600
 parity:N
 data:8
 stop:1
-dhcp:0
 ip:192.168.2.209
 gateway:192.168.2.1
 subnet:255.255.255.0

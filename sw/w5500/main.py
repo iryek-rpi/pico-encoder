@@ -252,7 +252,7 @@ def main():
 
     global_run_flag = True
     uart = init_serial(baud=9600, bits=8, parity=None, stop=1, timeout=SERIAL1_TIMEOUT)
-    net_info = pn.init_ip(settings['dhcp'], settings['ip'], settings['subnet'], settings['gateway'])
+    net_info = pn.init_ip(settings['ip'], settings['subnet'], settings['gateway'])
 
     cw.prepare_web()
     loop = uasyncio.get_event_loop()

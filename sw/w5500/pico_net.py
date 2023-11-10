@@ -7,12 +7,8 @@ from w5500 import w5x00_init
 
 ASYNC_SLEEP_MS = 30
 
-def init_ip(is_dhcp, ip, subnet, gateway):
-    if is_dhcp:
-        net_info = w5x00_init(None)
-    else:
-        net_info = w5x00_init((ip, subnet, gateway))
-
+def init_ip(ip, subnet, gateway):
+    net_info = w5x00_init((ip, subnet, gateway))
     return net_info
 
 def get_poller(polled, poller=None):
