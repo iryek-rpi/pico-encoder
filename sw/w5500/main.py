@@ -85,16 +85,14 @@ async def process_serial_msg(uart, fixed_binary_key, settings):
                 global_run_flag = False
                 return
             elif cmd=='TXT_WRT' and sm[-7:]=='TXT_END':
-                uart.deinit()
-                uart = None
                 received_msg = f'{sm[7:-7]}'
-                received_msg = bytes(received_msg.strip())
+                received_msg = bytes(received_msg.strip(), 'utf-8')
                 print(f'TXT_WRT Received msg: {received_msg}')
-                encoded_msg = process_tcp_text(received_msg, fixed_binary_key)
+                encoded_msg = encrypt_text(received_msg, fixed_binary_key)
                 if not encoded_msg:
                     print('Encryption result Empty')
-                    processed_msg = bytes('***BAD DATA***', 'utf-8')
-                pn.send_data_sync(processed_msg, settings['peer_ip'], utils.ENC_PORT)
+                    encoded_msg = bytes('***BAD DATA***', 'utf-8')
+                pn.send_data_sync(encoded_msg, settings['peer_ip'], utils.ENC_PORT)
                 return
             else:
                 print('Unknown command')
@@ -105,55 +103,50 @@ async def process_serial_msg(uart, fixed_binary_key, settings):
 
     return
 
-def     process_tcp_text(b64, fixed_binary_key):
+def encrypt_text(b64, fixed_binary_key):
     print('data received: ', b64)
     print('type(b64): ', type(b64))
     
-    if len(b64) <= 4:
-        print('irregular data. Exit')
-        return None
-    else:
-        print('msg: ', b64)
-        IV = aes.generate_IV(16)
-        print('fixed_binary_key: ', fixed_binary_key, 'type(fixed_binary_key): ', type(fixed_binary_key))
-        cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
-        msg = cipher.encrypt(b64)
-        print('IV:', IV, ' msg:', msg)
-        return IV + msg
+    #if len(b64) <= 4:
+    #    print('irregular data. Exit')
+    #    return None
+    #else:
+    print('msg: ', b64)
+    IV = aes.generate_IV(16)
+    print('fixed_binary_key: ', fixed_binary_key, 'type(fixed_binary_key): ', type(fixed_binary_key))
+    cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
+    msg = cipher.encrypt(b64)
+    print('IV:', IV, ' msg:', msg)
+    return IV + msg
 
-def process_tcp_crypto(b64, fixed_binary_key):
+def decrypt_crypto(b64, fixed_binary_key):
     print('data received: ', b64)
     print('type(b64): ', type(b64))
     
-    if len(b64) <= 4:
-        print('irregular data. Exit')
-        return None
-    else:
-        print('b64: ', b64)
-        IV, msg = b64[:16], b64[16:]
-        print('IV:', IV, ' msg:', msg)
-        msg_ba = bytearray(msg)
-        cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
-        return cipher.decrypt(msg_ba)
+    #if len(b64) <= 4:
+    #    print('irregular data. Exit')
+    #    return None
+    #else:
+    print('b64: ', b64)
+    IV, msg = b64[:16], b64[16:]
+    print('IV:', IV, ' msg:', msg)
+    msg_ba = bytearray(msg)
+    cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
+    return cipher.decrypt(msg_ba)
 
-async def process_tcp_msg(conn, handler, dest_ip, dest_port, poller, fixed_binary_key):
-    print('receiving data from ', conn)
-    b64 = conn.recv(128)
-    print('plaintext received: ', b64)
-    if b64:
-        processed_msg = handler(b64, fixed_binary_key)
-        print('sending encoded msg: ', processed_msg, ' to ', dest_ip, ':', dest_port)
-        if not processed_msg:
-            print('TCP processed result Empty')
-            processed_msg = bytes('***BAD DATA***', 'utf-8')
-        await pn.send_data(processed_msg, dest_ip, dest_port)
+#async def process_tcp_msg(b64, handler, channel, uart, dest_ip, dest_port, fixed_binary_key):
+def process_tcp_msg(b64, handler, channel, uart, dest_ip, dest_port, fixed_binary_key):
+    processed_msg = handler(b64, fixed_binary_key)
+    if not processed_msg:
+        print('TCP processed result Empty')
+        processed_msg = bytes('***BAD DATA***', 'utf-8')
+    if channel == utils.CH_TCP:
+        print('sending processed msg: ', processed_msg, ' to ', dest_ip, ':', dest_port)
+        pn.send_data(processed_msg, dest_ip, dest_port)
+        #await pn.send_data(processed_msg, dest_ip, dest_port)
     else:
-        print('Empty data received. Close connection')
-        conn.close()
-        poller.unregister(conn)
-        return None
-    
-    return conn
+        print('sending processed msg: ', processed_msg, ' to ', uart)
+        uart.write(processed_msg)
 
 async def run_hybrid_server(settings, uart, fixed_binary_key):
     global global_run_flag  # reset button flag
@@ -170,19 +163,33 @@ async def run_hybrid_server(settings, uart, fixed_binary_key):
             garbage_collect()
             #await uasyncio.sleep_ms(ASYNC_SLEEP_MS)
         else:
+            print('tcp_polled[0][0]: ', tcp_polled[0][0])
+            print('serv_sock_text: ', serv_sock_text)
+            print('conn_text: ', conn_text)
+            print('serv_sock_crypto: ', serv_sock_crypto)
+            print('conn_crypto: ', conn_crypto)
             if serv_sock_text:
                 if tcp_polled[0][0] == serv_sock_text:
                     print('pc is connecting...')
                     conn_text, addr, tcp_poller = pn.init_connection(serv_sock_text, tcp_poller)
                 elif tcp_polled[0][0] == conn_text:
                     print('data available from PC...')
-                    conn_text = await process_tcp_msg(conn_text, process_tcp_text, settings['peer_ip'], utils.ENC_PORT, tcp_poller, fixed_binary_key)
+                    b64 = conn_text.recv(128)
+                    if b64:
+                        process_tcp_msg(b64, encrypt_text, settings[utils.CHANNEL], uart, settings['peer_ip'], utils.ENC_PORT, fixed_binary_key)
+                    else:
+                        conn_text = pn.close_server_socket(conn_text, tcp_poller)
             elif tcp_polled[0][0] == serv_sock_crypto:
                 print('peer is connecting...')
                 conn_crypto, addr, tcp_poller = pn.init_connection(serv_sock_crypto, tcp_poller)
             elif tcp_polled[0][0] == conn_crypto:
                 print('data available from peer...')
-                conn_crypto = await process_tcp_msg(conn_crypto, process_tcp_crypto, settings['host_ip'], settings['host_port'], tcp_poller, fixed_binary_key)
+                b64 = conn_crypto.recv(128)
+                print('\n### tcp data received: ', b64, '\n')
+                if b64:
+                    process_tcp_msg(b64, decrypt_crypto, settings[utils.CHANNEL], uart, settings['host_ip'], settings['host_port'], fixed_binary_key)
+                else:
+                    conn_crypto = pn.close_server_socket(conn_crypto, tcp_poller)
 
     pn.close_sockets(serv_sock_text, serv_sock_crypto, conn_text, conn_crypto)
     if uart:
