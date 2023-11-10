@@ -415,11 +415,11 @@ class App(ctk.CTk):
 
         self.send_ciphertext(ciphertext)
 
-    def clear_button_event(self):
+    def start_server_button_event(self):
         print('server thread starting...')
         self.start_text_receive_thread()
 
-    def clear_button_event_old(self):
+    def start_server_button_event_old(self):
         self.entry_plaintext.delete(0, "end")
         self.ciphertextbox.configure(state='normal')
         self.ciphertextbox.delete("1.0", "end-1c")
