@@ -66,17 +66,17 @@ def read_options_file(self):
         options['data'] = lines[3].split("data:")[1].strip()
         options['stop'] = lines[4].split("stop:")[1].strip()
 
-        options['ip'] = lines[6].split("ip:")[1].strip()
-        options['gateway'] = lines[7].split("gateway:")[1].strip()
-        options['subnet'] = lines[8].split("subnet:")[1].strip()
+        options['ip'] = lines[5].split("ip:")[1].strip()
+        options['gateway'] = lines[6].split("gateway:")[1].strip()
+        options['subnet'] = lines[7].split("subnet:")[1].strip()
 
-        options['peer_ip'] = lines[9].split("peer_ip:")[1].strip()
-        options['host_ip'] = lines[10].split("host_ip:")[1].strip()
-        options['host_port'] = lines[11].split("host_port:")[1].strip()
+        options['peer_ip'] = lines[8].split("peer_ip:")[1].strip()
+        options['host_ip'] = lines[9].split("host_ip:")[1].strip()
+        options['host_port'] = lines[10].split("host_port:")[1].strip()
 
-        options['channel'] = lines[12].split("channel:")[1].strip()
+        options['channel'] = lines[11].split("channel:")[1].strip()
 
-        options['key'] = lines[13].split("key:")[1].strip()
+        options['key'] = lines[12].split("key:")[1].strip()
 
     return options
 
