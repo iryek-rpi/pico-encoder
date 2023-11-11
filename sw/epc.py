@@ -8,6 +8,7 @@ import serial
 import customtkinter as ctk
 import socket
 import select
+import asyncio
 
 from layout import *
 import device_options as do
@@ -39,6 +40,20 @@ ctk.set_appearance_mode(
     "Light")  #"System")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme(
     "green")  # Themes: "blue" (standard), "green", "dark-blue"
+
+async def handle_client(reader, writer):
+    request = None
+    while request != 'quit':
+        request = (await reader.read(255)).decode('utf8')
+        response = str(eval(request)) + '\n'
+        writer.write(response.encode('utf8'))
+        await writer.drain()
+    writer.close()
+
+async def run_server():
+    server = await asyncio.start_server(handle_client, 'localhost', 15555)
+    async with server:
+        await server.serve_forever()
 
 class ReceiveTCPTextThread(Thread):
     global app
@@ -407,18 +422,6 @@ class App(ctk.CTk):
         print('server thread starting...')
         self.start_text_receive_thread()
 
-    def start_server_button_event_old(self):
-        self.entry_plaintext.delete(0, "end")
-        self.ciphertextbox.configure(state='normal')
-        self.ciphertextbox.delete("1.0", "end-1c")
-        self.ciphertextbox.configure(state='disabled')
-        self.entry_dectext.configure(state='normal')
-        self.entry_dectext.delete(0, "end")
-        self.entry_dectext.configure(state='disabled')
-        self.errortextbox.configure(state='normal')
-        self.errortextbox.delete("1.0", "end-1c")
-        self.errortextbox.configure(state='disabled')
-
     def change_cipher_event(self, new_cipher: str):
         self.cipher = new_cipher
 
@@ -435,6 +438,7 @@ def main():
     app.apply_ui_options(options)
     app.comm_port = options["comm"]
 
+    asyncio.run(run_server())
     app.mainloop()
 
     app.stop_thread = True
