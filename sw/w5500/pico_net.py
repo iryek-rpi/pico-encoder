@@ -5,6 +5,7 @@ from usocket import socket
 import utime
 import uselect
 import uasyncio
+import network
 import utils
 
 ASYNC_SLEEP_MS = 30
