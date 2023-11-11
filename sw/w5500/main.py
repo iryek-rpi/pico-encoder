@@ -21,20 +21,16 @@ SERIAL1_TIMEOUT = 50 # ms
 print('Starting main script')
 led_init()
 btn = Pin(9, Pin.IN, Pin.PULL_UP)
-global_run_flag = False
 gc_start_time = utime.ticks_ms()
 
 def btn_callback(btn):
-    global global_run_flag
     led_onoff(yellow, True)
     led_onoff(green, False)
     print('Button pressed')
-    global_run_flag = False
 
 btn.irq(trigger=Pin.IRQ_FALLING, handler=btn_callback)
 
 def process_serial_msg(uart, fixed_binary_key, settings):
-    global global_run_flag
     sm = uart.readline()
     if sm:
         try:
@@ -58,8 +54,8 @@ def process_serial_msg(uart, fixed_binary_key, settings):
                 received_settings = sm[7:-7]
                 print(f'Received settings: {received_settings}')
                 utils.save_settings(received_settings)
-                global_run_flag = False
-                return
+                utime.sleep_ms(1000)
+                machine.reset()
             elif cmd=='TXT_WRT' and sm[-7:]=='TXT_END':
                 received_msg = f'{sm[7:-7]}'
                 received_msg = bytes(received_msg.strip(), 'utf-8')
@@ -125,14 +121,13 @@ def process_tcp_msg(b64, handler, channel, uart, dest_ip, dest_port, fixed_binar
         uart.write(processed_msg)
 
 async def run_hybrid_server(settings, uart, fixed_binary_key):
-    global global_run_flag  # reset button flag
     global gc_start_time
 
     gc_start_time = utime.ticks_ms()
     serv_sock_text, serv_sock_crypto, tcp_poller = pn.init_server_sockets(settings, settings[utils.MY_IP], utils.TEXT_PORT, utils.ENC_PORT)
     conn_text, conn_crypto = None, None
 
-    while global_run_flag:
+    while True:
         tcp_polled = tcp_poller.poll(0)
         if not tcp_polled:
             process_serial_msg(uart, fixed_binary_key, settings)
@@ -176,12 +171,11 @@ async def run_hybrid_server(settings, uart, fixed_binary_key):
     return
 
 async def run_serial_server(settings, uart, fixed_binary_key):
-    global global_run_flag  # reset button flag
     global gc_start_time
 
     gc_start_time = utime.ticks_ms()
 
-    while global_run_flag:
+    while True:
         process_serial_msg(uart, fixed_binary_key, settings)
         await uasyncio.sleep_ms(pn.ASYNC_SLEEP_MS+100)
         #gc_start_time = garbage_collect(gc_start_time)
@@ -195,8 +189,6 @@ async def run_serial_server(settings, uart, fixed_binary_key):
     return
 
 async def main_single(net_info, uart, fixed_binary_key, settings):
-    global global_run_flag
-
     if net_info and net_info[0]:
         led_state_good()
         print('IP assigned: ', net_info[0])
@@ -209,15 +201,12 @@ async def main_single(net_info, uart, fixed_binary_key, settings):
         await run_serial_server(settings, uart, fixed_binary_key)
 
     led_onoff(green, False)
-    print("Waiting for 0.2 sec before reset")
+    print("Waiting for 0.2 sec before reset...")
     utime.sleep_ms(200)
-    print("Resetting...")
 
     machine.reset()
 
 def main():
-    global global_run_flag
-
     led_start()
     utime.sleep_ms(1000)
     settings = utils.load_json_settings()
@@ -225,7 +214,6 @@ def main():
 
     fixed_binary_key = coder.fix_len_and_encode_key(settings['key'])
 
-    global_run_flag = True
     uart = pn.init_serial(baud=settings[utils.SPEED], parity=settings[utils.PARITY], bits=settings[utils.DATA], stop=settings[utils.STOP], timeout=SERIAL1_TIMEOUT)
     net_info = pn.init_ip(settings['ip'], settings['subnet'], settings['gateway'])
 
