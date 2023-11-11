@@ -3,7 +3,6 @@ W5500
 '''
 import machine
 from machine import Pin
-from machine import UART
 import utime
 import gc
 import ujson
@@ -33,13 +32,6 @@ def btn_callback(btn):
     global_run_flag = False
 
 btn.irq(trigger=Pin.IRQ_FALLING, handler=btn_callback)
-
-def init_serial(baud, parity, bits, stop, timeout=SERIAL1_TIMEOUT):
-    uart0 = UART(0, tx=Pin(0), rx=Pin(1))
-    if parity=='N':
-        parity = None
-    uart0.init(baudrate=baud, bits=bits, parity=parity, stop=stop, timeout=timeout)
-    return uart0
 
 def process_serial_msg(uart, fixed_binary_key, settings):
     global global_run_flag
@@ -234,7 +226,7 @@ def main():
     fixed_binary_key = coder.fix_len_and_encode_key(settings['key'])
 
     global_run_flag = True
-    uart = init_serial(baud=settings[utils.SPEED], parity=settings[utils.PARITY], bits=settings[utils.DATA], stop=settings[utils.STOP], timeout=SERIAL1_TIMEOUT)
+    uart = pn.init_serial(baud=settings[utils.SPEED], parity=settings[utils.PARITY], bits=settings[utils.DATA], stop=settings[utils.STOP], timeout=SERIAL1_TIMEOUT)
     net_info = pn.init_ip(settings['ip'], settings['subnet'], settings['gateway'])
 
     cw.prepare_web()

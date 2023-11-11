@@ -1,11 +1,40 @@
+from machine import Pin
+from machine import SPI
+from machine import UART
 from usocket import socket
+import utime
 import uselect
 import uasyncio
 import utils
 
-from w5500 import w5x00_init
-
 ASYNC_SLEEP_MS = 30
+
+def init_serial(baud, parity, bits, stop, timeout):
+    uart0 = UART(0, tx=Pin(0), rx=Pin(1))
+    if parity=='N':
+        parity = None
+    uart0.init(baudrate=baud, bits=bits, parity=parity, stop=stop, timeout=timeout)
+    return uart0
+
+def w5x00_init(net_config):
+    spi=SPI(0,2_000_000, mosi=Pin(19),miso=Pin(16),sck=Pin(18))
+    nic = network.WIZNET5K(spi,Pin(17),Pin(20)) #spi,cs,reset pin
+    
+    nic.active(True)
+    nic.ifconfig((net_config[0], net_config[1], net_config[2],'8.8.8.8'))
+
+    wait_count = 0
+    while not nic.isconnected():
+        print(nic.regs())
+        print('Waiting for Link...')
+        utime.sleep_ms(1000)
+        wait_count += 1
+        if wait_count > 10:
+            return None
+    
+    ifc = nic.ifconfig()
+    print(ifc)
+    return ifc
 
 def init_ip(ip, subnet, gateway):
     net_info = w5x00_init((ip, subnet, gateway))
