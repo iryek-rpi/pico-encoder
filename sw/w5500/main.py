@@ -17,11 +17,7 @@ from led import *
 import utils
 import pico_net as pn
 
-BAUD_RATE = 9600  #19200
-if BAUD_RATE == 9600:
-    SERIAL1_TIMEOUT = 200 # ms
-else:
-    SERIAL1_TIMEOUT = 100 # ms
+SERIAL1_TIMEOUT = 50 # ms
 
 print('Starting main script')
 led_init()
@@ -38,7 +34,7 @@ def btn_callback(btn):
 
 btn.irq(trigger=Pin.IRQ_FALLING, handler=btn_callback)
 
-def init_serial(baud, bits, parity, stop, timeout=SERIAL1_TIMEOUT):
+def init_serial(baud, parity, bits, stop, timeout=SERIAL1_TIMEOUT):
     uart0 = UART(0, tx=Pin(0), rx=Pin(1))
     if parity=='N':
         parity = None
@@ -197,7 +193,6 @@ async def run_serial_server(settings, uart, fixed_binary_key):
         process_serial_msg(uart, fixed_binary_key, settings)
         await uasyncio.sleep_ms(pn.ASYNC_SLEEP_MS+100)
         #gc_start_time = garbage_collect(gc_start_time)
-        #print('.#', end='')
         continue
 
     if uart:
@@ -239,7 +234,7 @@ def main():
     fixed_binary_key = coder.fix_len_and_encode_key(settings['key'])
 
     global_run_flag = True
-    uart = init_serial(baud=settings[utils.SPEED], bits=settings[utils.DATA], parity=settings[utils.PARITY], stop=settings[utils.STOP], timeout=SERIAL1_TIMEOUT)
+    uart = init_serial(baud=settings[utils.SPEED], parity=settings[utils.PARITY], bits=settings[utils.DATA], stop=settings[utils.STOP], timeout=SERIAL1_TIMEOUT)
     net_info = pn.init_ip(settings['ip'], settings['subnet'], settings['gateway'])
 
     cw.prepare_web()
