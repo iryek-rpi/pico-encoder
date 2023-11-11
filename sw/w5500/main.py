@@ -57,7 +57,7 @@ def init_serial(baud=9600, bits=8, parity=None, stop=1, timeout=SERIAL1_TIMEOUT)
     uart0.init(baudrate=BAUD_RATE, bits=8, parity=None, stop=1, timeout=SERIAL1_TIMEOUT)
     return uart0
 
-async def process_serial_msg(uart, fixed_binary_key, settings):
+def process_serial_msg(uart, fixed_binary_key, settings):
     global global_run_flag
     sm = uart.readline()
     if sm:
@@ -159,7 +159,7 @@ async def run_hybrid_server(settings, uart, fixed_binary_key):
     while global_run_flag:
         tcp_polled = tcp_poller.poll(0)
         if not tcp_polled:
-            await process_serial_msg(uart, fixed_binary_key, settings)
+            process_serial_msg(uart, fixed_binary_key, settings)
             garbage_collect()
             #await uasyncio.sleep_ms(ASYNC_SLEEP_MS)
         else:
@@ -199,16 +199,17 @@ async def run_hybrid_server(settings, uart, fixed_binary_key):
     #machine.reset()
     return
 
-async def run_serial_server(uart, fixed_binary_key):
+async def run_serial_server(settings, uart, fixed_binary_key):
     global global_run_flag  # reset button flag
     global gc_start_time
 
     gc_start_time = utime.ticks_ms()
 
     while global_run_flag:
-        process_serial_msg(uart)
-        await uasyncio.sleep_ms(ASYNC_SLEEP_MS)
-        garbage_collect()
+        process_serial_msg(uart, fixed_binary_key, settings)
+        await uasyncio.sleep_ms(ASYNC_SLEEP_MS+100)
+        #garbage_collect()
+        #print('.#', end='')
         continue
 
     if uart:
@@ -230,7 +231,7 @@ async def main_single(net_info, uart, fixed_binary_key, settings):
     else:
         print('No IP assigned')
         led_state_no_ip()
-        await run_serial_server(uart, fixed_binary_key)
+        await run_serial_server(settings, uart, fixed_binary_key)
 
     led_onoff(green, False)
     print("Waiting for 0.2 sec before reset")
@@ -248,7 +249,6 @@ def main():
     print(settings)
 
     fixed_binary_key = coder.fix_len_and_encode_key(settings['key'])
-    print('fixed_binary_key: ', fixed_binary_key)
 
     global_run_flag = True
     uart = init_serial(baud=9600, bits=8, parity=None, stop=1, timeout=SERIAL1_TIMEOUT)
