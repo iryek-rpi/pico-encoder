@@ -30,51 +30,6 @@ def btn_callback(btn):
 
 btn.irq(trigger=Pin.IRQ_FALLING, handler=btn_callback)
 
-def process_serial_msg(uart, fixed_binary_key, settings):
-    sm = uart.readline()
-    if sm:
-        try:
-            sm = sm.decode('utf-8')
-            sm = sm.strip()
-            print(sm)
-            cmd = sm[:7]
-            print(f'cmd: {cmd}')
-            print(f'sm[-7:]: {sm[-7:]}')
-            if cmd=='CNF_REQ':
-                saved_settings = utils.load_json_settings()
-                print('saved_settings: ', saved_settings)
-                print('type(saved_settings): ', type(saved_settings))
-                str_settings = ujson.dumps(saved_settings)
-                print(len(str_settings), ' bytes : ', str_settings)
-                msg = bytes('CNF_JSN', 'utf-8') + bytes(str_settings, 'utf-8') + bytes('CNF_END\n', 'utf-8')
-                uart.write(msg)
-            elif cmd=='CNF_WRT' and sm[-7:]=='CNF_END':
-                uart.deinit()
-                uart = None
-                received_settings = sm[7:-7]
-                print(f'Received settings: {received_settings}')
-                utils.save_settings(received_settings)
-                utime.sleep_ms(1000)
-                machine.reset()
-            elif cmd=='TXT_WRT' and sm[-7:]=='TXT_END':
-                received_msg = f'{sm[7:-7]}'
-                received_msg = bytes(received_msg.strip(), 'utf-8')
-                print(f'TXT_WRT Received msg: {received_msg}')
-                encoded_msg = encrypt_text(received_msg, fixed_binary_key)
-                if not encoded_msg:
-                    print('Encryption result Empty')
-                    encoded_msg = bytes('***BAD DATA***', 'utf-8')
-                pn.send_data_sync(encoded_msg, settings['peer_ip'], utils.ENC_PORT)
-                return
-            else:
-                print('Unknown command')
-        except Exception as e:
-            print(e)
-        
-    print('.', end='')
-
-    return
-
 def encrypt_text(b64, fixed_binary_key):
     print('data received: ', b64)
     print('type(b64): ', type(b64))
@@ -120,19 +75,62 @@ def process_tcp_msg(b64, handler, channel, uart, dest_ip, dest_port, fixed_binar
         print('sending processed msg: ', processed_msg, ' to ', uart)
         uart.write(processed_msg)
 
-async def run_hybrid_server(settings, uart, fixed_binary_key):
-    global gc_start_time
+async def process_serial_msg(uart, fixed_binary_key, settings):
+    try:
+        sm = uart.readline()
+        if sm:
+            sm = sm.decode('utf-8').strip()
+            print(f'cmd: {sm[:7]}  sm[-7:]: {sm[-7:]}')
+            if sm[:7]=='CNF_REQ':
+                saved_settings = utils.load_json_settings()
+                print('saved_settings: ', saved_settings)
+                str_settings = ujson.dumps(saved_settings)
+                print(len(str_settings), ' bytes : ', str_settings)
+                msg = bytes('CNF_JSN', 'utf-8') + bytes(str_settings, 'utf-8') + bytes('CNF_END\n', 'utf-8')
+                uart.write(msg)
+            elif sm[:7]=='CNF_WRT' and sm[-7:]=='CNF_END':
+                uart.deinit()
+                received_settings = sm[7:-7]
+                print(f'Received settings: {received_settings}')
+                utils.save_settings(received_settings)
+                utime.sleep_ms(1000)
+                machine.reset()
+            elif sm[:7]=='TXT_WRT' and sm[-7:]=='TXT_END':
+                received_msg = f'{sm[7:-7]}'
+                received_msg = bytes(received_msg.strip(), 'utf-8')
+                print(f'TXT_WRT Received msg: {received_msg}')
+                encoded_msg = encrypt_text(received_msg, fixed_binary_key)
+                if not encoded_msg:
+                    print('Encryption result Empty')
+                    encoded_msg = bytes('***BAD DATA***', 'utf-8')
+                await uasyncio.sleep_ms(pn.ASYNC_SLEEP_MS)
+                pn.send_data_sync(encoded_msg, settings['peer_ip'], utils.ENC_PORT)
+                await uasyncio.sleep_ms(pn.ASYNC_SLEEP_MS)
+                return
+            else:
+                print('Unknown command')
+    except Exception as e:
+        print(e)
+        
+    print('.', end='')
 
+    return
+
+async def run_hybrid_server(net_info, uart, fixed_binary_key, settings):
+    global gc_start_time
     gc_start_time = utime.ticks_ms()
+
     serv_sock_text, serv_sock_crypto, tcp_poller = pn.init_server_sockets(settings, settings[utils.MY_IP], utils.TEXT_PORT, utils.ENC_PORT)
     conn_text, conn_crypto = None, None
 
+    tcp_polled = None
     while True:
-        tcp_polled = tcp_poller.poll(0)
-        if not tcp_polled:
+        await uasyncio.sleep_ms(pn.ASYNC_SLEEP_MS)
+        if settings['ip']:
+            tcp_polled = tcp_poller.poll(0)
+        if not tcp_polled and uart.any():
             process_serial_msg(uart, fixed_binary_key, settings)
-            gc_start_time = garbage_collect(gc_start_time)
-            #await uasyncio.sleep_ms(pn.ASYNC_SLEEP_MS)
+            #gc_start_time = utils.garbage_collect(gc_start_time)
         else:
             print('tcp_polled[0][0]: ', tcp_polled[0][0])
             print('serv_sock_text: ', serv_sock_text)
@@ -166,44 +164,9 @@ async def run_hybrid_server(settings, uart, fixed_binary_key):
     if uart:
         uart.deinit()
 
-    utime.sleep_ms(2000)
-    #machine.reset()
-    return
-
-async def run_serial_server(settings, uart, fixed_binary_key):
-    global gc_start_time
-
-    gc_start_time = utime.ticks_ms()
-
-    while True:
-        process_serial_msg(uart, fixed_binary_key, settings)
-        await uasyncio.sleep_ms(pn.ASYNC_SLEEP_MS+100)
-        #gc_start_time = garbage_collect(gc_start_time)
-        continue
-
-    if uart:
-        uart.deinit()
-
-    utime.sleep_ms(100)
-
-    return
-
-async def main_single(net_info, uart, fixed_binary_key, settings):
-    if net_info and net_info[0]:
-        led_state_good()
-        print('IP assigned: ', net_info[0])
-        settings['ip'], settings['subnet'], settings['gateway'] = net_info[0], net_info[1], net_info[2]
-        utils.save_settings(ujson.dumps(settings))
-        await run_hybrid_server(settings, uart, fixed_binary_key)
-    else:
-        print('No IP assigned')
-        led_state_no_ip()
-        await run_serial_server(settings, uart, fixed_binary_key)
-
     led_onoff(green, False)
     print("Waiting for 0.2 sec before reset...")
     utime.sleep_ms(200)
-
     machine.reset()
 
 def main():
@@ -217,9 +180,19 @@ def main():
     uart = pn.init_serial(baud=settings[utils.SPEED], parity=settings[utils.PARITY], bits=settings[utils.DATA], stop=settings[utils.STOP], timeout=SERIAL1_TIMEOUT)
     net_info = pn.init_ip(settings['ip'], settings['subnet'], settings['gateway'])
 
+    if net_info and net_info[0]:
+        print('IP assigned: ', net_info[0])
+        led_state_good()
+        settings['ip'], settings['subnet'], settings['gateway'] = net_info[0], net_info[1], net_info[2]
+        utils.save_settings(ujson.dumps(settings))
+    else:
+        settings['ip'] = None
+        print('No IP assigned')
+        led_state_no_ip()
+
     cw.prepare_web()
     loop = uasyncio.get_event_loop()
-    loop.create_task(main_single(net_info, uart, fixed_binary_key, settings))
+    loop.create_task(run_hybrid_server(net_info, uart, fixed_binary_key, settings))
     loop.create_task(uasyncio.start_server(cw.server._handle_request, '0.0.0.0', 80))
     loop.run_forever()
 
