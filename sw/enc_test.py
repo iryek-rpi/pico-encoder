@@ -37,11 +37,6 @@ def main(page: ft.Page):
     controls = main_controls(page)
     page.add(controls)
 
-    tcp_thread = ReceiveTCPTextThread("192.168.2.159", 8553)
-    tcp_thread.start()
-
-    serial_thread = ReceiveSerialTextThread()
-    serial_thread.start()
     #monitor(serial_thread)
 
 if __name__ == "__main__":

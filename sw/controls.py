@@ -17,17 +17,23 @@ def add_history(msg):
     global history
     now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     history.value = f'{now}: {msg}\n{history.value}'
+    history.update()
     
 def request_encryption(e):
     global plain_text
     text = plain_text.value
     plain_text.value = ''
-    dlg.content.value = text
     plain_text.hint_text = text 
-    e.control.page.dialog = dlg
-    dlg.open = True
+    settings = get_settings()
+    if settings['chan'] == 'serial':
+        comm.serial_send_plaintext(settings, text)
+    else:
+        comm.tcp_send_plaintext(settings, text)
+
     e.control.page.update()
-    comm.serial_send_plaintext(get_settings(), text)
+
+def start_server(e):
+    comm.start_server(get_settings())
 
 def clear_history(e):
     history.value = ''
@@ -58,12 +64,17 @@ channel = ft.RadioGroup( value="serial", content=ft.Row([
             ft.Radio(value="serial", label="시리얼"),
             ft.Radio(value="tcp", label="TCP/IP"),]))
 
-channel_row = ft.Row( spacing = 5, width = ENC_COLUMN_WIDTH,
-    alignment=ft.MainAxisAlignment.START,
-    controls=[ ft.Text("통신채널", width=LEFT_TITLE_WIDTH, text_align=TITLE_ALIGN, weight=TITLE_WEIGHT), channel, ])
+start_server_button = ft.FilledButton("서버 시작", on_click=start_server, width=140,
+            style=ft.ButtonStyle(shape={ft.MaterialState.DEFAULT: ft.RoundedRectangleBorder(radius=2),}))
+start_server_row = ft.Row( spacing = 5, width = ENC_COLUMN_WIDTH, alignment=ft.MainAxisAlignment.START,
+                          controls=[ start_server_button,])
+
+channel_row = ft.Row( spacing = 5, width = ENC_COLUMN_WIDTH, alignment=ft.MainAxisAlignment.START,
+    controls=[ ft.Text("통신채널", width=LEFT_TITLE_WIDTH, text_align=TITLE_ALIGN, weight=TITLE_WEIGHT), channel,#])
+                start_server_button,])
 
 host_ip = ft.TextField( label="호스트 IP", width = LONG_FIELD) #on_blur=validate_required_text_field,
-host_port = ft.TextField( label="포트번호", width = SHORT_FIELD) #on_blur=validate_required_text_field,
+host_port = ft.TextField( label="포트번호", value = 8553, width = SHORT_FIELD) #on_blur=validate_required_text_field,
 device_ip = ft.TextField( label="단말 IP", width = LONG_FIELD) #on_blur=validate_required_text_field,
 
 host_ip_row = ft.Row( spacing = 5, width = ENC_COLUMN_WIDTH, alignment=ft.MainAxisAlignment.START,
@@ -138,7 +149,7 @@ def get_settings():
         'device_ip': device_ip.value,
         'serial_port': serial_port.value,
         'serial_speed': serial_speed.value,
-        'parity': None if parity.value=='N' else parity.value,
+        'parity': parity.value,
         'data_size': data_size.value,
         'stopbit': stopbit.value
     }

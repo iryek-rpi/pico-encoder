@@ -3,7 +3,8 @@ import serial
 import time
 
 
-PORT = 'COM16'
+#PORT = 'COM16'
+PORT = '/dev/ttyUSB0'
 def main():
     ser = serial.Serial(PORT, 9600, timeout=1)
     #ser = init('/dev/ttyUSB0')

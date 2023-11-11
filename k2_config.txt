@@ -3,11 +3,11 @@ speed:9600
 parity:N
 data:8
 stop:1
-ip:192.168.2.8
+ip:192.168.2.9
 gateway:192.168.2.1
 subnet:255.255.255.0
-peer_ip:192.168.2.9
+peer_ip:192.168.2.8
 host_ip:192.168.2.88
-host_port:8503
-channel:0
+host_port:8504
+channel:1
 key:12345678

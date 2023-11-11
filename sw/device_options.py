@@ -57,6 +57,12 @@ def apply_ui_options(app, options):
 
     app.entry_key.delete(0, "end")
     app.entry_key.insert(0, options["key"])
+    if options["channel"] == 0:
+        app.channel_var.set("Serial")
+        app.channel.deselect()
+    else:
+        app.channel_var.set("TCP")
+        app.channel.select()
 
 def read_options_file():
     options = {}

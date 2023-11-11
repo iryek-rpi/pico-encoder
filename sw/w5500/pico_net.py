@@ -12,9 +12,12 @@ ASYNC_SLEEP_MS = 30
 
 def init_serial(baud, parity, bits, stop, timeout):
     uart0 = UART(0, tx=Pin(0), rx=Pin(1))
-    if parity=='N':
-        parity = None
+    baud = int(baud)
+    parity = None if parity=='N' else parity
+    bits = int(bits)
+    stop = int(stop)
     uart0.init(baudrate=baud, bits=bits, parity=parity, stop=stop, timeout=timeout)
+    #uart0.init(baudrate=9600, bits=8, parity=None, stop=1, timeout=50)
     return uart0
 
 def w5x00_init(net_config):
@@ -47,7 +50,18 @@ def get_poller(polled, poller=None):
     poller.register(polled, uselect.POLLIN)
     return poller
 
-def init_server_socket(ip, port, poller):
+def init_server_socket(ip, port):
+    sock = socket()
+    sock.bind((ip, int(port)))
+    print('Listening on socket: ', sock, 'port:', port)
+    sock.listen(2)
+    poller = uselect.poll()
+    sock_poller = get_poller(sock, poller)
+    print('sock_poller: ', sock_poller)
+
+    return sock, sock_poller
+
+def init_server_socket_async(ip, port, poller):
     sock = socket()
     sock.bind((ip, int(port)))
     print('Listening on socket: ', sock, 'port:', port)
@@ -62,17 +76,30 @@ def close_server_socket(sock, poller):
     poller.unregister(sock)
     return None
 
-def init_server_sockets(settings, my_ip, text_port, crypto_port):
+def init_server_sockets_async(settings, my_ip, text_port, crypto_port):
     poller = uselect.poll()
-    serv_sock_crypto, poller = init_server_socket(my_ip, crypto_port, poller)
+    serv_sock_crypto, poller = init_server_socket_async(my_ip, crypto_port, poller)
 
     serv_sock_text = None
     if settings[utils.CHANNEL] == utils.CH_TCP:
-        serv_sock_text, poller = init_server_socket(my_ip, text_port, poller)
+        serv_sock_text, poller = init_server_socket_async(my_ip, text_port, poller)
     print('serv_sock_text: ', serv_sock_text, 'serv_sock_crypto: ', serv_sock_crypto)
     print('poller: ', poller)
 
     return serv_sock_text, serv_sock_crypto, poller
+
+def init_server_sockets(settings, my_ip, text_port, crypto_port):
+    serv_sock_crypto, serv_sock_crypto_poller = init_server_socket(my_ip, crypto_port)
+
+    serv_sock_text = None
+    serv_sock_text_poller = None
+    if settings[utils.CHANNEL] == utils.CH_TCP:
+        serv_sock_text, serv_sock_text_poller = init_server_socket(my_ip, text_port)
+    print('serv_sock_text: ', serv_sock_text, 'serv_sock_crypto: ', serv_sock_crypto)
+    print('crypto_poller: ', serv_sock_crypto_poller)
+    print('text_poller: ', serv_sock_text_poller)
+
+    return serv_sock_text, serv_sock_crypto, serv_sock_text_poller, serv_sock_crypto_poller
 
 def send_data(data, peer_ip, peer_port):
     sock = socket()
@@ -104,9 +131,11 @@ def send_data_sync(data, peer_ip, peer_port):
 def init_connection(server_sock, poller):
     conn, addr = server_sock.accept()
     print('Connected by ', conn, ' from ', addr)
-    sock_data_poller = get_poller(conn, poller)
+    if not poller:
+        poller = uselect.poll() 
+        poller = get_poller(conn, poller)
 
-    return conn, addr, sock_data_poller
+    return conn, addr, poller
 
 def close_sockets(*args):
     for sock in args:
