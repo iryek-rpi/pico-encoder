@@ -5,6 +5,17 @@ https://www.vaadata.com/blog/how-to-securely-store-passwords-in-database/
 import os
 import ujson
 
+def garbage_collect(start_time):
+    return 
+    time_now = utime.ticks_ms()
+    runtime = utime.ticks_diff(time_now, start_time)
+    print('===== gc.mem_free(): ', gc.mem_free(), ' at ', runtime)
+    if runtime > 500_000:
+        gc.collect()
+        print('+++++ gc.mem_free() after gc.collect(): ', gc.mem_free())
+        return time_now
+    return start_time
+
 CH_TCP = 1      # channel to host
 CH_SERIAL = 0
 
