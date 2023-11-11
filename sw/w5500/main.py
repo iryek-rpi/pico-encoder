@@ -17,31 +17,17 @@ from led import *
 import utils
 import pico_net as pn
 
-ASYNC_SLEEP_MS = pn.ASYNC_SLEEP_MS
-
 BAUD_RATE = 9600  #19200
 if BAUD_RATE == 9600:
     SERIAL1_TIMEOUT = 200 # ms
 else:
     SERIAL1_TIMEOUT = 100 # ms
 
-print('Starting W5500 script')
+print('Starting main script')
 led_init()
 btn = Pin(9, Pin.IN, Pin.PULL_UP)
 global_run_flag = False
 gc_start_time = utime.ticks_ms()
-
-def garbage_collect():
-    global gc_start_time
-
-    return 
-    time_now = utime.ticks_ms()
-    runtime = utime.ticks_diff(time_now, gc_start_time)
-    print('===== gc.mem_free(): ', gc.mem_free(), ' at ', runtime)
-    if runtime > 500_000:
-        gc.collect()
-        gc_start_time = time_now
-        print('+++++ gc.mem_free(): ', gc.mem_free())
 
 def btn_callback(btn):
     global global_run_flag
@@ -52,9 +38,11 @@ def btn_callback(btn):
 
 btn.irq(trigger=Pin.IRQ_FALLING, handler=btn_callback)
 
-def init_serial(baud=9600, bits=8, parity=None, stop=1, timeout=SERIAL1_TIMEOUT):
+def init_serial(baud, bits, parity, stop, timeout=SERIAL1_TIMEOUT):
     uart0 = UART(0, tx=Pin(0), rx=Pin(1))
-    uart0.init(baudrate=BAUD_RATE, bits=8, parity=None, stop=1, timeout=SERIAL1_TIMEOUT)
+    if parity=='N':
+        parity = None
+    uart0.init(baudrate=baud, bits=bits, parity=parity, stop=stop, timeout=timeout)
     return uart0
 
 def process_serial_msg(uart, fixed_binary_key, settings):
@@ -160,8 +148,8 @@ async def run_hybrid_server(settings, uart, fixed_binary_key):
         tcp_polled = tcp_poller.poll(0)
         if not tcp_polled:
             process_serial_msg(uart, fixed_binary_key, settings)
-            garbage_collect()
-            #await uasyncio.sleep_ms(ASYNC_SLEEP_MS)
+            gc_start_time = garbage_collect(gc_start_time)
+            #await uasyncio.sleep_ms(pn.ASYNC_SLEEP_MS)
         else:
             print('tcp_polled[0][0]: ', tcp_polled[0][0])
             print('serv_sock_text: ', serv_sock_text)
@@ -207,8 +195,8 @@ async def run_serial_server(settings, uart, fixed_binary_key):
 
     while global_run_flag:
         process_serial_msg(uart, fixed_binary_key, settings)
-        await uasyncio.sleep_ms(ASYNC_SLEEP_MS+100)
-        #garbage_collect()
+        await uasyncio.sleep_ms(pn.ASYNC_SLEEP_MS+100)
+        #gc_start_time = garbage_collect(gc_start_time)
         #print('.#', end='')
         continue
 
@@ -251,7 +239,7 @@ def main():
     fixed_binary_key = coder.fix_len_and_encode_key(settings['key'])
 
     global_run_flag = True
-    uart = init_serial(baud=9600, bits=8, parity=None, stop=1, timeout=SERIAL1_TIMEOUT)
+    uart = init_serial(baud=settings[utils.SPEED], bits=settings[utils.DATA], parity=settings[utils.PARITY], stop=settings[utils.STOP], timeout=SERIAL1_TIMEOUT)
     net_info = pn.init_ip(settings['ip'], settings['subnet'], settings['gateway'])
 
     cw.prepare_web()
