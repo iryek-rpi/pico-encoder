@@ -82,33 +82,23 @@ def validate_settings(settings):
     #check if the settings are valid
     msg = ''
     ns = settings.copy()
-    ns[BAUD] = int(settings[BAUD])
-    if ns[PARITY] is 'no':
-        ns[PARITY] = 'no'
+    ns[SPEED] = int(settings[SPEED])
+    if ns[PARITY] is 'N':
+        ns[PARITY] = None
     else:
         ns[PARITY] = int(ns[PARITY])
 
-    ns[DATASIZE] = int(settings[DATASIZE])
+    ns[DATA] = int(settings[DATA])
     ns[STOP] = int(settings[STOP])
 
     if not validate_ip_string(settings[IP]):
         msg += f'IP 주소 오류: {settings[IP]}<br>'
-
-    if not validate_port_string(settings[PORT]):
-        msg += f'포트 번호 오류: {settings[PORT]} 1023<포트번호<65536<br>'
-    else:
-        ns[PORT] = int(settings[PORT])
 
     if not validate_ip_string(settings[GATEWAY]):
         msg += f'게이트웨이 오류: {settings[GATEWAY]}<br>'
     
     if not validate_ip_string(settings[PEER_IP]):
         msg += f'상대 단말 IP 주소 오류: {settings[PEER_IP]}<br>'
-
-    if not validate_port_string(settings[PEER_PORT]):
-        msg += f'상대 단말 포트 오류: {settings[PEER_PORT]} 1023<포트번호<65536<br>'
-    else:
-        ns[PEER_PORT] = int(settings[PEER_PORT])
 
     if not validate_ip_string(settings[HOST_IP]):
         msg += f'호스트 IP 주소 오류: {settings[HOST_IP]}<br>'
