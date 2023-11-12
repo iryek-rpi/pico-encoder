@@ -24,9 +24,13 @@ btn = Pin(9, Pin.IN, Pin.PULL_UP)
 gc_start_time = utime.ticks_ms()
 
 def btn_callback(btn):
-    led_onoff(yellow, True)
-    led_onoff(green, False)
     print('Button pressed')
+    led_state_setting()
+    settings = utils.load_json_settings()
+    settings[utils.CONFIG] = 0 if settings[utils.CONFIG]==1 else 0
+    utils.save_settings(settings)
+    utime.sleep_ms(500)
+    machine.reset()
 
 btn.irq(trigger=Pin.IRQ_FALLING, handler=btn_callback)
 
@@ -34,10 +38,6 @@ def encrypt_text(b64, fixed_binary_key):
     print('data received: ', b64)
     print('type(b64): ', type(b64))
     
-    #if len(b64) <= 4:
-    #    print('irregular data. Exit')
-    #    return None
-    #else:
     print('msg: ', b64)
     IV = aes.generate_IV(16)
     print('fixed_binary_key: ', fixed_binary_key, 'type(fixed_binary_key): ', type(fixed_binary_key))
@@ -50,10 +50,6 @@ def decrypt_crypto(b64, fixed_binary_key):
     print('data received: ', b64)
     print('type(b64): ', type(b64))
     
-    #if len(b64) <= 4:
-    #    print('irregular data. Exit')
-    #    return None
-    #else:
     print('b64: ', b64)
     IV, msg = b64[:16], b64[16:]
     print('IV:', IV, ' msg:', msg)
@@ -158,6 +154,43 @@ async def process_serial_msg(uart, fixed_binary_key, settings):
 
     return
 
+async def process_serial_config_msg(uart, settings):
+    try:
+        sm = uart.readline()
+        if sm:
+            sm = sm.decode('utf-8').strip()
+            print(f'cmd: {sm[:7]}  sm[-7:]: {sm[-7:]}')
+            if sm[:7]=='CNF_REQ':
+                saved_settings = utils.load_json_settings()
+                print('saved_settings: ', saved_settings)
+                str_settings = ujson.dumps(saved_settings)
+                print(len(str_settings), ' bytes : ', str_settings)
+                msg = bytes('CNF_JSN', 'utf-8') + bytes(str_settings, 'utf-8') + bytes('CNF_END\n', 'utf-8')
+                uart.write(msg)
+            elif sm[:7]=='CNF_WRT' and sm[-7:]=='CNF_END':
+                uart.deinit()
+                received_settings = sm[7:-7]
+                print(f'Received settings: {received_settings}')
+                received_settings[utils.CONFIG] = 0
+                utils.save_settings(received_settings)
+                await uasyncio.sleep_ms(200)
+                machine.reset()
+            else:
+                print('Unknown command')
+    except Exception as e:
+        print(e)
+        
+    print('.', end='')
+
+    return
+
+
+async def run_serial_config_server(uart, settings):
+    while True:
+        await uasyncio.sleep_ms(pn.ASYNC_SLEEP_MS)
+        await process_serial_config_msg(uart, settings)
+            #gc_start_time = utils.garbage_collect(gc_start_time)
+
 def run_hybrid_server_sync(uart, fixed_binary_key, settings):
     global gc_start_time
     gc_start_time = utime.ticks_ms()
@@ -215,6 +248,7 @@ def run_hybrid_server_sync(uart, fixed_binary_key, settings):
     print("Waiting for 0.2 sec before reset...")
     utime.sleep_ms(200)
     machine.reset()
+
 async def run_hybrid_server(uart, fixed_binary_key, settings):
     global gc_start_time
     gc_start_time = utime.ticks_ms()
@@ -287,12 +321,20 @@ def main():
 
     fixed_binary_key = coder.fix_len_and_encode_key(settings['key'])
 
-    if 
-    cw.prepare_web()
-    loop = uasyncio.get_event_loop()
-    loop.create_task(run_hybrid_server(uart, fixed_binary_key, settings))
-    if settings['ip']:
-        loop.create_task(uasyncio.start_server(cw.server._handle_request, '0.0.0.0', 80))
+    if settingss[utils.CONFIG]:
+        led_state_setting()
+        loop = uasyncio.get_event_loop()
+        if settings['ip']:
+            cw.prepare_web()
+            loop.create_task(uasyncio.start_server(cw.server._handle_request, '0.0.0.0', 80))
+        loop.create_task(run_serial_config_server(uart, settings))
+    else:
+        loop = uasyncio.get_event_loop()
+        if settings['channel']==1:
+            loop.create_task(run_tcp_server(uart, fixed_binary_key, settings))
+        else:
+            loop.create_task(run_hybrid_server(uart, fixed_binary_key, settings))
+
     loop.run_forever()
 
 if __name__ == '__main__':

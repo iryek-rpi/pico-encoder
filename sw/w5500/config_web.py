@@ -1,4 +1,5 @@
 from machine import Pin
+import machine
 import os
 
 from phew import logging, server
@@ -32,7 +33,10 @@ def configure(request):
     if not ns:
         return render_template(f"{PHEW_TEMPLATE_PATH}/index.html", ns=settings)
     else:
+        ns[utils.CONFIG] = 0
         utils.save_settings(ns)
+        utime.sleep_ms(100)
+        machine.reset()
         return render_template(f"{PHEW_TEMPLATE_PATH}/index.html", ns=ns)
     
 def prepare_web():
