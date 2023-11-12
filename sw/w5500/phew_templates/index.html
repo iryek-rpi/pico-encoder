@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1", charset="utf-8">
-        <title>위너스 암호화 단말 설정 WIFI</title>
+        <title>위너스 암호화 단말 설정</title>
 		<script>
 			window.onload = function() {
 				//alert({{msg}});
@@ -38,17 +38,16 @@
 			</select><br><br>
         	<label for="baud">RS232 속도:</label>
 			<select id="baud" name="baud">
+				<option value="4800">4800</option>
 				<option selected value="9600">9600</option>
 				<option value="19200">19200</option>
 				<option value="38400">38400</option>
-				<option value="57600">57600</option>
-				<option value="115200">115200</option>
 			</select><br>
 			<label for="parity">패리티 비트:</label>
 			<select id="parity" name="parity">
-				<option selected value="no">No</option>
-				<option value="0">짝수</option>
-				<option value="1">홀수</option>
+				<option selected value="N">N</option>
+				<option value="0">0</option>
+				<option value="1">1</option>
 			</select><br>
 			<label for="datasize">데이터 길이:</label>
 			<select id="datasize" name="datasize">
@@ -71,12 +70,11 @@
 			<input type="text" id="subnet" name="subnet"><br><br>
 			<label for="remote_ip">원격 단말 주소:</label>
 			<input type="text" id="remote_ip" name="remote_ip"><br>
-			<label for="remote_port">원격 단말 포트:</label>
 			<input type="text" id="remote_port" name="remote_port"><br>
-			<label for="plc_ip">PLC 주소:</label>
-			<input type="text" id="plc_ip" name="plc_ip"><br>
-			<label for="plc_port">PLC 포트:</label>
-			<input type="text" id="plc_port" name="plc_port"><br><br>
+			<label for="host_ip">호스트 주소:</label>
+			<input type="text" id="host_ip" name="host_ip"><br>
+			<label for="host_port">호스트 포트:</label>
+			<input type="text" id="host_port" name="host_port"><br><br>
 
             <label for="crypto_key">암호키(8자리):</label>
             <input type="text" id="crypto_key" name="crypto_key"><br><br>
