@@ -191,7 +191,109 @@ async def run_serial_config_server(uart, settings):
         await process_serial_config_msg(uart, settings)
             #gc_start_time = utils.garbage_collect(gc_start_time)
 
-def run_hybrid_server_sync(uart, fixed_binary_key, settings):
+def run_tcp_server(fixed_binary_key, settings):
+    #if settings['ip']:
+    #    serv_sock_text, serv_sock_crypto, tcp_poller = pn.init_server_sockets_async(settings, settings[utils.MY_IP], utils.TEXT_PORT, utils.ENC_PORT)
+    #    conn_text, conn_crypto = None, None
+
+    #tcp_polled = None
+    sock_text = pn.init_serv_socket(settings[utils.MY_IP], utils.TEXT_PORT)
+    sock_crypto = pn.init_serv_socket(settings[utils.MY_IP], utils.ENC_PORT)
+
+    while True:
+        text_poller = select.poll()
+        poller.register(sock_text, select.POLLIN)
+        res = poller.poll(50)
+        if res:
+            text_conn, addr = sock_text.accept()
+            text_conn_poller = select.poll()
+        else:
+
+            print('tcp_polled[0][0]: ', tcp_polled[0][0])
+            if serv_sock_text:
+                if tcp_polled[0][0] == serv_sock_text:
+                    print('pc is connecting...')
+                    conn_text, addr, tcp_poller = pn.init_connection_async(serv_sock_text, tcp_poller)
+                elif tcp_polled[0][0] == conn_text:
+                    print('data available from PC...')
+                    b64 = conn_text.recv(128)
+                    if b64:
+                        process_tcp_msg(b64, encrypt_text, settings[utils.CHANNEL], uart, settings['peer_ip'], utils.ENC_PORT, fixed_binary_key)
+                    else:
+                        conn_text = pn.close_server_socket(conn_text, tcp_poller)
+            elif tcp_polled[0][0] == serv_sock_crypto:
+                print('peer is connecting...')
+                conn_crypto, addr, tcp_poller = pn.init_connection_async(serv_sock_crypto, tcp_poller)
+            elif tcp_polled[0][0] == conn_crypto:
+                print('data available from peer...')
+                b64 = conn_crypto.recv(128)
+                print('\n### tcp data received: ', b64, '\n')
+                if b64:
+                    process_tcp_msg(b64, decrypt_crypto, settings[utils.CHANNEL], uart, settings['host_ip'], settings['host_port'], fixed_binary_key)
+                else:
+                    conn_crypto = pn.close_server_socket(conn_crypto, tcp_poller)
+
+    pn.close_sockets(serv_sock_text, serv_sock_crypto, conn_text, conn_crypto)
+    if uart:
+        uart.deinit()
+
+    led_onoff(green, False)
+    print("Waiting for 0.2 sec before reset...")
+    utime.sleep_ms(200)
+    machine.reset()
+
+async def run_hybrid_server_sync(uart, fixed_binary_key, settings):
+    global gc_start_time
+    gc_start_time = utime.ticks_ms()
+
+    if settings['ip']:
+        serv_sock_text, serv_sock_crypto, tcp_poller = pn.init_server_sockets_async(settings, settings[utils.MY_IP], utils.TEXT_PORT, utils.ENC_PORT)
+        conn_text, conn_crypto = None, None
+
+    tcp_polled = None
+    while True:
+        await uasyncio.sleep_ms(pn.ASYNC_SLEEP_MS)
+        if settings['ip']:
+            tcp_polled = tcp_poller.poll(0)
+        if not tcp_polled:
+            #if uart.any():
+            await process_serial_msg(uart, fixed_binary_key, settings)
+            #gc_start_time = utils.garbage_collect(gc_start_time)
+        else:
+            print('tcp_polled[0][0]: ', tcp_polled[0][0])
+            if serv_sock_text:
+                if tcp_polled[0][0] == serv_sock_text:
+                    print('pc is connecting...')
+                    conn_text, addr, tcp_poller = pn.init_connection_async(serv_sock_text, tcp_poller)
+                elif tcp_polled[0][0] == conn_text:
+                    print('data available from PC...')
+                    b64 = conn_text.recv(128)
+                    if b64:
+                        process_tcp_msg(b64, encrypt_text, settings[utils.CHANNEL], uart, settings['peer_ip'], utils.ENC_PORT, fixed_binary_key)
+                    else:
+                        conn_text = pn.close_server_socket(conn_text, tcp_poller)
+            elif tcp_polled[0][0] == serv_sock_crypto:
+                print('peer is connecting...')
+                conn_crypto, addr, tcp_poller = pn.init_connection_async(serv_sock_crypto, tcp_poller)
+            elif tcp_polled[0][0] == conn_crypto:
+                print('data available from peer...')
+                b64 = conn_crypto.recv(128)
+                print('\n### tcp data received: ', b64, '\n')
+                if b64:
+                    process_tcp_msg(b64, decrypt_crypto, settings[utils.CHANNEL], uart, settings['host_ip'], settings['host_port'], fixed_binary_key)
+                else:
+                    conn_crypto = pn.close_server_socket(conn_crypto, tcp_poller)
+
+    pn.close_sockets(serv_sock_text, serv_sock_crypto, conn_text, conn_crypto)
+    if uart:
+        uart.deinit()
+
+    led_onoff(green, False)
+    print("Waiting for 0.2 sec before reset...")
+    utime.sleep_ms(200)
+    machine.reset()
+
+def run_hybrid_server_sync_old(uart, fixed_binary_key, settings):
     global gc_start_time
     gc_start_time = utime.ticks_ms()
 
@@ -329,11 +431,13 @@ def main():
             loop.create_task(uasyncio.start_server(cw.server._handle_request, '0.0.0.0', 80))
         loop.create_task(run_serial_config_server(uart, settings))
     else:
-        loop = uasyncio.get_event_loop()
+        #loop = uasyncio.get_event_loop()
         if settings['channel']==1:
-            loop.create_task(run_tcp_server(uart, fixed_binary_key, settings))
+            #loop.create_task(run_tcp_server(uart, fixed_binary_key, settings))
+            run_tcp_server_sync(uart, fixed_binary_key, settings)
         else:
-            loop.create_task(run_hybrid_server(uart, fixed_binary_key, settings))
+            #loop.create_task(run_hybrid_server(uart, fixed_binary_key, settings))
+            run_hybrid_server_sync(uart, fixed_binary_key, settings)
 
     loop.run_forever()
 

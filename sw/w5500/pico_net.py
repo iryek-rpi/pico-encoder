@@ -50,6 +50,14 @@ def get_poller(polled, poller=None):
     poller.register(polled, uselect.POLLIN)
     return poller
 
+def init_serv_socket(ip, port):
+    sock = socket()
+    sock.bind((ip, int(port)))
+    print('Listening on socket: ', sock, 'port:', port)
+    sock.listen(2)
+    return sock
+
+
 def init_server_socket(ip, port):
     sock = socket()
     sock.bind((ip, int(port)))
