@@ -29,29 +29,29 @@
 			{{render_template("./phew_templates/msg.html")}}
 		</div>
         <form id="settings-form" action="/configure" method="POST" autocomplete="off" autocapitalize="none">
-        	<label for="mode">통신 종류:</label>
-			<select id="mode" name="mode">
-				<option selected value="ETH">이더넷</option>
-				<option value="SER">RS-232C</option>
+        	<label for="mode">통신 채널:</label>
+			<select id="channel" name="channel">
+				<option value="0">시리얼</option>
+				<option value="1">TCP/IP</option>
 			</select><br><br>
-        	<label for="baud">RS232 속도:</label>
-			<select id="baud" name="baud">
+        	<label for="speed">시리얼 속도:</label>
+			<select id="speed" name="speed">
 				<option value="4800">4800</option>
 				<option selected value="9600">9600</option>
 				<option value="19200">19200</option>
 				<option value="38400">38400</option>
 			</select><br>
-			<label for="parity">패리티 비트:</label>
+			<label for="parity">패리티:</label>
 			<select id="parity" name="parity">
 				<option selected value="N">N</option>
 				<option value="0">0</option>
 				<option value="1">1</option>
 			</select><br>
-			<label for="datasize">데이터 길이:</label>
-			<select id="datasize" name="datasize">
-				<option value="7">7 비트</option>
-				<option selected value="8">8 비트</option>
-				<option value="9">9 비트</option>
+			<label for="data">데이터:</label>
+			<select id="data" name="data">
+				<option value="7">7</option>
+				<option selected value="8">8</option>
+				<option value="9">9</option>
 			</select><br>
 			<label for="stop">스톱 비트:</label>
 			<select id="stop" name="stop">
@@ -60,15 +60,13 @@
 			</select><br><br>
 			<label for="ip">IP 주소:</label>
 			<input type="text" id="ip" name="ip"><br>
-			<label for="port">포트:</label>
 			<input type="text" id="port" name="port"><br>
 			<label for="gateway">게이트웨이 주소:</label>
 			<input type="text" id="gateway" name="gateway"><br>
 			<label for="subnet">서브넷 마스크:</label>
 			<input type="text" id="subnet" name="subnet"><br><br>
-			<label for="remote_ip">원격 단말 주소:</label>
-			<input type="text" id="remote_ip" name="remote_ip"><br>
-			<input type="text" id="remote_port" name="remote_port"><br>
+			<label for="peer_ip">상대 단말 주소:</label>
+			<input type="text" id="peer_ip" name="peer_ip"><br>
 			<label for="host_ip">호스트 주소:</label>
 			<input type="text" id="host_ip" name="host_ip"><br>
 			<label for="host_port">호스트 포트:</label>
