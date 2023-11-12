@@ -34,6 +34,10 @@ def led_state_no_ip():
     led_onoff(green, True)
     blink_led(yellow, 2)
 
+def led_state_setting():
+    led_onoff(red, False)
+    blink_led(red, 4)
+
 def blink_led(_led, freq):  # freq = Hz
     global timer_led, timer_yellow, timer_green, timer_red
 

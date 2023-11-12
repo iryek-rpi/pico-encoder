@@ -32,7 +32,7 @@ STOP = 'stop'
 #{"speed": "9600", "parity": "N", "data": "8", "stop": "1", "ip": "192.168.0.5", "subnet": "255.255.255.0", "gateway": "192.168.0.1", "port": "8501", "peer_ip": "192.168.0.6", "peer_port": "8502", "host_ip": "192.168.0.2", "host_port": "8503", "key": "12345678"}
 
 MY_IP = 'ip'
-CRYPTO_PORT = 'crypto_port'
+CONFIG = 'config'
 GATEWAY = 'gateway'
 SUBNET = 'subnet'
 PEER_IP = 'peer_ip'
@@ -47,7 +47,7 @@ KEY = 'key'
 
 DEFAUlT_SETTINGS = {
     MY_IP : '192.168.1.10',
-    CRYPTO_PORT : 8502,
+    CONFIG : 0,
     GATEWAY : '192.168.0.1',
     SUBNET : '255.255.255.0',
     PEER_IP : '192.168.0.5',

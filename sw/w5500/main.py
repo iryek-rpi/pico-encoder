@@ -272,8 +272,6 @@ def main():
     settings = utils.load_json_settings()
     print(settings)
 
-    fixed_binary_key = coder.fix_len_and_encode_key(settings['key'])
-
     uart = pn.init_serial(baud=settings[utils.SPEED], parity=settings[utils.PARITY], bits=settings[utils.DATA], stop=settings[utils.STOP], timeout=SERIAL1_TIMEOUT)
     net_info = pn.init_ip(settings['ip'], settings['subnet'], settings['gateway'])
 
@@ -287,13 +285,15 @@ def main():
         print('No IP assigned')
         led_state_no_ip()
 
+    fixed_binary_key = coder.fix_len_and_encode_key(settings['key'])
+
+    if 
     cw.prepare_web()
     loop = uasyncio.get_event_loop()
     loop.create_task(run_hybrid_server(uart, fixed_binary_key, settings))
     if settings['ip']:
         loop.create_task(uasyncio.start_server(cw.server._handle_request, '0.0.0.0', 80))
     loop.run_forever()
-
 
 if __name__ == '__main__':
     main()
