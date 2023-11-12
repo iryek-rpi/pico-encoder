@@ -204,16 +204,44 @@ def run_tcp_server(fixed_binary_key, settings):
     text_connected = False
     crypto_connected = False
     while True:
-        text_poller = select.poll()
-        text_poller.register(sock_text, select.POLLIN)
-        res = text_poller.poll(50)
-        if res:
-            text_conn, addr = sock_text.accept()
+        if not text_conn:
+            text_poller = select.poll()
+            text_poller.register(sock_text, select.POLLIN)
+            res = text_poller.poll(50)
+            if res:
+                text_conn, addr = sock_text.accept()
+        else:
             text_conn_poller = select.poll()
             res = text_conn_poller.poll(50)
             if res:
-                text_conn.recv(32)
+                b64 = text_conn.recv(32)
+                if b64:
+                    process_tcp_msg(b64, encrypt_text, settings[utils.CHANNEL], uart, settings['peer_ip'], utils.ENC_PORT, fixed_binary_key)
+                else:
+                    text_conn = pn.close_server_socket(text_conn, tcp_poller)
+                
+        if not crypto_conn:
+            crypto_poller = select.poll()
+            crypto_poller.register(sock_crypto, select.POLLIN)
+            res = crypto_poller.poll(50)
+            if res:
+                crypto_conn, addr = sock_crypto.accept()
         else:
+            crypto_conn_poller = select.poll()
+            res = crypto_conn_poller.poll(50)
+            if res:
+                b64 = crypto_conn.recv(32)
+                if b64:
+                    process_tcp_msg(b64, decrypt_crypto, settings[utils.CHANNEL], uart, settings['host_ip'], settings['host_port'], fixed_binary_key)
+                else:
+                    crypto_conn = pn.close_server_socket(conn_crypto, tcp_poller)
+
+        
+        elif text_conn:
+            res = text_conn_poller.poll(50)
+            if res:
+               msg = text_conn.recv(32)
+                
             print('tcp_polled[0][0]: ', tcp_polled[0][0])
             if serv_sock_text:
                 if tcp_polled[0][0] == serv_sock_text:
