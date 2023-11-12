@@ -199,16 +199,21 @@ def run_tcp_server(fixed_binary_key, settings):
     #tcp_polled = None
     sock_text = pn.init_serv_socket(settings[utils.MY_IP], utils.TEXT_PORT)
     sock_crypto = pn.init_serv_socket(settings[utils.MY_IP], utils.ENC_PORT)
-
+    text_conn = None
+    crypto_conn = None
+    text_connected = False
+    crypto_connected = False
     while True:
         text_poller = select.poll()
-        poller.register(sock_text, select.POLLIN)
-        res = poller.poll(50)
+        text_poller.register(sock_text, select.POLLIN)
+        res = text_poller.poll(50)
         if res:
             text_conn, addr = sock_text.accept()
             text_conn_poller = select.poll()
+            res = text_conn_poller.poll(50)
+            if res:
+                text_conn.recv(32)
         else:
-
             print('tcp_polled[0][0]: ', tcp_polled[0][0])
             if serv_sock_text:
                 if tcp_polled[0][0] == serv_sock_text:
