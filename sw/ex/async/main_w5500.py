@@ -28,30 +28,32 @@ def w5x00_init(ip, subnet, gateway):
 
 async def handle_crypto(reader, writer):
     while True:
+        print('handling crypto..')        
         data = await reader.read(100)
         message = data.decode()
+        print(f'crypto data received:{message}')
         addr = writer.get_extra_info('peername')
+        print(f"Received {message} from {addr}")
 
-        print(f"Received {message!r} from {addr!r}")
-
-        print(f"Send: {message!r}")
+        print(f"Send: {message}")
         writer.write(data)
         await writer.drain()
 
     print("Close the connection")
     writer.close()
-    await writer.wait_closedro)
+    #await writer.wait_closedro)
 
 
 async def handle_text(reader, writer):
     while True:
+        print('handling text..')
         data = await reader.read(100)
         message = data.decode()
+        print(f'text data received:{message}')
         addr = writer.get_extra_info('peername')
+        print(f"Received {message} from {addr}")
 
-        print(f"Received {message!r} from {addr!r}")
-
-        print(f"Send: {message!r}")
+        print(f"Send: {message}")
         writer.write(data)
         await writer.drain()
 
@@ -60,10 +62,14 @@ async def handle_text(reader, writer):
     await writer.wait_closed()
 
 async def start_serving(handler, port):
-    server = await asyncio.start_server(handler, '127.0.0.1', port)
-    print(f'Serving on {", ".join(str(sock.getsockname()) for sock in server.sockets)}:{port}')
+
+    server = await asyncio.start_server(handler, '0.0.0.0', port)
+    print(f'server:{server}')
     async with server:
+        print('serv_forever()')
         await server.serve_forever()
+        print('serv_forever()2')
+    print('out of context')
 
 def main():
     net_info = w5x00_init('192.168.2.8', '255.255.255.0', '192.168.2.1')
@@ -74,8 +80,12 @@ def main():
     print('IP assigned: ', net_info[0])
 
     loop = asyncio.get_event_loop()
-    loop.create_task(start_serving(handle_text, 2004))
-    loop.create_task(start_serving(handle_crypto, 8513))
+    #loop.create_task(start_serving(handle_text, 2004))
+    #loop.create_task(start_serving(handle_crypto, 8513))
+    loop.create_task(asyncio.start_server(handle_text, '0.0.0.0', 2004))
+    loop.create_task(asyncio.start_server(handle_crypto, '0.0.0.0', 8513))
+
+    print('run_forever')
     loop.run_forever()
 
 if __name__ == '__main__':
