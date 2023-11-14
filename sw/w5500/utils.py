@@ -63,22 +63,30 @@ def init_settings():
     f.close()
 
 def load_settings():
+    '''returns a dictionary of settings'''
     try:
         f = open(SETTING_FILE, 'r', encoding='utf-8')
     except OSError:
         init_settings()
         f = open(SETTING_FILE, 'r', encoding='utf-8')
 
-    json_settings = f.read()
+    settings = json.load(f)
     f.close()
-    return json.loads(json_settings)
+    return settings # return a dictionary
 
-
-def save_settings(settings):
+def save_str_settings(str_settings):
     #save the settings to the file
     f = open(SETTING_FILE, 'w', encoding='utf-8')
-    f.write(json.dumps(settings))
-    #f.write(settings)
+    f.write(str_settings) # obj -> json formatted string
+    f.close()
+
+def save_settings(settings):
+    '''
+    settings is a dictionary
+    '''
+    #save the settings to the file
+    f = open(SETTING_FILE, 'w', encoding='utf-8')
+    json.dump(settings, f, indent=4)
     f.close()
 
 def validate_settings(settings):

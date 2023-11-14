@@ -22,10 +22,10 @@ async def process_serial_msg(uart, fixed_binary_key, settings):
             if sm[:7]=='CNF_REQ':
                 saved_settings = utils.load_settings()
                 print('saved_settings: ', saved_settings)
-                #str_settings = json.dumps(saved_settings)
-                #print(len(str_settings), ' bytes : ', str_settings)
-                #msg = bytes('CNF_JSN', 'utf-8') + bytes(str_settings, 'utf-8') + bytes('CNF_END\n', 'utf-8')
-                #uart.write(msg)
+                str_settings = json.dumps(saved_settings)
+                print(len(str_settings), ' bytes : ', str_settings)
+                msg = bytes('CNF_JSN', 'utf-8') + bytes(str_settings, 'utf-8') + bytes('CNF_END\n', 'utf-8')
+                uart.write(msg)
             elif sm[:7]=='CNF_WRT' and sm[-7:]=='CNF_END':
                 uart.deinit()
                 received_settings = sm[7:-7]
