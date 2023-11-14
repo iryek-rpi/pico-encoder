@@ -3,18 +3,7 @@ store password to database
 https://www.vaadata.com/blog/how-to-securely-store-passwords-in-database/
 '''
 import os
-import ujson
-
-def garbage_collect(start_time):
-    return 
-    time_now = utime.ticks_ms()
-    runtime = utime.ticks_diff(time_now, start_time)
-    print('===== gc.mem_free(): ', gc.mem_free(), ' at ', runtime)
-    if runtime > 500_000:
-        gc.collect()
-        print('+++++ gc.mem_free() after gc.collect(): ', gc.mem_free())
-        return time_now
-    return start_time
+import ujson as json
 
 CH_TCP = 1      # channel to host
 CH_SERIAL = 0
@@ -67,15 +56,29 @@ def init_settings():
     #create a new file called 'settings.json' truncating the old one if it exists
     #and write the default settings to it
     f = open(SETTING_FILE, 'w', encoding='utf-8')
-    f.write(ujson.dumps(DEFAUlT_SETTINGS))
+    str_settings = json.dumps(DEFAUlT_SETTINGS)
+    print(f'str_settings: {str_settings}')
+    f.write(str_settings)
+    #f.write(json.dumps(DEFAUlT_SETTINGS))
     f.close()
+
+def load_settings():
+    try:
+        f = open(SETTING_FILE, 'r', encoding='utf-8')
+    except OSError:
+        init_settings()
+        f = open(SETTING_FILE, 'r', encoding='utf-8')
+
+    json_settings = f.read()
+    f.close()
+    return json.loads(json_settings)
 
 
 def save_settings(settings):
     #save the settings to the file
     f = open(SETTING_FILE, 'w', encoding='utf-8')
-    #f.write(ujson.dumps(settings))
-    f.write(settings)
+    f.write(json.dumps(settings))
+    #f.write(settings)
     f.close()
 
 def validate_settings(settings):
@@ -146,34 +149,19 @@ def validate_port_string(sp):
 def update_setting(key, value):
     #read the settings file
     f = open(SETTING_FILE, 'r', encoding='utf-8')
-    settings = ujson.loads(f.read())
+    settings = json.loads(f.read())
     f.close()
     #update the setting
     settings[key] = value
     #write the settings file
     f = open(SETTING_FILE, 'w', encoding='utf-8')
-    f.write(ujson.dumps(settings))
+    f.write(json.dumps(settings))
     f.close()
 
 # write a function that returns a single setting
 def get_setting(key):
     settings = load_settings()
     return settings[key]
-
-def load_settings():
-    try:
-        f = open(SETTING_FILE, 'r', encoding='utf-8')
-    except OSError:
-        init_settings()
-        f = open(SETTING_FILE, 'r', encoding='utf-8')
-
-    json_settings = f.read()
-    f.close()
-    return json_settings
-
-def load_json_settings():
-    _settings = load_settings()
-    return ujson.loads(_settings)
 
 def file_exists(filename):
     try:
@@ -186,3 +174,14 @@ def folder_exists(foldername):
         return (os.stat(foldername)[0] & 0x4000) != 0
     except OSError:
         return False    
+
+def garbage_collect(start_time):
+    return 
+    time_now = utime.ticks_ms()
+    runtime = utime.ticks_diff(time_now, start_time)
+    print('===== gc.mem_free(): ', gc.mem_free(), ' at ', runtime)
+    if runtime > 500_000:
+        gc.collect()
+        print('+++++ gc.mem_free() after gc.collect(): ', gc.mem_free())
+        return time_now
+    return start_time

@@ -10,7 +10,7 @@ import pico_net as pn
 PHEW_TEMPLATE_PATH = "phew_templates"
 
 def index(request):
-    current_settings = utils.load_json_settings()
+    current_settings = utils.load_settings()
 
     print(f"Previous settings in ap_index: {current_settings}")
     print(f"prev_settings['parity']: {current_settings['parity']}")

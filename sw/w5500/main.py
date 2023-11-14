@@ -16,7 +16,6 @@ from led import *
 import utils
 import pico_net as pn
 
-SERIAL1_TIMEOUT = 50 # ms
 
 print('Starting main script')
 led_init()
@@ -26,7 +25,7 @@ gc_start_time = utime.ticks_ms()
 def btn_callback(btn):
     print('Button pressed')
     led_state_setting()
-    settings = utils.load_json_settings()
+    settings = utils.load_settings()
     settings[utils.CONFIG] = 0 if settings[utils.CONFIG]==1 else 0
     utils.save_settings(settings)
     utime.sleep_ms(500)
@@ -79,7 +78,7 @@ def process_serial_msg_sync(uart, fixed_binary_key, settings):
             sm = sm.decode('utf-8').strip()
             print(f'cmd: {sm[:7]}  sm[-7:]: {sm[-7:]}')
             if sm[:7]=='CNF_REQ':
-                saved_settings = utils.load_json_settings()
+                saved_settings = utils.load_settings()
                 print('saved_settings: ', saved_settings)
                 str_settings = ujson.dumps(saved_settings)
                 print(len(str_settings), ' bytes : ', str_settings)
@@ -120,7 +119,7 @@ async def process_serial_msg(uart, fixed_binary_key, settings):
             sm = sm.decode('utf-8').strip()
             print(f'cmd: {sm[:7]}  sm[-7:]: {sm[-7:]}')
             if sm[:7]=='CNF_REQ':
-                saved_settings = utils.load_json_settings()
+                saved_settings = utils.load_settings()
                 print('saved_settings: ', saved_settings)
                 str_settings = ujson.dumps(saved_settings)
                 print(len(str_settings), ' bytes : ', str_settings)
@@ -161,7 +160,7 @@ async def process_serial_config_msg(uart, settings):
             sm = sm.decode('utf-8').strip()
             print(f'cmd: {sm[:7]}  sm[-7:]: {sm[-7:]}')
             if sm[:7]=='CNF_REQ':
-                saved_settings = utils.load_json_settings()
+                saved_settings = utils.load_settings()
                 print('saved_settings: ', saved_settings)
                 str_settings = ujson.dumps(saved_settings)
                 print(len(str_settings), ' bytes : ', str_settings)
@@ -189,18 +188,6 @@ async def run_serial_config_server(uart, settings):
         await uasyncio.sleep_ms(pn.ASYNC_SLEEP_MS)
         await process_serial_config_msg(uart, settings)
             #gc_start_time = utils.garbage_collect(gc_start_time)
-
-            elif tcp_polled[0][0] == serv_sock_crypto:
-                print('peer is connecting...')
-                conn_crypto, addr, tcp_poller = pn.init_connection_async(serv_sock_crypto, tcp_poller)
-            elif tcp_polled[0][0] == conn_crypto:
-                print('data available from peer...')
-                b64 = conn_crypto.recv(128)
-                print('\n### tcp data received: ', b64, '\n')
-                if b64:
-                    process_tcp_msg(b64, decrypt_crypto, settings[utils.CHANNEL], uart, settings['host_ip'], settings['host_port'], fixed_binary_key)
-                else:
-                    conn_crypto = pn.close_server_socket(conn_crypto, tcp_poller)
 
     pn.close_sockets(serv_sock_text, serv_sock_crypto, conn_text, conn_crypto)
     if uart:
@@ -237,19 +224,6 @@ def run_hybrid_server_sync(uart, fixed_binary_key, settings):
     print("Waiting for 0.2 sec before reset...")
     utime.sleep_ms(200)
     machine.reset()
-
-
-            elif tcp_polled[0][0] == serv_sock_crypto:
-                print('peer is connecting...')
-                conn_crypto, addr, tcp_poller = pn.init_connection_async(serv_sock_crypto, tcp_poller)
-            elif tcp_polled[0][0] == conn_crypto:
-                print('data available from peer...')
-                b64 = conn_crypto.recv(128)
-                print('\n### tcp data received: ', b64, '\n')
-                if b64:
-                    process_tcp_msg(b64, decrypt_crypto, settings[utils.CHANNEL], uart, settings['host_ip'], settings['host_port'], fixed_binary_key)
-                else:
-                    conn_crypto = pn.close_server_socket(conn_crypto, tcp_poller)
 
     pn.close_sockets(serv_sock_text, serv_sock_crypto, conn_text, conn_crypto)
     if uart:
@@ -423,25 +397,14 @@ async def run_hybrid_server(uart, fixed_binary_key, settings):
 def main():
     led_start()
     utime.sleep_ms(1000)
-    settings = utils.load_json_settings()
+    settings = utils.load_settings()
     print(settings)
 
-    uart = pn.init_serial(baud=settings[utils.SPEED], parity=settings[utils.PARITY], bits=settings[utils.DATA], stop=settings[utils.STOP], timeout=SERIAL1_TIMEOUT)
-    net_info = pn.init_ip(settings['ip'], settings['subnet'], settings['gateway'])
-
-    if net_info and net_info[0]:
-        print('IP assigned: ', net_info[0])
-        led_state_good()
-        settings['ip'], settings['subnet'], settings['gateway'] = net_info[0], net_info[1], net_info[2]
-        utils.save_settings(ujson.dumps(settings))
-    else:
-        settings['ip'] = None
-        print('No IP assigned')
-        led_state_no_ip()
+    uart, settings = pn.init_connections(settings)
 
     fixed_binary_key = coder.fix_len_and_encode_key(settings['key'])
 
-    if settingss[utils.CONFIG]:
+    if settings[utils.CONFIG]:
         led_state_setting()
         loop = uasyncio.get_event_loop()
         if settings['ip']:
