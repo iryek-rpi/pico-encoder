@@ -55,12 +55,7 @@ SETTING_FILE = 'settings.json'
 def init_settings():
     #create a new file called 'settings.json' truncating the old one if it exists
     #and write the default settings to it
-    f = open(SETTING_FILE, 'w', encoding='utf-8')
-    str_settings = json.dumps(DEFAUlT_SETTINGS)
-    print(f'str_settings: {str_settings}')
-    f.write(str_settings)
-    #f.write(json.dumps(DEFAUlT_SETTINGS))
-    f.close()
+    save_settings(DEFAUlT_SETTINGS)
 
 def load_settings():
     '''returns a dictionary of settings'''

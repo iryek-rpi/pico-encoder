@@ -12,15 +12,12 @@ import utils
 
 SERIAL1_TIMEOUT = 50 # ms
 ASYNC_SLEEP_MS = 30
+SERIAL_BUF = 1024
 
 def init_serial(baud, parity, bits, stop, timeout):
     uart0 = UART(0, tx=Pin(0), rx=Pin(1))
-    baud = int(baud)
-    parity = None if parity=='N' else parity
-    bits = int(bits)
-    stop = int(stop)
-    uart0.init(baudrate=baud, bits=bits, parity=parity, stop=stop, timeout=timeout)
-    #uart0.init(baudrate=9600, bits=8, parity=None, stop=1, timeout=50)
+    parity = None if parity=='N' else int(parity)
+    uart0.init(int(baud), int(bits), parity, stop=int(stop), timeout=timeout, txbuff=SERIAL_BUF, rxbuff=SERIAL_BUF)
     return uart0
 
 def w5x00_init(net_config):

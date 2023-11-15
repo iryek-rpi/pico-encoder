@@ -13,6 +13,8 @@ import ujson as json
 import utils
 import net_utils as nu
 
+settings = None
+
 async def process_serial_msg(uart, fixed_binary_key, settings):
     try:
         sm = uart.readline()
@@ -25,13 +27,14 @@ async def process_serial_msg(uart, fixed_binary_key, settings):
                 str_settings = json.dumps(saved_settings)
                 print(len(str_settings), ' bytes : ', str_settings)
                 msg = bytes('CNF_JSN', 'utf-8') + bytes(str_settings, 'utf-8') + bytes('CNF_END\n', 'utf-8')
+                asyncio.sleep_ms(nu.ASYNC_SLEEP_MS)
                 uart.write(msg)
             elif sm[:7]=='CNF_WRT' and sm[-7:]=='CNF_END':
                 uart.deinit()
                 received_settings = sm[7:-7]
                 print(f'Received settings: {received_settings}')
                 utils.save_settings(received_settings)
-                time.sleep_ms(1000)
+                asyncio.sleep_ms(1000)
                 machine.reset()
             elif sm[:7]=='TXT_WRT' and sm[-7:]=='TXT_END':
                 received_msg = f'{sm[7:-7]}'
@@ -112,9 +115,10 @@ async def handle_serial(uart):
     await reader.wait_closed()
 
 def main():
+    global settings
+
     settings = utils.load_settings()
     uart, settings = nu.init_connections(settings)
-
     print('IP assigned: ', settings[utils.MY_IP])
 
     loop = asyncio.get_event_loop()
