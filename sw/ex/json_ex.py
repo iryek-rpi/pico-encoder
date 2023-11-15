@@ -32,13 +32,13 @@ def save_settings(settings):
     '''
     #save the settings to the file
     f = open(SETTING_FILE, 'w', encoding='utf-8')
-    json.dump(settings, f, indent=4)
+    json.dump(settings, f, indent=4) # obj -> json string -> file
     f.close()
 
 def save_str_settings(str_settings):
     #save the settings to the file
-    json_settings = json.loads(str_settings)
-    save_settings(json_settings)
+    settings = json.loads(str_settings)
+    save_settings(settings)
 
 def main():
     uart = init_serial()
