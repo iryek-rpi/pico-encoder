@@ -2,7 +2,7 @@
 import flet
 from flet import UserControl, Page, Column, Row, Container, Text, padding, alignment
 from flet import IconButton, GridView, transform, animation
-from flet import LinearGradient
+from flet import LinearGradient, transform
 
 class Expense(UserControl):
 
@@ -13,7 +13,13 @@ class Expense(UserControl):
         e.control.update()
 
     def change_icon(e):
-        pass
+        if e.control.selected != True:
+            e.control.selected = True
+            e.control.icon_color = "white"
+        else:
+            e.control.selected = False
+            e.control.icon_color = "white54"
+        e.control.update()
 
     def icon(self, name, color, selected):
         return IconButton(icon=name, icon_color=color, icon_size=18, selected=selected,on_click=lambda e:self.change_icon(e))
@@ -31,7 +37,8 @@ class Expense(UserControl):
                                   controls=[self.notification, self.hide, self.chat])
 
         self.innder_green_container = Container(width=self.green_container.width, height=self.green_container.height, 
-                            content=Row( spacing=0, controls=[Column(expand=4, controls(padding=20, expand=True, content=
+                            content=Row( spacing=0, 
+                                        controls=[Column(expand=4, controls=[(padding=20, expand=True, content=
                                                                                         Row(controls=[Column(controls=[
                                                                                             Text("Welcome Back", size=10, color="white70", ),
                                                                                             Text("Line Indent", size=18, weight="bold", ),
@@ -39,17 +46,67 @@ class Expense(UserControl):
                                                                                             Text("Total Current Balance", size=10, color="white70", ),
                                                                                             Text("$11,764.28", size=22, weight="bold", ),])]),)],),
                                         Column(expand=1, controls=[Container(padding=padding.only(right=10), expand=True, 
-                                                content=Row(alignment=alignment.center, controls=[
-                                                   Column(alignment=alignment.center, horizontal_alignment=alignment.center,
-                                                          controls=[Column(alignment=alignment.center, horizontal_alignment=alignment.start,
-                                                                           controls=[Container(width=40, height=150, bgcolor="white10", border_radius=14, content=self.icon_column,)],)],)],),),],),],),)
-        self.grid_transfers = GridView(expand=True, max_extent=150, runs_count=10, spacing=12, run_spacing=5, horizontal=True)
+                                                content=Row(alignment=alignment.center, 
+                                                            controls=[
+                                                                Column(alignment=alignment.center, horizontal_alignment=alignment.center,
+                                                                    controls=[
+                                                                        Column(alignment=alignment.center, horizontal_alignment=alignment.center,
+                                                                           controls=[
+                                                                               Column(alignment="center", horizontal_alignment=alignment.center,
+                                                                                      controls = [
+                                                                                          Column(alignment=alignment.center, horizontal_alignment=alignment.start,
+                                                                                                 controls=[Container(width=40, height=150, bgcolor="white10", border_radius=14, content=self, icon_column, )],)],)],),),],),],),)
+        self.grid_transfers = GridView(expand=True, max_extent=150, runs_count=0, spacing=12, run_spacing=5, horizontal=True)
         self.grid_payments = GridView(expand=True, max_extent=150, runs_count=0, spacing=12, run_spacing=5)
 
-        self.main_content_area = Container(width=self.main.width, height=self.main.height*0.50, )
+        self.main_content_area = Container(width=self.main.width, height=self.main.height*0.50, 
+                                           padding=padding.only(top=10, left=10, right=10),
+                                           content=Column(spacing=20, controls=[
+                                               Row(alignment="spaceBetween", vertical_alignment="end",
+                                                    controls=[ 
+                                                        Container(content=Text("Recent Transfers", size=14, weight="bold",)),
+                                                        Container(content=Text("View All", size=10, weight="w400", color="white54",)),
+                                                    ],),
+                                                    Container(height=50, content=self.grid_transfers),
+                                                    Row(
+                                                        alignment="spaceBetween", vertical_alignment="end",
+                                                        controls=[ 
+                                                            Container(content=Text("Pending Payments", size=14, weight="bold",)),
+                                                            Container(content=Text("View All", size=10, weight="w400", color="white54",)),
+                                                        ],
+                                                    ),
+                                                    self.grid_payments,
+                                                    ],),
+                                           )
 
+        info_list = ["PH", "SD", "WQ", "KG", "TY", "SB", "LP", "LK"]
+        for i in info_list:
+            _ = Container(width=100, height=100, bgcolor="white10", border_radius=15, alignment=alignment.center, content=Text(f"{i}", weight="bold"),)
+            self.grid_transfers.controls.append(_)
 
+        payment_list = [
+            ["Utilities", "$523.23"],
+            ["Phone Bill", "$102.32"],
+            ["Internet", "$102.32"],
+            ["Rent", "$102.32"],
+            ["Car Payment", "$102.32"],
+            ["Car Insurance", "$102.32"],
+        ]
+        for i in payment_list:
+            _ = Container(width=100, height=100, bgcolor="white10", border_radius=15, alignment=alignment.center, content=Text(f"{i}", weight="bold"),)
+            self.grid_payments.controls.append(_)
+            for x in i:
+                _.content = Column(alignment="center", horizontal_alignment="center", 
+                                   controls=[
+                                       Text(f"{i[0]}", size=11, color="whight54"),
+                                       Text(f"{i[1]}", size=16, weight="bold"),
+                                       Text("Pay Now?", color="white60", size=12, text_align='start', weight="w600", offset=transform.Offset(0,1),),
+                                       ],)
+
+        self.green_container.content = self.inner_green_container
         self.main_col.controls.append(self.green_container)
+        self.main_col.controls.append(self.main_content_area)
+
         self.main.content = self.main_col
 
         return self.main
