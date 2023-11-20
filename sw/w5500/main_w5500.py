@@ -10,12 +10,13 @@ import utime as time
 import uasyncio as asyncio
 import ujson as json
 
+import config_web as cw
 import utils
 import net_utils as nu
 
 settings = None
 
-async def process_serial_msg(uart, fixed_binary_key, settings):
+async def process_serial_msg(uart, channel, fixed_binary_key, settings):
     try:
         sm = uart.readline()
         if sm:
@@ -36,7 +37,7 @@ async def process_serial_msg(uart, fixed_binary_key, settings):
                 utils.save_settings(received_settings)
                 asyncio.sleep_ms(1000)
                 machine.reset()
-            elif sm[:7]=='TXT_WRT' and sm[-7:]=='TXT_END':
+            elif channel==utils.CH_SERIAL and sm[:7]=='TXT_WRT' and sm[-7:]=='TXT_END':
                 received_msg = f'{sm[7:-7]}'
                 received_msg = bytes(received_msg.strip(), 'utf-8')
                 print(f'TXT_WRT Received msg: {received_msg}')
@@ -120,11 +121,15 @@ def main():
     settings = utils.load_settings()
     uart, settings = nu.init_connections(settings)
     print('IP assigned: ', settings[utils.MY_IP])
+    channel = settings[utils.CHANNEL]
 
     loop = asyncio.get_event_loop()
-    loop.create_task(asyncio.start_server(handle_tcp_text, '0.0.0.0', 2004))
+    if channel == utils.CH_TCP:
+        loop.create_task(asyncio.start_server(handle_tcp_text, '0.0.0.0', 2004))
     loop.create_task(asyncio.start_server(handle_crypto, '0.0.0.0', 8513))
-    loop.create_task(process_serial_msg(uart, None, settings))
+    loop.create_task(process_serial_msg(uart, channel, None, settings))
+    cw.prepare_web()
+    loop.create_task(asyncio.start_server(cw.server._handle_request, '0.0.0.0', 80))
 
     print('run_forever')
     loop.run_forever()
