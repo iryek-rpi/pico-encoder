@@ -4,12 +4,7 @@ https://www.vaadata.com/blog/how-to-securely-store-passwords-in-database/
 '''
 import os
 import ujson as json
-
-CH_TCP = 1      # channel to host
-CH_SERIAL = 0
-
-TEXT_PORT = 8501
-ENC_PORT = 8502
+import constants as c
 
 MODE = 'mode'
 
@@ -46,7 +41,7 @@ DEFAUlT_SETTINGS = {
     PARITY : 'N',   #N, E, O
     DATA : 8,
     STOP : 1,
-    CHANNEL : CH_TCP, # 0=tcp, 1=serial
+    CHANNEL : c.CH_TCP, # 1=tcp, 0=serial
     KEY:'12345678'
 }
 
@@ -81,7 +76,7 @@ def save_settings(settings):
     '''
     #save the settings to the file
     f = open(SETTING_FILE, 'w', encoding='utf-8')
-    json.dump(settings, f, indent=4)
+    json.dump(settings, f)
     f.close()
 
 def validate_settings(settings):

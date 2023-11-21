@@ -8,6 +8,7 @@ import gc
 import ujson
 import uasyncio
 
+import constants as c
 import config_web as cw
 
 import mpyaes as aes
@@ -62,7 +63,7 @@ def process_tcp_msg(b64, handler, channel, uart, dest_ip, dest_port, fixed_binar
     if not processed_msg:
         print('TCP processed result Empty')
         processed_msg = bytes('***BAD DATA***', 'utf-8')
-    if channel == utils.CH_TCP:
+    if channel == c.CH_TCP:
         print('sending processed msg: ', processed_msg, ' to ', dest_ip, ':', dest_port)
         pn.send_data(processed_msg, dest_ip, dest_port)
         #await pn.send_data(processed_msg, dest_ip, dest_port)

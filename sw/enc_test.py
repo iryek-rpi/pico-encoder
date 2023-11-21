@@ -31,7 +31,7 @@ def main(page: ft.Page):
     #page.window_top = 200
     #page.window_left = 400
     page.window_width = ENC_COLUMN_WIDTH
-    page.window_height = 700
+    page.window_height = 720
 
     host_ip.value = find_host_ip()
     controls = main_controls(page)

@@ -8,6 +8,7 @@ import uselect
 import uasyncio
 import network
 from led import *
+import constants as c
 import utils
 
 SERIAL1_TIMEOUT = 50 # ms
@@ -108,7 +109,7 @@ def init_server_sockets_async(settings, my_ip, text_port, crypto_port):
     serv_sock_crypto, poller = init_server_socket_async(my_ip, crypto_port, poller)
 
     serv_sock_text = None
-    if settings[utils.CHANNEL] == utils.CH_TCP:
+    if settings[utils.CHANNEL] == c.CH_TCP:
         serv_sock_text, poller = init_server_socket_async(my_ip, text_port, poller)
     print('serv_sock_text: ', serv_sock_text, 'serv_sock_crypto: ', serv_sock_crypto)
     print('poller: ', poller)
@@ -120,7 +121,7 @@ def init_server_sockets(settings, my_ip, text_port, crypto_port):
 
     serv_sock_text = None
     serv_sock_text_poller = None
-    if settings[utils.CHANNEL] == utils.CH_TCP:
+    if settings[utils.CHANNEL] == c.CH_TCP:
         serv_sock_text, serv_sock_text_poller = init_server_socket(my_ip, text_port)
     print('serv_sock_text: ', serv_sock_text, 'serv_sock_crypto: ', serv_sock_crypto)
     print('crypto_poller: ', serv_sock_crypto_poller)

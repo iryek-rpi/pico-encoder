@@ -10,6 +10,7 @@ import utime as time
 import uasyncio as asyncio
 import ujson as json
 
+import constants as c
 import config_web as cw
 import utils
 import net_utils as nu
@@ -37,7 +38,7 @@ async def process_serial_msg(uart, channel, fixed_binary_key, settings):
                 utils.save_settings(received_settings)
                 asyncio.sleep_ms(1000)
                 machine.reset()
-            elif channel==utils.CH_SERIAL and sm[:7]=='TXT_WRT' and sm[-7:]=='TXT_END':
+            elif channel==c.CH_SERIAL and sm[:7]=='TXT_WRT' and sm[-7:]=='TXT_END':
                 received_msg = f'{sm[7:-7]}'
                 received_msg = bytes(received_msg.strip(), 'utf-8')
                 print(f'TXT_WRT Received msg: {received_msg}')
@@ -46,7 +47,7 @@ async def process_serial_msg(uart, channel, fixed_binary_key, settings):
                     print('Encryption result Empty')
                     encoded_msg = bytes('***BAD DATA***', 'utf-8')
                 await asyncio.sleep_ms(nu.ASYNC_SLEEP_MS)
-                #pn.send_data_sync(encoded_msg, settings['peer_ip'], utils.ENC_PORT)
+                #pn.send_data_sync(encoded_msg, settings['peer_ip'], c.ENC_PORT)
                 await asyncio.sleep_ms(nu.ASYNC_SLEEP_MS)
                 return
             else:
@@ -119,14 +120,19 @@ def main():
     global settings
 
     settings = utils.load_settings()
+    print(settings)
+    settings['ip'] = '192.168.2.10'
+    settings['gateway'] = '192.168.2.1'
     uart, settings = nu.init_connections(settings)
     print('IP assigned: ', settings[utils.MY_IP])
     channel = settings[utils.CHANNEL]
+    if channel == c.CH_TCP: print('Channel: TCP')
+    else: print('channel: SERIAL')
 
     loop = asyncio.get_event_loop()
-    if channel == utils.CH_TCP:
-        loop.create_task(asyncio.start_server(handle_tcp_text, '0.0.0.0', 2004))
-    loop.create_task(asyncio.start_server(handle_crypto, '0.0.0.0', 8513))
+    if channel == c.CH_TCP:
+        loop.create_task(asyncio.start_server(handle_tcp_text, '0.0.0.0', c.TEXT_PORT))
+    loop.create_task(asyncio.start_server(handle_crypto, '0.0.0.0', c.ENC_PORT))
     loop.create_task(process_serial_msg(uart, channel, None, settings))
     cw.prepare_web()
     loop.create_task(asyncio.start_server(cw.server._handle_request, '0.0.0.0', 80))

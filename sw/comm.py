@@ -9,6 +9,8 @@ import fcntl
 
 import select
 import asyncio
+
+from w5500 import constants as c
 import controls
 
 # config a logger using default logger
@@ -155,9 +157,10 @@ def tcp_send_plaintext(settings, text):
         msg = bytes(f"TXT_WRT{text}TXT_END\n", encoding='utf-8')
         logging.info(f'msg: {msg}')
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect((settings['device_ip'], 8501))
+        print(f'ip: {settings['device_ip']} c.TEXT_PORT: {c.TEXT_PORT}')
+        sock.connect((settings['device_ip'], c.TEXT_PORT))
         written = sock.sendall(msg)
-        print(f'{written} bytes 송신: {msg} to {settings["device_ip"]}:8501')
+        print(f'{written} bytes 송신: {msg} to {settings["device_ip"]}:{c.TEXT_PORT}')
         #logging.info(f'{written} bytes 송신: {msg} ')
     except serial.serialutil.SerialException as e:
         #self.add_status_msg(f"시리얼 연결 오류: COM 포트({self.comm_port})를 확인하세요.")
