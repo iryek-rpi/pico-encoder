@@ -73,6 +73,9 @@ class ReceiveTCPTextThread(Thread):
         except Exception as e:
             print('Exception: ', e)
 
+def get_serial_settings(settings):
+    return settings['serial_port'], settings['serial_speed'], settings['parity'], settings['data_size'], settings['stopbit']
+
 def init_serial(port, baud, parity, data, stopbits):
     global global_serial_device
     global global_serial_sending
@@ -128,7 +131,7 @@ def start_server(settings):
     tcp_thread = ReceiveTCPTextThread(settings['host_ip'], settings['host_port'])
     tcp_thread.start()
 
-    serial_thread = ReceiveSerialTextThread(settings['serial_port'], settings['serial_speed'], settings['parity'], settings['data_size'], settings['stopbit'])
+    serial_thread = ReceiveSerialTextThread(get_serial_settings(settings))
     serial_thread.start()
 
 def serial_send_plaintext(settings, text):
@@ -138,7 +141,7 @@ def serial_send_plaintext(settings, text):
     logging.info(f'sending plaintext: {text}')
     try:
         if not global_serial_device:
-            global_serial_device = init_serial(settings)
+            global_serial_device = init_serial(get_serial_settings(settings))
         msg = bytes(f"TXT_WRT{text}TXT_END\n", encoding='utf-8')
         logging.info(f'msg: {msg}')
         global_serial_sending = True

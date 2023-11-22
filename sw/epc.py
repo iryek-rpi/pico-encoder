@@ -13,7 +13,7 @@ import device_options as do
 from crypto_ex import *
 
 TEXT_PORT = 8501
-ENC_PORT = 8502
+CRYPTO_PORT = 8502
 
 global_serial_device = None
 global_serial_sending = False

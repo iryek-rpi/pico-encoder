@@ -101,7 +101,7 @@ def process_serial_msg_sync(uart, fixed_binary_key, settings):
                     print('Encryption result Empty')
                     encoded_msg = bytes('***BAD DATA***', 'utf-8')
                 #await uasyncio.sleep_ms(pn.ASYNC_SLEEP_MS)
-                pn.send_data_sync(encoded_msg, settings['peer_ip'], utils.ENC_PORT)
+                pn.send_data_sync(encoded_msg, settings['peer_ip'], utils.CRYPTO_PORT)
                 #await uasyncio.sleep_ms(pn.ASYNC_SLEEP_MS)
                 return
             else:
@@ -142,7 +142,7 @@ async def process_serial_msg(uart, fixed_binary_key, settings):
                     print('Encryption result Empty')
                     encoded_msg = bytes('***BAD DATA***', 'utf-8')
                 await uasyncio.sleep_ms(pn.ASYNC_SLEEP_MS)
-                pn.send_data_sync(encoded_msg, settings['peer_ip'], utils.ENC_PORT)
+                pn.send_data_sync(encoded_msg, settings['peer_ip'], utils.CRYPTO_PORT)
                 await uasyncio.sleep_ms(pn.ASYNC_SLEEP_MS)
                 return
             else:
@@ -200,7 +200,7 @@ async def run_serial_config_server(uart, settings):
     machine.reset()
 
 def run_hybrid_server_sync(uart, fixed_binary_key, settings):
-    sock_crypto = pn.init_serv_socket(settings[utils.MY_IP], utils.ENC_PORT)
+    sock_crypto = pn.init_serv_socket(settings[utils.MY_IP], utils.CRYPTO_PORT)
     crypto_conn = None
 
     crypto_connected = False
@@ -240,7 +240,7 @@ def run_hybrid_server_sync(uart, fixed_binary_key, settings):
 
 def run_hybrid_server_sync2(uart, fixed_binary_key, settings):
     if settings['ip']:
-        serv_sock_text, serv_sock_crypto, tcp_poller = pn.init_server_sockets_async(settings, settings[utils.MY_IP], utils.TEXT_PORT, utils.ENC_PORT)
+        serv_sock_text, serv_sock_crypto, tcp_poller = pn.init_server_sockets_async(settings, settings[utils.MY_IP], utils.TEXT_PORT, utils.CRYPTO_PORT)
         conn_text, conn_crypto = None, None
 
     tcp_polled = None
@@ -262,7 +262,7 @@ def run_hybrid_server_sync2(uart, fixed_binary_key, settings):
                     print('data available from PC...')
                     b64 = conn_text.recv(128)
                     if b64:
-                        process_tcp_msg(b64, encrypt_text, settings[utils.CHANNEL], uart, settings['peer_ip'], utils.ENC_PORT, fixed_binary_key)
+                        process_tcp_msg(b64, encrypt_text, settings[utils.CHANNEL], uart, settings['peer_ip'], utils.CRYPTO_PORT, fixed_binary_key)
                     else:
                         conn_text = pn.close_server_socket(conn_text, tcp_poller)
             elif tcp_polled[0][0] == serv_sock_crypto:
@@ -291,7 +291,7 @@ def run_hybrid_server_sync_old(uart, fixed_binary_key, settings):
     gc_start_time = utime.ticks_ms()
 
     if settings['ip']:
-        serv_sock_text, serv_sock_crypto, text_vpoller, crypto_vpoller = pn.init_server_sockets(settings, settings[utils.MY_IP], utils.TEXT_PORT, utils.ENC_PORT)
+        serv_sock_text, serv_sock_crypto, text_vpoller, crypto_vpoller = pn.init_server_sockets(settings, settings[utils.MY_IP], utils.TEXT_PORT, utils.CRYPTO_PORT)
         conn_text, conn_crypto, text_cpoller, crypto_cpoller = None, None, None, None
 
     tcp_polled = None
@@ -317,7 +317,7 @@ def run_hybrid_server_sync_old(uart, fixed_binary_key, settings):
                     print('text_cpoller: data available from PC...')
                     b64 = conn_text.recv(128)
                     if b64:
-                        process_tcp_msg(b64, encrypt_text, settings[utils.CHANNEL], uart, settings['peer_ip'], utils.ENC_PORT, fixed_binary_key)
+                        process_tcp_msg(b64, encrypt_text, settings[utils.CHANNEL], uart, settings['peer_ip'], utils.CRYPTO_PORT, fixed_binary_key)
                     else:
                         conn_text = pn.close_server_socket(conn_text, text_cpoller)
                     text_cpolled = None
@@ -349,7 +349,7 @@ async def run_hybrid_server(uart, fixed_binary_key, settings):
     gc_start_time = utime.ticks_ms()
 
     if settings['ip']:
-        serv_sock_text, serv_sock_crypto, tcp_poller = pn.init_server_sockets_async(settings, settings[utils.MY_IP], utils.TEXT_PORT, utils.ENC_PORT)
+        serv_sock_text, serv_sock_crypto, tcp_poller = pn.init_server_sockets_async(settings, settings[utils.MY_IP], utils.TEXT_PORT, utils.CRYPTO_PORT)
         conn_text, conn_crypto = None, None
 
     tcp_polled = None
@@ -371,7 +371,7 @@ async def run_hybrid_server(uart, fixed_binary_key, settings):
                     print('data available from PC...')
                     b64 = conn_text.recv(128)
                     if b64:
-                        process_tcp_msg(b64, encrypt_text, settings[utils.CHANNEL], uart, settings['peer_ip'], utils.ENC_PORT, fixed_binary_key)
+                        process_tcp_msg(b64, encrypt_text, settings[utils.CHANNEL], uart, settings['peer_ip'], utils.CRYPTO_PORT, fixed_binary_key)
                     else:
                         conn_text = pn.close_server_socket(conn_text, tcp_poller)
             elif tcp_polled[0][0] == serv_sock_crypto:

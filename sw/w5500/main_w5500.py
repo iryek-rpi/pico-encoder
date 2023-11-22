@@ -47,7 +47,7 @@ async def process_serial_msg(uart, channel, fixed_binary_key, settings):
                     print('Encryption result Empty')
                     encoded_msg = bytes('***BAD DATA***', 'utf-8')
                 await asyncio.sleep_ms(nu.ASYNC_SLEEP_MS)
-                #pn.send_data_sync(encoded_msg, settings['peer_ip'], c.ENC_PORT)
+                #pn.send_data_sync(encoded_msg, settings['peer_ip'], c.CRYPTO_PORT)
                 await asyncio.sleep_ms(nu.ASYNC_SLEEP_MS)
                 return
             else:
@@ -87,9 +87,12 @@ async def handle_tcp_text(reader, writer):
         addr = writer.get_extra_info('peername')
         print(f"Received {message} from {addr}")
 
-        print(f"Send: {message}")
-        writer.write(data)
-        await writer.drain()
+        _, stream_writer = await asyncio.open_connection('192.168.2.10', c.CRYPTO_PORT)
+        print(f'write {data} to 192.168.2.10:{c.CRYPTO_PORT}')
+        stream_writer.write(data)
+        await stream_writer.drain()
+        print(f"Sent: {message}")
+        stream_writer.close()
 
     print("Close the connection")
     writer.close()
@@ -132,7 +135,7 @@ def main():
     loop = asyncio.get_event_loop()
     if channel == c.CH_TCP:
         loop.create_task(asyncio.start_server(handle_tcp_text, '0.0.0.0', c.TEXT_PORT))
-    loop.create_task(asyncio.start_server(handle_crypto, '0.0.0.0', c.ENC_PORT))
+    loop.create_task(asyncio.start_server(handle_crypto, '0.0.0.0', c.CRYPTO_PORT))
     loop.create_task(process_serial_msg(uart, channel, None, settings))
     cw.prepare_web()
     loop.create_task(asyncio.start_server(cw.server._handle_request, '0.0.0.0', 80))
