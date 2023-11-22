@@ -3,8 +3,6 @@ W5500
 '''
 import machine
 from machine import Pin
-from machine import SPI
-import network
 
 import utime as time
 import uasyncio as asyncio
@@ -12,10 +10,25 @@ import ujson as json
 
 import constants as c
 import config_web as cw
-import utils
 import net_utils as nu
+import utils
+from led import *
+import coder
 
+led_init()
+btn = Pin(9, Pin.IN, Pin.PULL_UP)
 settings = None
+
+def btn_callback(btn):
+    print('Button pressed')
+    led_state_setting()
+    settings = utils.load_settings()
+    settings[utils.CONFIG] = 0 if settings[utils.CONFIG]==1 else 0
+    utils.save_settings(settings)
+    time.sleep_ms(500)
+    machine.reset()
+
+btn.irq(trigger=Pin.IRQ_FALLING, handler=btn_callback)
 
 async def process_serial_msg(uart, channel, fixed_binary_key, settings):
     try:
@@ -58,43 +71,73 @@ async def process_serial_msg(uart, channel, fixed_binary_key, settings):
     print('.', end='')
     return
 
-async def handle_crypto(reader, writer):
-    while True:
-        print('handling crypto..')        
-        data = await reader.read(100)
-        message = data.decode()
-        print(f'crypto data received:{message}')
-        addr = writer.get_extra_info('peername')
-        print(f"Received {message} from {addr}")
+async def process_stream(handler, key, reader, writer, name, dest_ip, dest_port):
+    print(f'handling {name}..')
+    b64 = await reader.readline()
+    addr = writer.get_extra_info('peername')
+    message = b64.decode()
+    print(f'{name} data received:{message}')
+    print(f"Received {message} from {addr}")
+    processed_msg = handler(b64, key)
 
-        print(f"Send: {message}")
-        writer.write(data)
-        await writer.drain()
+    sr, sw = await asyncio.open_connection(dest_ip, dest_port)
+    print(f'write {processed_msg} to {dest_ip}:{dest_port}')
+    sw.write(processed_msg)
+    await sw.drain()
+    sw.close()
+    await sw.wait_closed()
+    sr.close()
+    await sr.wait_closed()
 
-    print("Close the connection")
+    print(f"Close the connection for handle_{name}()")
     writer.close()
     await writer.wait_closed()
     reader.close()
     await reader.wait_closed()
 
-
 async def handle_tcp_text(reader, writer):
-    while True:
-        print('handling text..')
-        data = await reader.read(100)
-        message = data.decode()
-        print(f'text data received:{message}')
-        addr = writer.get_extra_info('peername')
-        print(f"Received {message} from {addr}")
+    print('handling text..')
+    b64 = await reader.readline()
+    addr = writer.get_extra_info('peername')
+    message = b64.decode()
+    print(f'text data received:{message}')
+    print(f"Received {message} from {addr}")
+    encrypted = coder.encrypt_text(b64, fixed_binary_key)
 
-        _, stream_writer = await asyncio.open_connection('192.168.2.10', c.CRYPTO_PORT)
-        print(f'write {data} to 192.168.2.10:{c.CRYPTO_PORT}')
-        stream_writer.write(data)
-        await stream_writer.drain()
-        print(f"Sent: {message}")
-        stream_writer.close()
+    sr, sw = await asyncio.open_connection(settings[utils.PEER_IP], c.CRYPTO_PORT)
+    print(f'write {encrypted} to {settings[utils.PEER_IP]}:{c.CRYPTO_PORT}')
+    sw.write(encrypted)
+    await sw.drain()
+    sw.close()
+    await sw.wait_closed()
+    sr.close()
+    await sr.wait_closed()
 
-    print("Close the connection")
+    print("Close the connection for handle_text()")
+    writer.close()
+    await writer.wait_closed()
+    reader.close()
+    await reader.wait_closed()
+
+async def handle_crypto(reader, writer):
+    print('handling crypto..')        
+    b64 = await reader.readline()
+    addr = writer.get_extra_info('peername')
+    message = b64.decode()
+    print(f'crypto data received:{message}')
+    print(f"Received {message} from {addr}")
+    text = coder.decrypt_crypto(b64, fixed_binary_key)
+
+    sr, sw = await asyncio.open_connection(settings[utils.HOST_IP], settings[utils.HOST_PORT])
+    print(f'write {text} to {settings[utils.HOST_IP]}:{utils.HOST_PORT}')
+    sw.write(text)
+    await sw.drain()
+    sw.close()
+    await sw.wait_closed()
+    sr.close()
+    await sr.wait_closed()
+
+    print("Close the connection for handle_crypto()")
     writer.close()
     await writer.wait_closed()
     reader.close()
@@ -120,23 +163,30 @@ async def handle_serial(uart):
     await reader.wait_closed()
 
 def main():
+    global fixed_binary_key
     global settings
 
+    led_start()
     settings = utils.load_settings()
     print(settings)
+
     settings['ip'] = '192.168.2.10'
     settings['gateway'] = '192.168.2.1'
+
     uart, settings = nu.init_connections(settings)
+    
     print('IP assigned: ', settings[utils.MY_IP])
     channel = settings[utils.CHANNEL]
     if channel == c.CH_TCP: print('Channel: TCP')
     else: print('channel: SERIAL')
 
+    fixed_binary_key = coder.fix_len_and_encode_key(settings['key'])
+
     loop = asyncio.get_event_loop()
-    if channel == c.CH_TCP:
-        loop.create_task(asyncio.start_server(handle_tcp_text, '0.0.0.0', c.TEXT_PORT))
     loop.create_task(asyncio.start_server(handle_crypto, '0.0.0.0', c.CRYPTO_PORT))
     loop.create_task(process_serial_msg(uart, channel, None, settings))
+    if channel == c.CH_TCP:
+        loop.create_task(asyncio.start_server(handle_tcp_text, '0.0.0.0', c.TEXT_PORT))
     cw.prepare_web()
     loop.create_task(asyncio.start_server(cw.server._handle_request, '0.0.0.0', 80))
 

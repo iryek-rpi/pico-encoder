@@ -12,7 +12,7 @@ import mpyaes as aes
 
 #cipher = AES.new(key, AES.MODE_EAX, nonce)
 #data = cipher.decrypt_and_verify(ciphertext, tag)
-
+import mpyaes as aes
 DEFAULT_LENGTH_KEY = b'aD\xd8\x11e\xdcy`\t\xdc\xe4\xa7\x1f\x11\x94\x93'
 default_key_len = len(DEFAULT_LENGTH_KEY)
 
@@ -21,6 +21,29 @@ def fix_len_and_encode_key(key):
         key = key[:default_key_len]
     keyb = key.encode()
     return keyb + DEFAULT_LENGTH_KEY[len(keyb):]
+
+def encrypt_text(b64, fixed_binary_key):
+    print('data received: ', b64)
+    print('type(b64): ', type(b64))
+    
+    print('msg: ', b64)
+    IV = aes.generate_IV(16)
+    print('fixed_binary_key: ', fixed_binary_key, 'type(fixed_binary_key): ', type(fixed_binary_key))
+    cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
+    msg = cipher.encrypt(b64)
+    print('IV:', IV, ' msg:', msg)
+    return IV + msg
+
+def decrypt_crypto(b64, fixed_binary_key):
+    print('data received: ', b64)
+    print('type(b64): ', type(b64))
+    
+    print('b64: ', b64)
+    IV, msg = b64[:16], b64[16:]
+    print('IV:', IV, ' msg:', msg)
+    msg_ba = bytearray(msg)
+    cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
+    return cipher.decrypt(msg_ba)
 
 def enc_aes(key, iv, data):
     cipher = aes.new(key, aes.MODE_CBC, iv)
