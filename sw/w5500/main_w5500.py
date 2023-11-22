@@ -96,52 +96,10 @@ async def process_stream(handler, key, reader, writer, name, dest_ip, dest_port)
     await reader.wait_closed()
 
 async def handle_tcp_text(reader, writer):
-    print('handling text..')
-    b64 = await reader.readline()
-    addr = writer.get_extra_info('peername')
-    message = b64.decode()
-    print(f'text data received:{message}')
-    print(f"Received {message} from {addr}")
-    encrypted = coder.encrypt_text(b64, fixed_binary_key)
-
-    sr, sw = await asyncio.open_connection(settings[utils.PEER_IP], c.CRYPTO_PORT)
-    print(f'write {encrypted} to {settings[utils.PEER_IP]}:{c.CRYPTO_PORT}')
-    sw.write(encrypted)
-    await sw.drain()
-    sw.close()
-    await sw.wait_closed()
-    sr.close()
-    await sr.wait_closed()
-
-    print("Close the connection for handle_text()")
-    writer.close()
-    await writer.wait_closed()
-    reader.close()
-    await reader.wait_closed()
+    process_stream(coder.encrypt_text, fixed_binary_key, reader, writer, 'TEXT', utils.PEER_IP, c.CRYPTO_PORT)
 
 async def handle_crypto(reader, writer):
-    print('handling crypto..')        
-    b64 = await reader.readline()
-    addr = writer.get_extra_info('peername')
-    message = b64.decode()
-    print(f'crypto data received:{message}')
-    print(f"Received {message} from {addr}")
-    text = coder.decrypt_crypto(b64, fixed_binary_key)
-
-    sr, sw = await asyncio.open_connection(settings[utils.HOST_IP], settings[utils.HOST_PORT])
-    print(f'write {text} to {settings[utils.HOST_IP]}:{utils.HOST_PORT}')
-    sw.write(text)
-    await sw.drain()
-    sw.close()
-    await sw.wait_closed()
-    sr.close()
-    await sr.wait_closed()
-
-    print("Close the connection for handle_crypto()")
-    writer.close()
-    await writer.wait_closed()
-    reader.close()
-    await reader.wait_closed()
+    process_stream(coder.decrypt_text, fixed_binary_key, reader, writer, 'CRYPTO', utils.HOST_IP, utils.HOST_PORT)
 
 async def handle_serial(uart):
     while True:
