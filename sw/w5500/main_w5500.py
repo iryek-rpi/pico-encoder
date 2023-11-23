@@ -32,39 +32,40 @@ btn.irq(trigger=Pin.IRQ_FALLING, handler=btn_callback)
 
 async def process_serial_msg(uart, channel, fixed_binary_key, settings):
     try:
-        sm = uart.readline()
-        if sm:
-            sm = sm.decode('utf-8').strip()
-            print(f'cmd: {sm[:7]}  sm[-7:]: {sm[-7:]}')
-            if sm[:7]=='CNF_REQ':
-                saved_settings = utils.load_settings()
-                print('saved_settings: ', saved_settings)
-                str_settings = json.dumps(saved_settings)
-                print(len(str_settings), ' bytes : ', str_settings)
-                msg = bytes('CNF_JSN', 'utf-8') + bytes(str_settings, 'utf-8') + bytes('CNF_END\n', 'utf-8')
-                asyncio.sleep_ms(nu.ASYNC_SLEEP_MS)
-                uart.write(msg)
-            elif sm[:7]=='CNF_WRT' and sm[-7:]=='CNF_END':
-                uart.deinit()
-                received_settings = sm[7:-7]
-                print(f'Received settings: {received_settings}')
-                utils.save_settings(received_settings)
-                asyncio.sleep_ms(1000)
-                machine.reset()
-            elif channel==c.CH_SERIAL and sm[:7]=='TXT_WRT' and sm[-7:]=='TXT_END':
-                received_msg = f'{sm[7:-7]}'
-                received_msg = bytes(received_msg.strip(), 'utf-8')
-                print(f'TXT_WRT Received msg: {received_msg}')
-                #encoded_msg = encrypt_text(received_msg, fixed_binary_key)
-                if not encoded_msg:
-                    print('Encryption result Empty')
-                    encoded_msg = bytes('***BAD DATA***', 'utf-8')
-                await asyncio.sleep_ms(nu.ASYNC_SLEEP_MS)
-                #pn.send_data_sync(encoded_msg, settings['peer_ip'], c.CRYPTO_PORT)
-                await asyncio.sleep_ms(nu.ASYNC_SLEEP_MS)
-                return
-            else:
-                print('Unknown command')
+        while True:
+            sm = uart.readline()
+            if sm:
+                sm = sm.decode('utf-8').strip()
+                print(f'cmd: {sm[:7]}  sm[-7:]: {sm[-7:]}')
+                if sm[:7]=='CNF_REQ':
+                    saved_settings = utils.load_settings()
+                    print('saved_settings: ', saved_settings)
+                    str_settings = json.dumps(saved_settings)
+                    print(len(str_settings), ' bytes : ', str_settings)
+                    msg = bytes('CNF_JSN', 'utf-8') + bytes(str_settings, 'utf-8') + bytes('CNF_END\n', 'utf-8')
+                    asyncio.sleep_ms(nu.ASYNC_SLEEP_MS)
+                    uart.write(msg)
+                elif sm[:7]=='CNF_WRT' and sm[-7:]=='CNF_END':
+                    uart.deinit()
+                    received_settings = sm[7:-7]
+                    print(f'Received settings: {received_settings}')
+                    utils.save_settings(json.loads(received_settings))
+                    asyncio.sleep_ms(1000)
+                    machine.reset()
+                elif channel==c.CH_SERIAL and sm[:7]=='TXT_WRT' and sm[-7:]=='TXT_END':
+                    received_msg = f'{sm[7:-7]}'
+                    received_msg = bytes(received_msg.strip(), 'utf-8')
+                    print(f'TXT_WRT Received msg: {received_msg}')
+                    #encoded_msg = encrypt_text(received_msg, fixed_binary_key)
+                    if not encoded_msg:
+                        print('Encryption result Empty')
+                        encoded_msg = bytes('***BAD DATA***', 'utf-8')
+                    await asyncio.sleep_ms(nu.ASYNC_SLEEP_MS)
+                    #pn.send_data_sync(encoded_msg, settings['peer_ip'], c.CRYPTO_PORT)
+                    await asyncio.sleep_ms(nu.ASYNC_SLEEP_MS)
+                    return
+                else:
+                    print('Unknown command')
     except Exception as e:
         print(e)
         
@@ -128,12 +129,7 @@ def main():
     settings = utils.load_settings()
     print(settings)
 
-    settings['ip'] = '192.168.2.10'
-    settings['gateway'] = '192.168.2.1'
-
     uart, settings = nu.init_connections(settings)
-    
-    print('IP assigned: ', settings[utils.MY_IP])
     channel = settings[utils.CHANNEL]
     if channel == c.CH_TCP: print('Channel: TCP')
     else: print('channel: SERIAL')
