@@ -159,7 +159,8 @@ def serial_send_plaintext(settings, text):
 def tcp_send_plaintext(settings, text):
     try:
         logging.info(f'sending plaintext: {text}')
-        msg = bytes(f"TXT_WRT{text}TXT_END\n", encoding='utf-8')
+        #msg = bytes(f"TXT_WRT{text}TXT_END\n", encoding='utf-8')
+        msg = bytes(text, encoding='utf-8')
         logging.info(f'msg: {msg}')
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         print(f'ip: {settings['device_ip']} c.TEXT_PORT: {c.TEXT_PORT}')
