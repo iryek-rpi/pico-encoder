@@ -7,6 +7,7 @@ from machine import Pin
 import utime as time
 import uasyncio as asyncio
 import ujson as json
+import usocket as socket
 
 import constants as c
 import config_web as cw
@@ -33,6 +34,7 @@ btn.irq(trigger=Pin.IRQ_FALLING, handler=btn_callback)
 async def process_serial_msg(uart, channel, fixed_binary_key, settings):
     try:
         while True:
+            await asyncio.sleep_ms(nu.ASYNC_SLEEP_MS)
             sm = uart.readline()
             if sm:
                 sm = sm.decode('utf-8').strip()
@@ -76,19 +78,14 @@ async def process_stream(handler, key, reader, writer, name, dest_ip, dest_port)
     print(f'handling {name}..')
     b64 = await reader.readline()
     addr = writer.get_extra_info('peername')
-    message = b64.decode()
-    print(f'{name} data received:{message}')
-    print(f"Received {message} from {addr}")
+    print(f"Received {b64} from {addr}")
     processed_msg = handler(b64, key)
 
-    sr, sw = await asyncio.open_connection(dest_ip, dest_port)
-    print(f'write {processed_msg} to {dest_ip}:{dest_port}')
-    sw.write(processed_msg)
-    await sw.drain()
-    sw.close()
-    await sw.wait_closed()
-    sr.close()
-    await sr.wait_closed()
+    s = socket.socket()
+    print(f'\n#### connecting to {dest_ip}:{dest_port}')
+    s.connect((dest_ip, dest_port))
+    s.send(processed_msg)
+    s.close()
 
     print(f"Close the connection for handle_{name}()")
     writer.close()
@@ -97,10 +94,12 @@ async def process_stream(handler, key, reader, writer, name, dest_ip, dest_port)
     await reader.wait_closed()
 
 async def handle_tcp_text(reader, writer):
-    process_stream(coder.encrypt_text, fixed_binary_key, reader, writer, 'TEXT', utils.PEER_IP, c.CRYPTO_PORT)
+    print(f"\n### handle TCP TEXT from {reader} {writer}")
+    await process_stream(coder.encrypt_text, fixed_binary_key, reader, writer, 'TEXT', settings[utils.PEER_IP], c.CRYPTO_PORT)
 
 async def handle_crypto(reader, writer):
-    process_stream(coder.decrypt_text, fixed_binary_key, reader, writer, 'CRYPTO', utils.HOST_IP, utils.HOST_PORT)
+    print(f"\n### handle CRYPTO TEXT from {reader} {writer}")
+    await process_stream(coder.decrypt_crypto, fixed_binary_key, reader, writer, 'CRYPTO', settings[utils.HOST_IP],int(settings[utils.HOST_PORT]))
 
 async def handle_serial(uart):
     while True:
@@ -137,10 +136,15 @@ def main():
     fixed_binary_key = coder.fix_len_and_encode_key(settings['key'])
 
     loop = asyncio.get_event_loop()
+
+    print(f'\n### starting CRYPTO server at {settings[utils.MY_IP]}:{c.CRYPTO_PORT}')
     loop.create_task(asyncio.start_server(handle_crypto, '0.0.0.0', c.CRYPTO_PORT))
+    
     loop.create_task(process_serial_msg(uart, channel, None, settings))
     if channel == c.CH_TCP:
+        print(f'\n### starting TEXT server at {settings[utils.MY_IP]}:{c.TEXT_PORT}')
         loop.create_task(asyncio.start_server(handle_tcp_text, '0.0.0.0', c.TEXT_PORT))
+    
     cw.prepare_web()
     loop.create_task(asyncio.start_server(cw.server._handle_request, '0.0.0.0', 80))
 
