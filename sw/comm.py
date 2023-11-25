@@ -76,10 +76,11 @@ class ReceiveTCPTextThread(Thread):
 def get_serial_settings(settings):
     return settings['serial_port'], settings['serial_speed'], settings['parity'], settings['data_size'], settings['stopbit']
 
-def init_serial(port, baud, parity, data, stopbits):
+def init_serial(serial_settings):
     global global_serial_device
     global global_serial_sending
 
+    port, baud, parity, data, stopbits = serial_settings 
     try:
         return serial.Serial(port=port, baudrate=int(baud), bytesize=int(data), 
                              parity=parity, stopbits=int(stopbits), timeout=0.02, write_timeout=0.02) 
@@ -88,7 +89,7 @@ def init_serial(port, baud, parity, data, stopbits):
         logging.info('시리얼 예외 발생: ', e)
 
 class ReceiveSerialTextThread(Thread):
-    def __init__(self, port, baud, parity, data, stopbits):
+    def __init__(self, serial_settings):
         global global_serial_device
         global global_serial_sending
 
@@ -97,7 +98,7 @@ class ReceiveSerialTextThread(Thread):
         self.plaintext = None
         self.name = 'Serial Text Thread'
 
-        global_serial_device = init_serial(port, baud, parity, data, stopbits)
+        global_serial_device = init_serial(serial_settings)
 
     def run(self):
         global app
@@ -128,11 +129,12 @@ def start_server(settings):
     global tcp_thread
     global serial_thread
 
-    tcp_thread = ReceiveTCPTextThread(settings['host_ip'], settings['host_port'])
-    tcp_thread.start()
-
-    serial_thread = ReceiveSerialTextThread(get_serial_settings(settings))
-    serial_thread.start()
+    print(f'settings[chan]: {settings["chan"]}')
+    if settings['chan'] == 'tcp':
+        server_thread = ReceiveTCPTextThread(settings['host_ip'], settings['host_port'])
+    else:
+        server_thread = ReceiveSerialTextThread(get_serial_settings(settings))
+    server_thread.start()
 
 def serial_send_plaintext(settings, text):
     global global_serial_device
