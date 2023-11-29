@@ -1,4 +1,5 @@
 import mpyaes as aes
+import net_utils as nu
 
 #NONCE = b'K\xa2\x02\xb5+N\xd3\x1c\xd9i\xf62\xcf\x95\x93 '
 #TAG = b'\xf3\xe6\xf34\xd2\xa5K\xe3c\xe3C\xba\x94la\x1b'
@@ -22,7 +23,7 @@ def fix_len_and_encode_key(key):
     keyb = key.encode()
     return keyb + DEFAULT_LENGTH_KEY[len(keyb):]
 
-def encrypt_text(b64, fixed_binary_key):
+def encrypt_text(b64, fixed_binary_key, dest):
     print('data received: ', b64)
     print('type(b64): ', type(b64))
     
@@ -32,9 +33,13 @@ def encrypt_text(b64, fixed_binary_key):
     cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
     msg = cipher.encrypt(b64)
     print('IV:', IV, ' msg:', msg)
-    return IV + msg
+    encrypted_msg = IV + msg
 
-def decrypt_crypto(b64, fixed_binary_key):
+    dest[1](encrypted_msg, dest[0])
+    return encrypted_msg
+
+
+def decrypt_crypto(b64, fixed_binary_key, dest):
     print('data received: ', b64)
     print('type(b64): ', type(b64))
     
@@ -43,7 +48,11 @@ def decrypt_crypto(b64, fixed_binary_key):
     print('IV:', IV, ' msg:', msg)
     msg_ba = bytearray(msg)
     cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
-    return cipher.decrypt(msg_ba)
+    decrypted_msg = cipher.decrypt(msg_ba)
+    print('decrypted_msg: ', decrypted_msg)
+
+    dest[1](decrypted_msg, dest[0])
+    return decrypted_msg
 
 def enc_aes(key, iv, data):
     cipher = aes.new(key, aes.MODE_CBC, iv)
