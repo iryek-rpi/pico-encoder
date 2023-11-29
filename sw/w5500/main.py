@@ -50,7 +50,7 @@ def send_tcp_data_sync(data, addr):
 def send_serial_data_sync(data, uart):
     uart.write(data)
 
-async def process_serial_msg(uart, channel, key, settings):
+async def process_serial_msg(uart, key, settings):
     try:
         while True:
             await asyncio.sleep_ms(nu.ASYNC_SLEEP_MS)
@@ -73,7 +73,7 @@ async def process_serial_msg(uart, channel, key, settings):
                     utils.save_settings(json.loads(received_settings))
                     asyncio.sleep_ms(1000)
                     machine.reset()
-                elif channel==c.CH_SERIAL and sm[:7]=='TXT_WRT' and sm[-7:]=='TXT_END':
+                elif settings[utils.CHANNEL]==c.CH_SERIAL and sm[:7]=='TXT_WRT' and sm[-7:]=='TXT_END':
                     #received_msg = f'{sm[7:-7]}'
                     #received_msg = bytes(received_msg.strip(), 'utf-8')
                     received_msg = b64[7:-7]
@@ -126,12 +126,11 @@ def main():
     fixed_binary_key = coder.fix_len_and_encode_key(settings['key'])
 
     loop = asyncio.get_event_loop()
-    loop.create_task(process_serial_msg(g_uart, channel, None, settings))
+    loop.create_task(process_serial_msg(g_uart, fixed_binary_key, settings))
     print(f'\n### starting CRYPTO server at {settings[utils.MY_IP]}:{c.CRYPTO_PORT}')
     loop.create_task(asyncio.start_server(handle_crypto, '0.0.0.0', c.CRYPTO_PORT))
-    channel = settings[utils.CHANNEL]
-    print('Channel: TCP') if channel == c.CH_TCP else print('Channel: SERIAL')  
-    if channel == c.CH_TCP:
+    print('Channel: TCP') if settings[utils.CHANNEL] == c.CH_TCP else print('Channel: SERIAL')  
+    if settings[utils.CHANNEL] == c.CH_TCP:
         print(f'\n### starting TEXT server at {settings[utils.MY_IP]}:{c.TEXT_PORT}')
         loop.create_task(asyncio.start_server(handle_tcp_text, '0.0.0.0', c.TEXT_PORT))
     cw.prepare_web()
