@@ -1,11 +1,11 @@
 from machine import Pin
 import machine
 import os
+import utime as time
 
 from phew import logging, server
 from phew.template import render_template
 import utils
-import pico_net as pn
 
 PHEW_TEMPLATE_PATH = "phew_templates"
 
@@ -35,7 +35,7 @@ def configure(request):
     else:
         ns[utils.CONFIG] = 0
         utils.save_settings(ns)
-        utime.sleep_ms(100)
+        time.sleep_ms(100)
         machine.reset()
         return render_template(f"{PHEW_TEMPLATE_PATH}/index.html", ns=ns)
     
