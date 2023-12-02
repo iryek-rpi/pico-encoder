@@ -57,6 +57,7 @@ async def process_serial_msg(uart, key, settings):
             b64 = uart.readline()
             if b64:
                 sm = b64.decode('utf-8').strip()
+                print(f'b64: {b64} sm: {sm}')
                 print(f'cmd: {sm[:7]}  sm[-7:]: {sm[-7:]}')
                 if sm[:7]=='CNF_REQ':
                     saved_settings = utils.load_settings()
@@ -73,16 +74,18 @@ async def process_serial_msg(uart, key, settings):
                     utils.save_settings(json.loads(received_settings))
                     asyncio.sleep_ms(1000)
                     machine.reset()
-                elif settings[utils.CHANNEL]==c.CH_SERIAL and sm[:7]=='TXT_WRT' and sm[-7:]=='TXT_END':
-                    #received_msg = f'{sm[7:-7]}'
-                    #received_msg = bytes(received_msg.strip(), 'utf-8')
-                    received_msg = b64[7:-7]
+                #elif settings[utils.CHANNEL]==c.CH_SERIAL and sm[:7]=='TXT_WRT' and sm[-7:]=='TXT_END':
+                elif sm[:7]=='TXT_WRT' and sm[-7:]=='TXT_END':
+                    #received_msg = b64[7:-7] # 끝에 \n이 붙어있음
+                    received_msg = f'{sm[7:-7]}'
+                    print(f'b64: {b64} sm: {sm} received_msg: {received_msg}')
                     print(f'TXT_WRT Received msg: {received_msg}')
-                    encoded_msg = coder.encrypt_text(received_msg, key)
+                    msg_bin = bytes(received_msg, 'utf-8')
+                    encoded_msg = coder.encrypt_text(msg_bin, key, ((settings[utils.PEER_IP], c.CRYPTO_PORT), send_tcp_data_sync))
                     if not encoded_msg:
                         print('Encryption result Empty')
                         encoded_msg = bytes('***BAD DATA***', 'utf-8')
-                    send_tcp_data_sync(encoded_msg, settings['peer_ip'], c.CRYPTO_PORT)
+                    #send_tcp_data_sync(encoded_msg, settings['peer_ip'], c.CRYPTO_PORT)
                 else:
                     print('Unknown command')
     except Exception as e:
