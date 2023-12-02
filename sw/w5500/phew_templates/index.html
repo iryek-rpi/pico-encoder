@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+        <link rel="manifest" href="/manifest.json">
+        <meta name="msapplication-TileColor" content="#ffffff">
+        <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+        <meta name="theme-color" content="#ffffff">
+
         <meta name="viewport" content="width=device-width, initial-scale=1", charset="utf-8">
         <title>위너스 암호화 단말 설정</title>
 		<script>
@@ -29,7 +35,7 @@
 			{{render_template("./phew_templates/msg.html")}}
 		</div>
         <form id="settings-form" action="/configure" method="POST" autocomplete="off" autocapitalize="none">
-			<h4>시리얼 통신</h4>
+			<p><strong>시리얼 통신</strong></p>
         	<label for="speed">통신속도:</label>
 			<select id="speed" name="speed">
 				<option value="4800">4800</option>
@@ -53,8 +59,8 @@
 			<select id="stop" name="stop">
 				<option selected value="1">1 비트</option>
 				<option value="2">2 비트</option>
-			</select><br><br>
-			<h4>단말 네트워크 설정</h4>
+			</select><br>
+			<p><strong>단말 네트워크 설정</strong></p>
 			<label for="ip">IP 주소:</label>
 			<input type="text" id="ip" name="ip"><br>
 			<label for="port">포트번호:</label>
@@ -62,19 +68,17 @@
 			<label for="gateway">게이트웨이:</label>
 			<input type="text" id="gateway" name="gateway"><br>
 			<label for="subnet">서브넷마스크:</label>
-			<input type="text" id="subnet" name="subnet"><br><br>
-			<h4>상대 단말 설정</h4>
+			<input type="text" id="subnet" name="subnet"><br>
+			<p><strong>상대 단말 설정</strong></p>
 			<label for="peer_ip">IP 주소:</label>
-			<input type="text" id="peer_ip" name="peer_ip"><br><br>
-			<h4>호스트 설정</h4>
+			<input type="text" id="peer_ip" name="peer_ip"><br>
+			<p><strong>호스트 설정</strong></p>
 			<label for="host_ip">IP 주소:</label>
 			<input type="text" id="host_ip" name="host_ip"><br>
 			<label for="host_port">포트번호:</label>
-			<input type="text" id="host_port" name="host_port"><br><br>
-
+			<input type="text" id="host_port" name="host_port"><br>
             <label for="crypto_key">암호키(8글자 이내):</label>
-            <input type="text" id="crypto_key" name="crypto_key"><br><br>
-
+            <input type="text" id="crypto_key" name="crypto_key"><br>
         	<label for="mode">통신연결:</label>
 			<select id="channel" name="channel">
 				<option value="0">RS-232</option>
