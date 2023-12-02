@@ -1,4 +1,5 @@
 import flet as ft
+import controls
 from controls import *
 from comm import *
 
@@ -34,8 +35,8 @@ def main(page: ft.Page):
     page.window_height = 720
 
     host_ip.value = find_host_ip()
-    controls = main_controls(page)
-    page.add(controls)
+    page.add(main_controls(page))
+    controls.g_page = page
 
     #monitor(serial_thread)
 

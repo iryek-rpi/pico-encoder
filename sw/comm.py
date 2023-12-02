@@ -5,10 +5,7 @@ from threading import Thread
 import logging
 import serial
 import socket
-import fcntl
-
-import select
-import asyncio
+import flet as ft
 
 from w5500 import constants as c
 import controls
@@ -20,6 +17,7 @@ logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 tcp_thread = None
 serial_thread = None
 
+global_page = None
 global_serial_device=None
 global_serial_sending=None
 SERIAL1_TIMEOUT = 50
@@ -64,10 +62,9 @@ class ReceiveTCPTextThread(Thread):
                     if not data:
                         print('No data received from tcp socket')
                         break
-                    controls.add_history(f'TCP/IP: {data}')
-                    print('PlainText received through socket: ', data)
                     self.plaintext = data.decode('utf-8')
-                    #app.add_status_msg(f'복호화 데이터 수신: {data}')
+                    controls.add_history(f'TCP/IP: {self.plaintext}')
+                    print('PlainText received through socket: ', data)
                 conn.close()
             
         except Exception as e:
@@ -83,10 +80,17 @@ def init_serial(serial_settings):
     port, baud, parity, data, stopbits = serial_settings 
     try:
         return serial.Serial(port=port, baudrate=int(baud), bytesize=int(data), 
-                             parity=parity, stopbits=int(stopbits), timeout=0.02, write_timeout=0.02) 
+                             parity=parity, stopbits=int(stopbits), write_timeout=0.02) 
     except serial.serialutil.SerialException as e:
         #add_status_msg(f"시리얼 연결 오류: COM 포트({self.comm_port})를 확인하세요.")
         logging.info('시리얼 예외 발생: ', e)
+        controls.add_history(f"시리얼 연결 오류: COM 포트({port})를 확인하세요.")
+        #if controls.g_page:
+        #    controls.alert_dlg.content = f"시리얼 연결 오류: COM 포트({port})를 확인하세요."
+        #    controls.g_page.dialog = controls.alert_dlg
+        #    controls.alert_dlg.open = True
+        #    controls.g_page.update()
+        return None
 
 class ReceiveSerialTextThread(Thread):
     def __init__(self, serial_settings):
@@ -108,7 +112,9 @@ class ReceiveSerialTextThread(Thread):
         while True:
             try:
                 if not global_serial_sending:
+                    logging.info(f'Waiting for serial data from {global_serial_device}...')
                     msg = global_serial_device.readline()
+                    logging.info(f'수신: {msg} from {global_serial_device}')
                     if msg:
                         logging.info(f'수신: {msg}')
                         msg = msg.decode('utf-8')
@@ -130,11 +136,17 @@ def start_server(settings):
     global serial_thread
 
     print(f'settings[chan]: {settings["chan"]}')
-    if settings['chan'] == 'tcp':
-        server_thread = ReceiveTCPTextThread(settings['host_ip'], settings['host_port'])
-    else:
-        server_thread = ReceiveSerialTextThread(get_serial_settings(settings))
-    server_thread.start()
+    #if settings['chan'] == 'tcp':
+    if not tcp_thread:
+        tcp_thread = ReceiveTCPTextThread(settings['host_ip'], settings['host_port'])
+        tcp_thread.start()
+    #else:
+    if not serial_thread:
+        serial_thread = ReceiveSerialTextThread(get_serial_settings(settings))
+        if global_serial_device:
+            serial_thread.start()
+        else:
+            serial_thread = None
 
 def serial_send_plaintext(settings, text):
     global global_serial_device

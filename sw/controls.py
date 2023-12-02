@@ -14,6 +14,8 @@ SHORT_FIELD = 100
 MID_FIELD = 120
 INPUT_HINT = "전송할 데이터를 입력하세요"
 
+g_page = None
+
 def add_history(msg):
     global history
     now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
