@@ -263,16 +263,21 @@ async def _handle_request(reader, writer):
   if isinstance(response, str):
     response = (response,)
 
+  #print(f"\n\n@@@@@@@@@@@@@@@@@ response: {response}")
+
   # if shorthand tuple notation used then build full response object
   if isinstance(response, tuple):
     body = response[0]
     status = response[1] if len(response) >= 2 else 200
     content_type = response[2] if len(response) >= 3 else "text/html"
     response = Response(body, status=status)
+    #print(f"response inside if: {response}")
     response.add_header("Content-Type", content_type)
     if hasattr(body, '__len__'):
       response.add_header("Content-Length", len(body))
   
+  #print(f"request: {request}")
+  #print(f"response: {response}")
   # write status line
   status_message = status_message_map.get(response.status, "Unknown")
   writer.write(f"HTTP/1.1 {response.status} {status_message}\r\n".encode("ascii"))
