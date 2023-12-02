@@ -36,7 +36,7 @@ def btn_callback(btn):
 btn.irq(trigger=Pin.IRQ_FALLING, handler=btn_callback)
 
 def send_tcp_data_sync(data, addr):
-    sock = socket()
+    sock = socket.socket()
     print(f'Connecting to: {addr}')
     sock.connect(addr)
     print(f'Sending data: {data} to {addr}')
@@ -110,7 +110,7 @@ async def handle_tcp_text(reader, writer):
 
 async def handle_crypto(reader, writer):
     print(f"\n### handle CRYPTO TEXT from {reader} {writer}")
-    dest = (g_uart, send_serial_data_sync) if settings[utils.CHANNEL] == c.CH_SERIAL else ((settings[utils.PEER_IP], c.TEXT_PORT), send_tcp_data_sync)
+    dest = (g_uart, send_serial_data_sync) if settings[utils.CHANNEL] == c.CH_SERIAL else ((settings[utils.HOST_IP], int(settings[utils.HOST_PORT])), send_tcp_data_sync)
     await process_stream(coder.decrypt_crypto, fixed_binary_key, reader, writer, 'CRYPTO', dest)
 
 def main():
