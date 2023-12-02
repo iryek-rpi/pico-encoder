@@ -36,6 +36,9 @@ def configure(request):
         machine.reset()
         return render_template(f"{PHEW_TEMPLATE_PATH}/index.html", ns=ns)
     
+def app_catch_all(request):
+    return "Not found.", 404
+
 def prepare_web():
     try:
         os.remove('./phew_templates/msg.html')
@@ -43,6 +46,7 @@ def prepare_web():
         pass
     server.add_route("/", handler = index, methods = ["GET"])
     server.add_route("/configure", handler = configure, methods = ["POST"])
+    server.set_callback(app_catch_all)
 
 print('Starting web_config script')
     
