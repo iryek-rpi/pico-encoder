@@ -11,9 +11,6 @@ PHEW_TEMPLATE_PATH = "phew_templates"
 
 def index(request):
     current_settings = utils.load_settings()
-
-    print(f"Previous settings in ap_index: {current_settings}")
-    print(f"prev_settings['parity']: {current_settings['parity']}")
     return render_template(f"{PHEW_TEMPLATE_PATH}/index.html", ns=current_settings)
 
 def configure(request):
