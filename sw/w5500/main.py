@@ -96,10 +96,15 @@ async def process_serial_msg(uart, key, settings):
 
 async def process_stream(handler, key, reader, writer, name, dest):
     print(f'handling {name}..')
-    b64 = await reader.readline()
-    addr = writer.get_extra_info('peername')
-    print(f"Received {b64} from {addr}")
-    _ = handler(b64, key, dest)
+    #b64 = await reader.readline()
+    while True:
+        b64 = await reader.read(100)
+        addr = writer.get_extra_info('peername')
+        print(f"Received {b64} from {addr}")
+        if len(b64)>0:
+            _ = handler(b64, key, dest)
+        else:
+            break
 
     print(f"Close the connection for handle_{name}()")
     writer.close()
