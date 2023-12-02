@@ -12,6 +12,7 @@ TITLE_WEIGHT = ft.FontWeight.BOLD
 LONG_FIELD = 180
 SHORT_FIELD = 100
 MID_FIELD = 120
+INPUT_HINT = "전송할 데이터를 입력하세요"
 
 def add_history(msg):
     global history
@@ -21,15 +22,19 @@ def add_history(msg):
     
 def request_encryption(e):
     global plain_text
-    text = plain_text.value
-    plain_text.value = ''
-    plain_text.hint_text = text 
-    settings = get_settings()
-    if settings['chan'] == 'serial':
-        comm.serial_send_plaintext(settings, text)
+    text = plain_text.value if plain_text.value != '' else plain_text.hint_text
+    if text == '' or text.startswith(INPUT_HINT):
+        alert_dlg.content = ft.Text(INPUT_HINT)
+        e.control.page.dialog = alert_dlg
+        alert_dlg.open = True
     else:
-        comm.tcp_send_plaintext(settings, text)
-
+        plain_text.value = ''
+        plain_text.hint_text = text 
+        settings = get_settings()
+        if settings['chan'] == 'serial':
+            comm.serial_send_plaintext(settings, text)
+        else:
+            comm.tcp_send_plaintext(settings, text)
     e.control.page.update()
 
 def start_server(e):
@@ -41,7 +46,7 @@ def clear_history(e):
     print("기록 삭제됨")
 
 def close_dlg(e):
-    dlg.open = False
+    alert_dlg.open = False
     e.control.page.update()
 
 def validate_required_text_field(e):
@@ -49,9 +54,9 @@ def validate_required_text_field(e):
             e.control.error_text = "The field is required"
             e.control.update()
 
-dlg = ft.AlertDialog(
-        # modal=True,
-        # title=ft.Text("Form submitted"),
+alert_dlg = ft.AlertDialog(
+        modal=True,
+        title=ft.Text("오류"),
         content=ft.Text("감사합니다 "),
         actions=[
             ft.TextButton("OK", on_click=close_dlg),
@@ -60,7 +65,7 @@ dlg = ft.AlertDialog(
         on_dismiss=lambda e: print("Modal dialog dismissed!"),
     )
 
-channel = ft.RadioGroup( value="serial", content=ft.Row([
+channel = ft.RadioGroup( value="tcp", content=ft.Row([
             ft.Radio(value="serial", label="시리얼"),
             ft.Radio(value="tcp", label="TCP/IP"),]))
 
@@ -125,7 +130,7 @@ def update_preview(e):
     pass
 
 plain_text = ft.TextField(expand=True,on_change=update_preview,
-            hint_text="전송할 데이터를 입력하세요", label="전송 데이터(평문)")
+            hint_text=INPUT_HINT, label="전송 데이터(평문)")
 
 request_row = ft.Row( spacing = 5, width = ENC_COLUMN_WIDTH, alignment=ft.MainAxisAlignment.START,
                     controls=[ plain_text,
