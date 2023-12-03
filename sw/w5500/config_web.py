@@ -14,12 +14,10 @@ def index(request):
     return render_template(f"{PHEW_TEMPLATE_PATH}/index.html", ns=current_settings)
 
 def configure(request):
-    current_settings = utils.load_json_settings()
-    print("Saving user inputs...")
-    print(f"Previous settings in ap_configure: {current_settings}")
+    current_settings = utils.load_settings()
+    print(f"Previous settings in configure: {current_settings}")
 
     print(request.form)
-    print(type(request.form))
     
     settings = request.form #ujson.loads(request.form)
     print(settings)

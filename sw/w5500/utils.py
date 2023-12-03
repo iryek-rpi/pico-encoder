@@ -84,10 +84,10 @@ def validate_settings(settings):
     msg = ''
     ns = settings.copy()
     ns[SPEED] = int(settings[SPEED])
-    if ns[PARITY] is 'N':
-        ns[PARITY] = None
-    else:
-        ns[PARITY] = int(ns[PARITY])
+    #if ns[PARITY] is 'N':
+    #    ns[PARITY] = None
+    #else:
+    #    ns[PARITY] = int(ns[PARITY])
 
     ns[DATA] = int(settings[DATA])
     ns[STOP] = int(settings[STOP])
@@ -109,8 +109,8 @@ def validate_settings(settings):
     else:
         ns[HOST_PORT] = int(settings[HOST_PORT])
 
-    if len(ns[KEY]) != 8:
-        msg += f'암호키 오류: {settings[KEY]} 암호키는 8자리로 지정해야 합니다<br>'
+    if len(ns[KEY]) > 16 or len(ns[KEY]<4):
+        msg += f'암호키 오류: {settings[KEY]} 암호키는 4~16자리로 지정해야 합니다<br>'
 
     if msg != '':
         msg = f'<p style="color:Tomato;">설정 오류<br>{msg}</p>'
