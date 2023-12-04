@@ -35,7 +35,7 @@ def btn_callback(btn):
 
 btn.irq(trigger=Pin.IRQ_FALLING, handler=btn_callback)
 
-def send_tcp_data_sync(data, addr):
+def send_tcp_data_async(data, reader, writer):
     sock = socket.socket()
     print(f'Connecting to: {addr}')
     sock.connect(addr)
@@ -47,8 +47,13 @@ def send_tcp_data_sync(data, addr):
         data = data[sent:]
     sock.close()
 
-def send_serial_data_sync(data, uart):
-    uart.write(data)
+async def send_serial_data_async(data, reader, writer):
+    writer.write(data)
+    while True:
+        await asyncio.sleep_ms(nu.ASYNC_SLEEP_MS)
+        b64 = reader.readline()
+        if b64:
+            return b64
 
 async def process_serial_msg(uart, key, settings):
     try:
@@ -94,17 +99,36 @@ async def process_serial_msg(uart, key, settings):
     print('.', end='')
     return
 
-async def process_stream(handler, key, reader, writer, name, dest):
+async def process_stream(handler1, handler2, key, reader, writer, name, dest):
     print(f'handling {name}..')
-    #b64 = await reader.readline()
+    if dest==g_uart:
+        relay_reader, relay_writer = g_uart, g_uart
+        relay_func = send_serial_data_async
+    else:
+        relay_reader, relay_writer = await asyncio.open_connection(*dest)
+        relay_func = send_tcp_data_async
+
     while True:
         b64 = await reader.read(100)
         addr = writer.get_extra_info('peername')
         print(f"Received {b64} from {addr}")
         if len(b64)>0:
-            _ = handler(b64, key, dest)
+            processed_msg = handler1(b64, key)
+            response = await relay_func(processed_msg, relay_reader, relay_writer)
+            if len(response)>0:
+                processed_response = handler2(response, key)
+                writer.write(processed_response)
+            else:
+                break
         else:
             break
+
+    print(f"Close the connection for {dest}")
+    if dest!=g_uart:
+        relay_writer.close()
+        await relay_writer.wait_closed()
+        relay_reader.close()
+        await relay_reader.wait_closed()
 
     print(f"Close the connection for handle_{name}()")
     writer.close()
@@ -114,12 +138,13 @@ async def process_stream(handler, key, reader, writer, name, dest):
 
 async def handle_tcp_text(reader, writer):
     print(f"\n### handle TCP TEXT from {reader} {writer}")
-    await process_stream(coder.encrypt_text, fixed_binary_key, reader, writer, 'TEXT', ((settings[utils.PEER_IP], c.CRYPTO_PORT), send_tcp_data_sync))
+    dest = (settings[utils.PEER_IP], c.CRYPTO_PORT)
+    await process_stream(coder.encrypt_text, coder.decrypt_crypto, fixed_binary_key, reader, writer, 'TEXT', dest)
 
 async def handle_crypto(reader, writer):
     print(f"\n### handle CRYPTO TEXT from {reader} {writer}")
-    dest = (g_uart, send_serial_data_sync) if settings[utils.CHANNEL] == c.CH_SERIAL else ((settings[utils.HOST_IP], int(settings[utils.HOST_PORT])), send_tcp_data_sync)
-    await process_stream(coder.decrypt_crypto, fixed_binary_key, reader, writer, 'CRYPTO', dest)
+    dest = g_uart if settings[utils.CHANNEL] == c.CH_SERIAL else (settings[utils.HOST_IP], int(settings[utils.HOST_PORT]))
+    await process_stream(coder.decrypt_crypto, coder.encrypt_text, fixed_binary_key, reader, writer, 'CRYPTO', dest)
 
 def main():
     global fixed_binary_key
@@ -134,13 +159,17 @@ def main():
     fixed_binary_key = coder.fix_len_and_encode_key(settings['key'])
 
     loop = asyncio.get_event_loop()
+
     loop.create_task(process_serial_msg(g_uart, fixed_binary_key, settings))
+
     print(f'\n### starting CRYPTO server at {settings[utils.MY_IP]}:{c.CRYPTO_PORT}')
     loop.create_task(asyncio.start_server(handle_crypto, '0.0.0.0', c.CRYPTO_PORT))
+
     print('Channel: TCP') if settings[utils.CHANNEL] == c.CH_TCP else print('Channel: SERIAL')  
     if settings[utils.CHANNEL] == c.CH_TCP:
         print(f'\n### starting TEXT server at {settings[utils.MY_IP]}:{c.TEXT_PORT}')
         loop.create_task(asyncio.start_server(handle_tcp_text, '0.0.0.0', c.TEXT_PORT))
+
     cw.prepare_web()
     loop.create_task(asyncio.start_server(cw.server._handle_request, '0.0.0.0', 80))
 
