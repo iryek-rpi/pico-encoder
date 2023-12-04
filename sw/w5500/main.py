@@ -35,17 +35,10 @@ def btn_callback(btn):
 
 btn.irq(trigger=Pin.IRQ_FALLING, handler=btn_callback)
 
-def send_tcp_data_async(data, reader, writer):
-    sock = socket.socket()
-    print(f'Connecting to: {addr}')
-    sock.connect(addr)
-    print(f'Sending data: {data} to {addr}')
-    msg_len = len(data)
-    while msg_len>0:
-        sent = sock.write(data)
-        msg_len -= sent
-        data = data[sent:]
-    sock.close()
+async def send_tcp_data_async(data, reader, writer):
+    writer.write(data)
+    await writer.drain()
+    return await reader.read(100)
 
 async def send_serial_data_async(data, reader, writer):
     writer.write(data)
@@ -118,6 +111,7 @@ async def process_stream(handler1, handler2, key, reader, writer, name, dest):
             if len(response)>0:
                 processed_response = handler2(response, key)
                 writer.write(processed_response)
+                await writer.drain()
             else:
                 break
         else:
