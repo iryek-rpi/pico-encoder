@@ -1,0 +1,23 @@
+services:
+  host-client:
+    image: pico/host:0.0.1
+    build: ./host
+    restart: always
+    container_name: host-client 
+    environment:
+      - TEXT_SERVER_IP='192.168.2.9'
+      - TEXT_SERVER_PORT=2004
+    network_mode: "host"
+    stdin_open: true
+    tty: true
+    #command: python /app/client.py
+    command: /bin/bash
+  host-server:
+    image: pico/host:0.0.1
+    restart: always
+    container_name: host-server 
+    environment:
+      - TEXT_SERVER_IP='192.168.2.10'
+      - TEXT_SERVER_PORT=2004
+    network_mode: "host"
+    command: python /app/server.py
