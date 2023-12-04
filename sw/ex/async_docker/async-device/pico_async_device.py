@@ -9,17 +9,15 @@ CRYPTO_PORT = 8503
 TEXT_PORT = 2004
 
 def encrypt_text(b64, dest):
-    print('data received: ', b64, 'of type(b64): ', type(b64))
-    
-    print(f'dest: {dest}')
-    dest[1](b64, dest[0])
+    print('encrypt_text(): data received: ', b64, 'of type(b64): ', type(b64))
+    print(f'encrypt_text(): dest: {dest}')
+    #dest[1](b64, dest[0])
     return b64
 
 def decrypt_crypto(b64, dest):
-    print('data received: ', b64, 'of type(b64): ', type(b64))
-
-    print(f'dest: {dest}')
-    dest[1](b64, dest[0])
+    print('decrypt_text(): data received: ', b64, 'of type(b64): ', type(b64))
+    print(f'decrypt_text(): dest: {dest}')
+    #dest[1](b64, dest[0])
     return b64
 
 def send_tcp_data_sync(data, addr):
@@ -36,10 +34,27 @@ def send_tcp_data_sync(data, addr):
 
 async def process_stream(handler, reader, writer, name, dest):
     print(f'handling {name}..')
+    dest_reader, dest_writer = await asyncio.open_connection(*dest)
     while True:
         b64 = await reader.read(100)
         addr = writer.get_extra_info('peername')
-        print(f"Received {b64} from {addr}")
+        print(f"Received {b64} from {addr} and relay it to {dest}")
+        if b64 == b'':
+            break
+        dest_writer.write(handler(b64, dest))
+        await dest_writer.drain()
+        response = await dest_reader.read(100)
+        print(f"Received {response} from {dest}")
+        if b64 == b'':
+            break
+        writer.write(handler(response, addr))
+        await writer.drain()
+
+    print(f"Close the connection for {dest}()")
+    dest_writer.close()
+    await dest_writer.wait_closed()
+    dest_reader.close()
+    await dest_reader.wait_closed()
 
     print(f"Close the connection for handle_{name}()")
     writer.close()
