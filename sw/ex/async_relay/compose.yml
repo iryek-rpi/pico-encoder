@@ -30,7 +30,6 @@ services:
       - HOST_IP=host-client
       - HOST_PORT=2004
       - PEER_IP=device2
-      - PEER_PORT=8503
     stdin_open: true
     tty: true
   device2:
@@ -41,6 +40,5 @@ services:
       - HOST_IP=host-server
       - HOST_PORT=2004
       - PEER_IP=device1
-      - PEER_PORT=8503
     stdin_open: true
     tty: true
