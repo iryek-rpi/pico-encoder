@@ -126,6 +126,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
 hw/pcb/pcb-backups/*.zip
 k2_config.txt
 
