@@ -9,7 +9,7 @@ def main(port):
         values = input("Enter values to send:")
         ser.write(bytes(values, 'utf-8'))
         response = ser.readline()
-        print("Serial client received data: " + response)
+        print("Serial client received data: " + response.decode('utf-8'))
 
 PORT = '/dev/ttyUSB0'
 if __name__ == "__main__":

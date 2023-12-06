@@ -8,11 +8,12 @@ def main(port):
     while True:
         print("Serial server waiting for connection on " + PORT)
         data=ser.readline()
-        print("Serial server received data: " + data)
+        print("Serial server received data: " + data.decode('utf-8'))
         # convert bytestring  to unicode transformation format -8 bit
         #data_read = str(data).encode("utf-8")
 
-        ser.write(bytes(f"<<<<< {data}", 'utf-8'))
+        if data:
+            ser.write(bytes(f"<<<<< {data}", 'utf-8'))
         time.sleep(0.1)
 
 
