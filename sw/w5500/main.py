@@ -49,6 +49,14 @@ async def send_serial_data_async(data, reader, writer):
             return b64
 
 async def process_serial_msg(uart, key, settings):
+    print(f'handling {name}..')
+    if dest==g_uart:
+        relay_reader, relay_writer = g_uart, g_uart
+        relay_func = send_serial_data_async
+    else:
+        relay_reader, relay_writer = await asyncio.open_connection(*dest)
+        relay_func = send_tcp_data_async
+
     try:
         while True:
             await asyncio.sleep_ms(nu.ASYNC_SLEEP_MS)
@@ -73,7 +81,8 @@ async def process_serial_msg(uart, key, settings):
                     asyncio.sleep_ms(1000)
                     machine.reset()
                 #elif settings[utils.CHANNEL]==c.CH_SERIAL and sm[:7]=='TXT_WRT' and sm[-7:]=='TXT_END':
-                elif sm[:7]=='TXT_WRT' and sm[-7:]=='TXT_END':
+                #elif sm[:7]=='TXT_WRT' and sm[-7:]=='TXT_END':
+                else:
                     #received_msg = b64[7:-7] # 끝에 \n이 붙어있음
                     received_msg = f'{sm[7:-7]}'
                     print(f'b64: {b64} sm: {sm} received_msg: {received_msg}')
@@ -84,8 +93,6 @@ async def process_serial_msg(uart, key, settings):
                         print('Encryption result Empty')
                         encoded_msg = bytes('***BAD DATA***', 'utf-8')
                     #send_tcp_data_sync(encoded_msg, settings['peer_ip'], c.CRYPTO_PORT)
-                else:
-                    print('Unknown command')
     except Exception as e:
         print(e)
         
