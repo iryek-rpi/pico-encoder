@@ -175,7 +175,7 @@ def tcp_send_plaintext(settings, text):
         msg = bytes(text, encoding='utf-8')
         logging.info(f'msg: {msg}')
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print(f'ip: {settings['device_ip']} c.TEXT_PORT: {c.TEXT_PORT}')
+        print(f"ip: {settings['device_ip']} c.TEXT_PORT: {c.TEXT_PORT}")
         sock.connect((settings['device_ip'], c.TEXT_PORT))
         written = sock.sendall(msg)
         print(f'{written} bytes 송신: {msg} to {settings["device_ip"]}:{c.TEXT_PORT}')
