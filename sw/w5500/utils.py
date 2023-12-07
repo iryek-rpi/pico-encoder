@@ -6,43 +6,22 @@ import os
 import ujson as json
 import constants as c
 
-MODE = 'mode'
-
-BAUD = 'baud'
-PARITY = 'parity'
-DATASIZE = 'datasize'
-STOP = 'stop'
-
 #{"speed": "9600", "parity": "N", "data": "8", "stop": "1", "ip": "192.168.0.5", "subnet": "255.255.255.0", "gateway": "192.168.0.1", "port": "8501", "peer_ip": "192.168.0.6", "peer_port": "8502", "host_ip": "192.168.0.2", "host_port": "8503", "key": "12345678"}
 
-MY_IP = 'ip'
-CONFIG = 'config'
-GATEWAY = 'gateway'
-SUBNET = 'subnet'
-PEER_IP = 'peer_ip'
-HOST_IP = 'host_ip'
-HOST_PORT = 'host_port'
-SPEED = 'speed'
-PARITY = 'parity'
-DATA = 'data'
-STOP = 'stop'
-CHANNEL = 'channel'
-KEY = 'key'
-
 DEFAUlT_SETTINGS = {
-    MY_IP : '192.168.1.10',
-    CONFIG : 0,
-    GATEWAY : '192.168.0.1',
-    SUBNET : '255.255.255.0',
-    PEER_IP : '192.168.0.5',
-    HOST_IP : '192.168.0.6',
-    HOST_PORT : 8503,
-    SPEED : 9600,
-    PARITY : 'N',   #N, E, O
-    DATA : 8,
-    STOP : 1,
-    CHANNEL : c.CH_TCP, # 1=tcp, 0=serial
-    KEY:'12345678'
+    c.MY_IP : '192.168.1.10',
+    c.CONFIG : 0,
+    c.GATEWAY : '192.168.0.1',
+    c.SUBNET : '255.255.255.0',
+    c.PEER_IP : '192.168.0.5',
+    c.HOST_IP : '192.168.0.6',
+    c.HOST_PORT : 8503,
+    c.SPEED : 9600,
+    c.PARITY : 'N',   #N, E, O
+    c.DATA : 8,
+    c.STOP : 1,
+    c.CHANNEL : c.CH_TCP, # 1=tcp, 0=serial
+    c.KEY:'12345678'
 }
 
 SETTING_FILE = 'settings.json'
