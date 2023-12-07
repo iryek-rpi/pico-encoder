@@ -31,7 +31,12 @@ def encrypt_text(b64, fixed_binary_key):
     cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
     msg = cipher.encrypt(b64)
     print('IV:', IV, ' msg:', msg)
-    return IV + msg
+    crypto = IV + msg
+    if not crypto:
+        print('Encryption result Empty')
+        crypto = bytes('***BAD DATA***', 'utf-8')
+    return crypto
+    
 
 def decrypt_crypto(b64, fixed_binary_key):
     print('data received: ', b64, 'of type(b64): ', type(b64))
@@ -42,6 +47,9 @@ def decrypt_crypto(b64, fixed_binary_key):
     cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
     decrypted_msg = cipher.decrypt(msg_ba)
     print('decrypted_msg: ', decrypted_msg)
+    if not decrypted_msg:
+        print('Decryption result Empty')
+        decrypted_msg = bytes('***BAD DATA***', 'utf-8')
     return decrypted_msg
 
 def enc_aes(key, iv, data):
