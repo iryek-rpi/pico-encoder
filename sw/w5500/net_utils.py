@@ -46,7 +46,7 @@ def init_ip(ip, subnet, gateway):
     return net_info
 
 def init_connections(settings):
-    uart = init_serial(settings[utils.SPEED], settings[utils.PARITY], settings[utils.DATA], settings[utils.STOP], SERIAL1_TIMEOUT)
+    uart = init_serial(settings[c.SPEED], settings[c.PARITY], settings[c.DATA], settings[c.STOP], SERIAL1_TIMEOUT)
     net_info = w5x00_init((settings['ip'], settings['subnet'], settings['gateway']))
 
     if net_info and net_info[0]:
@@ -106,7 +106,7 @@ def init_server_sockets_async(settings, my_ip, text_port, crypto_port):
     serv_sock_crypto, poller = init_server_socket_async(my_ip, crypto_port, poller)
 
     serv_sock_text = None
-    if settings[utils.CHANNEL] == c.CH_TCP:
+    if settings[c.CHANNEL] == c.CH_TCP:
         serv_sock_text, poller = init_server_socket_async(my_ip, text_port, poller)
     print('serv_sock_text: ', serv_sock_text, 'serv_sock_crypto: ', serv_sock_crypto)
     print('poller: ', poller)
@@ -118,7 +118,7 @@ def init_server_sockets(settings, my_ip, text_port, crypto_port):
 
     serv_sock_text = None
     serv_sock_text_poller = None
-    if settings[utils.CHANNEL] == c.CH_TCP:
+    if settings[c.CHANNEL] == c.CH_TCP:
         serv_sock_text, serv_sock_text_poller = init_server_socket(my_ip, text_port)
     print('serv_sock_text: ', serv_sock_text, 'serv_sock_crypto: ', serv_sock_crypto)
     print('crypto_poller: ', serv_sock_crypto_poller)

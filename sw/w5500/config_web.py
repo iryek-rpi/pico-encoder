@@ -6,6 +6,7 @@ import utime as time
 from phew import logging, server
 from phew.template import render_template
 import utils
+import constants as c
 
 PHEW_TEMPLATE_PATH = "phew_templates"
 
@@ -28,7 +29,7 @@ def configure(request):
     if not ns:
         return render_template(f"{PHEW_TEMPLATE_PATH}/index.html", ns=settings)
     else:
-        ns[utils.CONFIG] = 0
+        ns[c.CONFIG] = 0
         utils.save_settings(ns)
         time.sleep_ms(100)
         machine.reset()
