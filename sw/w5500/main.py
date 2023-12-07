@@ -7,7 +7,6 @@ from machine import Pin
 import utime as time
 import uasyncio as asyncio
 import ujson as json
-import usocket as socket
 
 import constants as c
 import config_web as cw
@@ -48,14 +47,9 @@ async def send_serial_data_async(data, reader, writer):
         if b64:
             return b64
 
-async def process_serial_msg(uart, key, settings):
-    print(f'handling {name}..')
-    if dest==g_uart:
-        relay_reader, relay_writer = g_uart, g_uart
-        relay_func = send_serial_data_async
-    else:
-        relay_reader, relay_writer = await asyncio.open_connection(*dest)
-        relay_func = send_tcp_data_async
+async def process_serial_msg(uart, key, settings, dest):
+    if settings[utils.CHANNEL]==c.CH_SERIAL:
+        relay_reader, relay_writer = await asyncio.open_connection(settings[utils.PEER_IP], c.CRYPTO_PORT)
 
     try:
         while True:
@@ -64,12 +58,10 @@ async def process_serial_msg(uart, key, settings):
             if b64:
                 sm = b64.decode('utf-8').strip()
                 print(f'b64: {b64} sm: {sm}')
-                print(f'cmd: {sm[:7]}  sm[-7:]: {sm[-7:]}')
                 if sm[:7]=='CNF_REQ':
                     saved_settings = utils.load_settings()
                     print('saved_settings: ', saved_settings)
                     str_settings = json.dumps(saved_settings)
-                    print(len(str_settings), ' bytes : ', str_settings)
                     msg = bytes('CNF_JSN', 'utf-8') + bytes(str_settings, 'utf-8') + bytes('CNF_END\n', 'utf-8')
                     asyncio.sleep_ms(nu.ASYNC_SLEEP_MS)
                     uart.write(msg)
@@ -80,19 +72,12 @@ async def process_serial_msg(uart, key, settings):
                     utils.save_settings(json.loads(received_settings))
                     asyncio.sleep_ms(1000)
                     machine.reset()
-                #elif settings[utils.CHANNEL]==c.CH_SERIAL and sm[:7]=='TXT_WRT' and sm[-7:]=='TXT_END':
                 #elif sm[:7]=='TXT_WRT' and sm[-7:]=='TXT_END':
-                else:
-                    #received_msg = b64[7:-7] # 끝에 \n이 붙어있음
-                    received_msg = f'{sm[7:-7]}'
-                    print(f'b64: {b64} sm: {sm} received_msg: {received_msg}')
-                    print(f'TXT_WRT Received msg: {received_msg}')
-                    msg_bin = bytes(received_msg, 'utf-8')
-                    encoded_msg = coder.encrypt_text(msg_bin, key, ((settings[utils.PEER_IP], c.CRYPTO_PORT), send_tcp_data_sync))
-                    if not encoded_msg:
-                        print('Encryption result Empty')
-                        encoded_msg = bytes('***BAD DATA***', 'utf-8')
-                    #send_tcp_data_sync(encoded_msg, settings['peer_ip'], c.CRYPTO_PORT)
+                elif settings[utils.CHANNEL]==c.CH_SERIAL:
+                    msg_bin = bytes(sm, 'utf-8')
+                    encoded_msg = coder.encrypt_text(msg_bin, key)
+                    response=send_tcp_data_async(encoded_msg, relay_reader, relay_writer)
+                    uart.write(response)
     except Exception as e:
         print(e)
         
