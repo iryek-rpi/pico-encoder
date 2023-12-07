@@ -27,7 +27,7 @@ def btn_callback(btn):
     print('Button pressed')
     led_state_setting()
     settings = utils.load_settings()
-    settings[utils.CONFIG] = 0 if settings[utils.CONFIG]==1 else 0
+    settings[c.CONFIG] = 0 if settings[c.CONFIG]==1 else 0
     utils.save_settings(settings)
     time.sleep_ms(500)
     machine.reset()
@@ -35,6 +35,7 @@ def btn_callback(btn):
 btn.irq(trigger=Pin.IRQ_FALLING, handler=btn_callback)
 
 async def send_tcp_data_async(data, reader, writer):
+    print(f'send_tcp_data_async: {data} {reader} {writer}')
     writer.write(data)
     await writer.drain()
     return await reader.read(100)
@@ -47,9 +48,10 @@ async def send_serial_data_async(data, reader, writer):
         if b64:
             return b64
 
-async def process_serial_msg(uart, key, settings, dest):
-    if settings[utils.CHANNEL]==c.CH_SERIAL:
-        relay_reader, relay_writer = await asyncio.open_connection(settings[utils.PEER_IP], c.CRYPTO_PORT)
+async def process_serial_msg(uart, key, settings):
+    if settings[c.CHANNEL]==c.CH_SERIAL:
+        relay_reader, relay_writer = await asyncio.open_connection(settings[c.PEER_IP], c.CRYPTO_PORT)
+        print(f'### process_serial_msg() open connection {relay_reader} {relay_writer} to {settings[c.PEER_IP]}:{c.CRYPTO_PORT}')
 
     try:
         while True:
@@ -73,10 +75,12 @@ async def process_serial_msg(uart, key, settings, dest):
                     asyncio.sleep_ms(1000)
                     machine.reset()
                 #elif sm[:7]=='TXT_WRT' and sm[-7:]=='TXT_END':
-                elif settings[utils.CHANNEL]==c.CH_SERIAL:
+                elif settings[c.CHANNEL]==c.CH_SERIAL:
                     msg_bin = bytes(sm, 'utf-8')
                     encoded_msg = coder.encrypt_text(msg_bin, key)
-                    response=send_tcp_data_async(encoded_msg, relay_reader, relay_writer)
+                    print(f'encoded_msg: {encoded_msg}')
+                    response= await send_tcp_data_async(encoded_msg, relay_reader, relay_writer)
+                    print(f'process_serial_msg: response: {response}')
                     uart.write(response)
     except Exception as e:
         print(e)
@@ -92,11 +96,12 @@ async def process_stream(handler1, handler2, key, reader, writer, name, dest):
     else:
         relay_reader, relay_writer = await asyncio.open_connection(*dest)
         relay_func = send_tcp_data_async
+        print(f'process_stream: open connection to {dest}')
 
     while True:
         b64 = await reader.read(100)
         addr = writer.get_extra_info('peername')
-        print(f"Received {b64} from {addr}")
+        print(f"process_stream() Received {b64} from {addr}")
         if len(b64)>0:
             processed_msg = handler1(b64, key)
             response = await relay_func(processed_msg, relay_reader, relay_writer)
@@ -124,12 +129,12 @@ async def process_stream(handler1, handler2, key, reader, writer, name, dest):
 
 async def handle_tcp_text(reader, writer):
     print(f"\n### handle TCP TEXT from {reader} {writer}")
-    dest = (settings[utils.PEER_IP], c.CRYPTO_PORT)
+    dest = (settings[c.PEER_IP], c.CRYPTO_PORT)
     await process_stream(coder.encrypt_text, coder.decrypt_crypto, fixed_binary_key, reader, writer, 'TEXT', dest)
 
 async def handle_crypto(reader, writer):
     print(f"\n### handle CRYPTO TEXT from {reader} {writer}")
-    dest = g_uart if settings[utils.CHANNEL] == c.CH_SERIAL else (settings[utils.HOST_IP], int(settings[utils.HOST_PORT]))
+    dest = g_uart if settings[c.CHANNEL] == c.CH_SERIAL else (settings[c.HOST_IP], int(settings[c.HOST_PORT]))
     await process_stream(coder.decrypt_crypto, coder.encrypt_text, fixed_binary_key, reader, writer, 'CRYPTO', dest)
 
 def main():
@@ -148,12 +153,12 @@ def main():
 
     loop.create_task(process_serial_msg(g_uart, fixed_binary_key, settings))
 
-    print(f'\n### starting CRYPTO server at {settings[utils.MY_IP]}:{c.CRYPTO_PORT}')
+    print(f'\n### starting CRYPTO server at {settings[c.MY_IP]}:{c.CRYPTO_PORT}')
     loop.create_task(asyncio.start_server(handle_crypto, '0.0.0.0', c.CRYPTO_PORT))
 
-    print('Channel: TCP') if settings[utils.CHANNEL] == c.CH_TCP else print('Channel: SERIAL')  
-    if settings[utils.CHANNEL] == c.CH_TCP:
-        print(f'\n### starting TEXT server at {settings[utils.MY_IP]}:{c.TEXT_PORT}')
+    print('Channel: TCP') if settings[c.CHANNEL] == c.CH_TCP else print('Channel: SERIAL')  
+    if settings[c.CHANNEL] == c.CH_TCP:
+        print(f'\n### starting TEXT server at {settings[c.MY_IP]}:{c.TEXT_PORT}')
         loop.create_task(asyncio.start_server(handle_tcp_text, '0.0.0.0', c.TEXT_PORT))
 
     cw.prepare_web()

@@ -24,7 +24,7 @@ def fix_len_and_encode_key(key):
     return keyb + DEFAULT_LENGTH_KEY[len(keyb):]
 
 def encrypt_text(b64, fixed_binary_key):
-    print('data received: ', b64, 'of type(b64): ', type(b64))
+    print('encrypt text(): data received: ', b64, 'of type(b64): ', type(b64))
     
     IV = aes.generate_IV(16)
     print('fixed_binary_key: ', fixed_binary_key, 'type(fixed_binary_key): ', type(fixed_binary_key))
@@ -39,7 +39,7 @@ def encrypt_text(b64, fixed_binary_key):
     
 
 def decrypt_crypto(b64, fixed_binary_key):
-    print('data received: ', b64, 'of type(b64): ', type(b64))
+    print('deecrypt text(): data received: ', b64, 'of type(b64): ', type(b64))
 
     IV, msg = b64[:16], b64[16:]
     print('IV:', IV, ' msg:', msg)
