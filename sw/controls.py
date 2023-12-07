@@ -2,19 +2,68 @@ from datetime import datetime
 
 import flet as ft
 import comm
+import w5500.constants as c
+
+WINC_WINDOW_WIDTH = 1400
+WINC_WINDOW_HEIGHT = 720
 
 ENC_COLUMN_WIDTH = 1000
 LEFT_TITLE_WIDTH = 80
 MID_TITLE_WIDTH = 60 
+
 TITLE_ALIGN = ft.TextAlign.CENTER
 MID_TITLE_ALIGN = ft.TextAlign.END
+
 TITLE_WEIGHT = ft.FontWeight.BOLD
+TITLE_SIZE = 18
+
 LONG_FIELD = 180
 SHORT_FIELD = 100
 MID_FIELD = 120
 INPUT_HINT = "전송할 데이터를 입력하세요"
 
+GROUP_WIDTH_MARGIN = 50
+GROUP_WIDTH = LEFT_TITLE_WIDTH + LONG_FIELD + GROUP_WIDTH_MARGIN
+GROUP_TITLE_HEIGHT = 50
+
 g_page = None
+
+class OptionRow(ft.Row):
+    def __init__(self, label, control, options):
+        option_label = ft.Text(label, width=LEFT_TITLE_WIDTH, text_align=TITLE_ALIGN, weight=TITLE_WEIGHT)
+        if control == ft.TextField:
+            option_control = ft.TextField(width=LONG_FIELD)
+        elif control == ft.Dropdown:
+            option_control = ft.Dropdown(width=LONG_FIELD,
+                                value=options[1][options[0]],
+                                options=[ft.dropdown.Option(option) for option in options[1]],
+                            )
+        elif control == ft.RadioGroup:
+            option_control = ft.RadioGroup(value=options[1][options[0]], content = ft.Row([ft.Radio(value=option, label=option) for option in options[1]]))
+        else:
+            assert False, f"Unknown control type: {control}"
+        super().__init__(spacing=5, width=ENC_COLUMN_WIDTH, alignment=ft.MainAxisAlignment.START,
+                    controls=[option_label, option_control])
+    
+    def get_value(self):
+        return self.controls[1].value
+
+    def set_value(self, value):
+        self.controls[1].value = value
+
+class OptionGroup(ft.Container):
+    def __init__(self, title, options):
+        self.group_title = ft.Container(ft.Text(title, weight=TITLE_WEIGHT, size=TITLE_SIZE), alignment=ft.alignment.center, 
+                                        bgcolor=ft.colors.BLUE_GREY_100, width=GROUP_WIDTH, height=GROUP_TITLE_HEIGHT)
+        self.options = options
+        content = ft.Column(scroll=ft.ScrollMode.HIDDEN, expand=True, alignment=ft.MainAxisAlignment.START, 
+                         controls=[self.group_title]+self.options, width=GROUP_WIDTH)
+        super().__init__(content=content, width=GROUP_WIDTH, height=WINC_WINDOW_HEIGHT, bgcolor=ft.colors.YELLOW_ACCENT_100)
+
+custom_host_ip = OptionRow("호스트 IP:", ft.TextField, [])
+custom_device_ip = OptionRow("단말 IP:", ft.TextField, [])
+custom_serial_speed = OptionRow("시리얼 속도:", ft.Dropdown, c.SPEED_OPTIONS)
+custom_channel = OptionRow("통신채널:", ft.RadioGroup, c.CHANNEL_OPTIONS)
 
 def add_history(msg):
     global history
@@ -67,9 +116,10 @@ alert_dlg = ft.AlertDialog(
         on_dismiss=lambda e: print("Modal dialog dismissed!"),
     )
 
-channel = ft.RadioGroup( value="tcp", content=ft.Row([
-            ft.Radio(value="serial", label="시리얼"),
-            ft.Radio(value="tcp", label="TCP/IP"),]))
+channel = ft.RadioGroup( value="tcp", 
+                        content=ft.Row([
+                            ft.Radio(value="serial", label="시리얼"),
+                            ft.Radio(value="tcp", label="TCP/IP"),]))
 
 start_server_button = ft.FilledButton("서버 시작", on_click=start_server, width=140,
             style=ft.ButtonStyle(shape={ft.MaterialState.DEFAULT: ft.RoundedRectangleBorder(radius=2),}))
