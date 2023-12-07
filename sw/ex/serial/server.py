@@ -4,9 +4,9 @@ import serial
 import time
 
 def main(port):
-    ser = serial.Serial(port, 9600, timeout=1)
+    ser = serial.Serial(port, 9600, timeout=None)
     while True:
-        print("Serial server waiting for connection on " + PORT)
+        print("Serial server waiting for connection on " + port)
         data=ser.readline()
         print("Serial server received data: " + data.decode('utf-8'))
         # convert bytestring  to unicode transformation format -8 bit
