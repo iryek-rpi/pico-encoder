@@ -24,31 +24,29 @@ def fix_len_and_encode_key(key):
     return keyb + DEFAULT_LENGTH_KEY[len(keyb):]
 
 def encrypt_text(b64, fixed_binary_key):
-    print('encrypt text(): data received: ', b64, 'of type(b64): ', type(b64))
+    print('OOOOO encrypt text(): data received: ', b64, 'of type(b64): ', type(b64))
     
     IV = aes.generate_IV(16)
-    print('fixed_binary_key: ', fixed_binary_key, 'type(fixed_binary_key): ', type(fixed_binary_key))
     cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
     msg = cipher.encrypt(b64)
-    print('IV:', IV, ' msg:', msg)
+    #print('IV:', IV, ' msg:', msg)
     crypto = IV + msg
     if not crypto:
-        print('Encryption result Empty')
+        print('OOOOO Encryption result Empty')
         crypto = bytes('***BAD DATA***', 'utf-8')
     return crypto
     
 
 def decrypt_crypto(b64, fixed_binary_key):
-    print('deecrypt text(): data received: ', b64, 'of type(b64): ', type(b64))
+    print('XXXXX deecrypt text(): data received: ', b64, 'of type(b64): ', type(b64))
 
     IV, msg = b64[:16], b64[16:]
-    print('IV:', IV, ' msg:', msg)
-    msg_ba = bytearray(msg)
+    msg = bytearray(msg)
     cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
-    decrypted_msg = cipher.decrypt(msg_ba)
-    print('decrypted_msg: ', decrypted_msg)
+    decrypted_msg = cipher.decrypt(msg)
+    print('XXXXX decrypted_msg: ', decrypted_msg)
     if not decrypted_msg:
-        print('Decryption result Empty')
+        print('XXXXX Decryption result Empty')
         decrypted_msg = bytes('***BAD DATA***', 'utf-8')
     return decrypted_msg
 
