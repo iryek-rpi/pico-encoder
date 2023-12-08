@@ -33,28 +33,48 @@ def btn_callback(btn):
 
 btn.irq(trigger=Pin.IRQ_FALLING, handler=btn_callback)
 
+async def open_relay_connection(ip, port):
+    while True:
+        try:
+            reader, writer = await asyncio.open_connection(ip, port)
+            print(f'### open_relay_connection to {ip}:{port}')
+            return reader, writer
+        except Exception as e:
+            print(e)
+            await asyncio.sleep_ms(nu.ASYNC_SLEEP_100MS)
+
 async def send_tcp_data_async(data, reader, writer):
-    print(f'send_tcp_data_async: {data} {reader} {writer}')
+    print(f'send_tcp_data_async: {data}')
     writer.write(data)
     await writer.drain()
-    return await reader.read(100)
+    data = await reader.read(100)
+    print(f'send_tcp_data_async: read: {data.decode("utf-8")}')
+    return data.decode('utf-8')
 
 async def send_serial_data_async(data, reader, writer):
+    print(f'\n+++ send_serial_data_async: writer.write(data:{data}) via uart')
     writer.write(data)
     while True:
-        await asyncio.sleep_ms(nu.ASYNC_SLEEP_MS)
-        b64 = reader.readline()
+        await asyncio.sleep_ms(nu.ASYNC_SLEEP_30MS)
+        b64 = reader.read(256)
         if b64:
+            print(f'+++ send_serial_data_async: reader.read(256) => b64:{b64}')
+            return b64
+
+def send_serial_data_sync(data, uart):
+    print(f'\n@@@@@ send_serial_data_sync: writer.write(data:{data}) via uart')
+    uart.write(data)
+    while True:
+        b64 = uart.read(256)
+        if b64:
+            print(f'@@@@@ send_serial_data_sync: reader.read(256) => b64:{b64}')
             return b64
 
 async def process_serial_msg(uart, key, settings):
-    if settings[c.CHANNEL]==c.CH_SERIAL:
-        relay_reader, relay_writer = await asyncio.open_connection(settings[c.PEER_IP], c.CRYPTO_PORT)
-        print(f'### process_serial_msg() open connection {relay_reader} {relay_writer} to {settings[c.PEER_IP]}:{c.CRYPTO_PORT}')
-
+    relay_reader = relay_writer = None
     try:
         while True:
-            await asyncio.sleep_ms(nu.ASYNC_SLEEP_MS)
+            await asyncio.sleep_ms(nu.ASYNC_SLEEP_30MS)
             b64 = uart.readline()
             if b64:
                 sm = b64.decode('utf-8').strip()
@@ -64,7 +84,7 @@ async def process_serial_msg(uart, key, settings):
                     print('saved_settings: ', saved_settings)
                     str_settings = json.dumps(saved_settings)
                     msg = bytes('CNF_JSN', 'utf-8') + bytes(str_settings, 'utf-8') + bytes('CNF_END\n', 'utf-8')
-                    asyncio.sleep_ms(nu.ASYNC_SLEEP_MS)
+                    asyncio.sleep_ms(nu.ASYNC_SLEEP_30MS)
                     uart.write(msg)
                 elif sm[:7]=='CNF_WRT' and sm[-7:]=='CNF_END':
                     uart.deinit()
@@ -77,9 +97,15 @@ async def process_serial_msg(uart, key, settings):
                 elif settings[c.CHANNEL]==c.CH_SERIAL:
                     msg_bin = bytes(sm, 'utf-8')
                     encoded_msg = coder.encrypt_text(msg_bin, key)
-                    print(f'encoded_msg: {encoded_msg}')
-                    response= await send_tcp_data_async(encoded_msg, relay_reader, relay_writer)
-                    print(f'process_serial_msg: response: {response}')
+                    if not relay_reader:
+                        relay_reader, relay_writer = await open_relay_connection(settings[c.PEER_IP], c.CRYPTO_PORT)
+                    #response= await send_tcp_data_async(encoded_msg, relay_reader, relay_writer) # never use this
+                    relay_writer.write(encoded_msg)
+                    await relay_writer.drain()
+                    response = await relay_reader.read(256)
+                    print(f'process_serial_msg: response: {response}:{type(response)} writing to uart')
+                    response = coder.decrypt_crypto(response, key)
+                    print(f'decryped serial response: {response}:{type(response)} writing to uart')
                     uart.write(response)
     except Exception as e:
         print(e)
@@ -88,24 +114,25 @@ async def process_serial_msg(uart, key, settings):
     return
 
 async def process_stream(handler1, handler2, key, reader, writer, name, dest):
-    print(f'handling {name}..')
-    if dest==g_uart:
-        relay_reader, relay_writer = g_uart, g_uart
-        relay_func = send_serial_data_async
-    else:
+    print(f'\nhandling {name}..')
+    if dest!=g_uart:
         relay_reader, relay_writer = await asyncio.open_connection(*dest)
-        relay_func = send_tcp_data_async
-        print(f'process_stream: open connection to {dest}')
+        print(f'\n=== process_stream: open connection to {dest}')
 
     while True:
         b64 = await reader.read(100)
         addr = writer.get_extra_info('peername')
-        print(f"process_stream() Received {b64} from {addr}")
+        print(f"\n=== process_stream() Received {b64} from {addr}")
         if len(b64)>0:
             processed_msg = handler1(b64, key)
-            response = await relay_func(processed_msg, relay_reader, relay_writer)
+            if dest==g_uart:
+                response = send_serial_data_sync(processed_msg, g_uart)
+            else:
+                response = await send_tcp_data_async(processed_msg, relay_reader, relay_writer)
+            print(f'=== process_stream: response: {response}')
             if len(response)>0:
                 processed_response = handler2(response, key)
+                print(f'=== process_stream: procesed_response: {processed_response}')
                 writer.write(processed_response)
                 await writer.drain()
             else:
