@@ -16,12 +16,11 @@ from led import *
 import coder
 
 fixed_binary_key = None
-settings = None
+g_settings = None
 g_uart = None
 
 led_init()
 btn = Pin(9, Pin.IN, Pin.PULL_UP)
-settings = None
 
 def btn_callback(btn):
     print('Button pressed')
@@ -129,36 +128,36 @@ async def process_stream(handler1, handler2, key, reader, writer, name, dest):
 
 async def handle_tcp_text(reader, writer):
     print(f"\n### handle TCP TEXT from {reader} {writer}")
-    dest = (settings[c.PEER_IP], c.CRYPTO_PORT)
+    dest = (g_settings[c.PEER_IP], c.CRYPTO_PORT)
     await process_stream(coder.encrypt_text, coder.decrypt_crypto, fixed_binary_key, reader, writer, 'TEXT', dest)
 
 async def handle_crypto(reader, writer):
     print(f"\n### handle CRYPTO TEXT from {reader} {writer}")
-    dest = g_uart if settings[c.CHANNEL] == c.CH_SERIAL else (settings[c.HOST_IP], int(settings[c.HOST_PORT]))
+    dest = g_uart if g_settings[c.CHANNEL] == c.CH_SERIAL else (g_settings[c.HOST_IP], int(g_settings[c.HOST_PORT]))
     await process_stream(coder.decrypt_crypto, coder.encrypt_text, fixed_binary_key, reader, writer, 'CRYPTO', dest)
 
 def main():
     global fixed_binary_key
-    global settings
+    global g_settings
     global g_uart
 
     led_start()
-    settings = utils.load_settings()
-    print(settings)
+    g_settings = utils.load_settings()
+    print(g_settings)
 
-    g_uart, settings = nu.init_connections(settings)
-    fixed_binary_key = coder.fix_len_and_encode_key(settings['key'])
+    g_uart, g_settings = nu.init_connections(g_settings)
+    fixed_binary_key = coder.fix_len_and_encode_key(g_settings['key'])
 
     loop = asyncio.get_event_loop()
 
-    loop.create_task(process_serial_msg(g_uart, fixed_binary_key, settings))
+    loop.create_task(process_serial_msg(g_uart, fixed_binary_key, g_settings))
 
-    print(f'\n### starting CRYPTO server at {settings[c.MY_IP]}:{c.CRYPTO_PORT}')
+    print(f'\n### starting CRYPTO server at {g_settings[c.MY_IP]}:{c.CRYPTO_PORT}')
     loop.create_task(asyncio.start_server(handle_crypto, '0.0.0.0', c.CRYPTO_PORT))
 
-    print('Channel: TCP') if settings[c.CHANNEL] == c.CH_TCP else print('Channel: SERIAL')  
-    if settings[c.CHANNEL] == c.CH_TCP:
-        print(f'\n### starting TEXT server at {settings[c.MY_IP]}:{c.TEXT_PORT}')
+    print('Channel: TCP') if g_settings[c.CHANNEL] == c.CH_TCP else print('Channel: SERIAL')  
+    if g_settings[c.CHANNEL] == c.CH_TCP:
+        print(f'\n### starting TEXT server at {g_settings[c.MY_IP]}:{c.TEXT_PORT}')
         loop.create_task(asyncio.start_server(handle_tcp_text, '0.0.0.0', c.TEXT_PORT))
 
     cw.prepare_web()
