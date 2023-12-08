@@ -12,8 +12,9 @@ import constants as c
 import utils
 
 SERIAL1_TIMEOUT = 50 # ms
-ASYNC_SLEEP_MS = 30
 SERIAL_BUF = 1024
+ASYNC_SLEEP_30MS = 30
+ASYNC_SLEEP_100MS = 100
 
 def init_serial(baud, parity, bits, stop, timeout):
     uart0 = UART(0, tx=Pin(0), rx=Pin(1))
