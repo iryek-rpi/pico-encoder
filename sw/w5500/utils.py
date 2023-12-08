@@ -62,34 +62,34 @@ def validate_settings(settings):
     #check if the settings are valid
     msg = ''
     ns = settings.copy()
-    ns[SPEED] = int(settings[SPEED])
+    ns[c.SPEED] = int(settings[c.SPEED])
     #if ns[PARITY] is 'N':
     #    ns[PARITY] = None
     #else:
     #    ns[PARITY] = int(ns[PARITY])
 
-    ns[DATA] = int(settings[DATA])
-    ns[STOP] = int(settings[STOP])
+    ns[c.DATA] = int(settings[c.DATA])
+    ns[c.STOP] = int(settings[c.STOP])
 
-    if not validate_ip_string(settings[IP]):
-        msg += f'IP 주소 오류: {settings[IP]}<br>'
+    if not validate_ip_string(settings[c.IP]):
+        msg += f'IP 주소 오류: {settings[c.IP]}<br>'
 
-    if not validate_ip_string(settings[GATEWAY]):
-        msg += f'게이트웨이 오류: {settings[GATEWAY]}<br>'
+    if not validate_ip_string(settings[c.GATEWAY]):
+        msg += f'게이트웨이 오류: {settings[c.GATEWAY]}<br>'
     
-    if not validate_ip_string(settings[PEER_IP]):
-        msg += f'상대 단말 IP 주소 오류: {settings[PEER_IP]}<br>'
+    if not validate_ip_string(settings[c.PEER_IP]):
+        msg += f'상대 단말 IP 주소 오류: {settings[c.PEER_IP]}<br>'
 
-    if not validate_ip_string(settings[HOST_IP]):
-        msg += f'호스트 IP 주소 오류: {settings[HOST_IP]}<br>'
+    if not validate_ip_string(settings[c.HOST_IP]):
+        msg += f'호스트 IP 주소 오류: {settings[c.HOST_IP]}<br>'
 
-    if not validate_port_string(settings[HOST_PORT]):
-        msg += f'호스트 포트 오류: {settings[HOST_PORT]} 1023<포트번호<65536<br>'
+    if not validate_port_string(settings[c.HOST_PORT]):
+        msg += f'호스트 포트 오류: {settings[c.HOST_PORT]} 1023<포트번호<65536<br>'
     else:
-        ns[HOST_PORT] = int(settings[HOST_PORT])
+        ns[c.HOST_PORT] = int(settings[c.HOST_PORT])
 
-    if len(ns[KEY]) > 16 or len(ns[KEY]<4):
-        msg += f'암호키 오류: {settings[KEY]} 암호키는 4~16자리로 지정해야 합니다<br>'
+    if len(ns[c.KEY]) > 16 or len(ns[c.KEY]<4):
+        msg += f'암호키 오류: {settings[c.KEY]} 암호키는 4~16자리로 지정해야 합니다<br>'
 
     if msg != '':
         msg = f'<p style="color:Tomato;">설정 오류<br>{msg}</p>'
