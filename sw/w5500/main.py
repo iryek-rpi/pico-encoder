@@ -49,7 +49,8 @@ async def send_tcp_data_async(data, reader, writer):
     await writer.drain()
     data = await reader.read(100)
     print(f'send_tcp_data_async: read: {data.decode("utf-8")}')
-    return data.decode('utf-8')
+    #return data.decode('utf-8')
+    return data
 
 async def send_serial_data_async(data, reader, writer):
     print(f'\n+++ send_serial_data_async: writer.write(data:{data}) via uart')
@@ -117,7 +118,7 @@ async def process_stream(handler1, handler2, key, reader, writer, name, dest):
     print(f'\nhandling {name}..')
     if dest!=g_uart:
         relay_reader, relay_writer = await asyncio.open_connection(*dest)
-        print(f'\n=== process_stream: open connection to {dest}')
+        print(f'\n=== process_stream: relay open connection to {dest}')
 
     while True:
         b64 = await reader.read(100)
@@ -128,7 +129,11 @@ async def process_stream(handler1, handler2, key, reader, writer, name, dest):
             if dest==g_uart:
                 response = send_serial_data_sync(processed_msg, g_uart)
             else:
-                response = await send_tcp_data_async(processed_msg, relay_reader, relay_writer)
+                #response = await send_tcp_data_async(processed_msg, relay_reader, relay_writer)
+                print(f'=== process_stream: sending to relay at {dest}: {processed_msg}')
+                relay_writer.write(processed_msg)
+                await relay_writer.drain()
+                response = await relay_reader.read(100)
             print(f'=== process_stream: response: {response}')
             if len(response)>0:
                 processed_response = handler2(response, key)
