@@ -3,8 +3,11 @@ import asyncio
 import socket
 
 HOSTNAME = socket.gethostname()
+SERVER_IP = os.environ['TEXT_SERVER_IP']
+SERVER_PORT = os.environ['TEXT_SERVER_PORT']
+print(f'# CLIENT({HOSTNAME}): Connecting to {SERVER_IP}:{SERVER_PORT}')
 
-async def tcp_echo_client(ip, port):
+async def tcp_client(ip, port):
     reader, writer = await asyncio.open_connection(ip, int(port))
     print(f'# CLIENT({HOSTNAME}): Connected to {ip}:{port}')
     while True:
@@ -22,4 +25,4 @@ async def tcp_echo_client(ip, port):
     writer.close()
     await writer.wait_closed()
 
-asyncio.run(tcp_echo_client(os.environ['TEXT_SERVER_IP'], os.environ['TEXT_SERVER_PORT']))
+asyncio.run(tcp_client(SERVER_IP, SERVER_PORT))
