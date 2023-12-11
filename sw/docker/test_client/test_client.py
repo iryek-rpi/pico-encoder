@@ -1,5 +1,8 @@
 import socket
-import Cryptodome as aes
+from Cryptodome.Cipher import AES
+from Cryptodome.Cipher import AES
+from Cryptodome.Util.Padding import pad
+from Cryptodome.Random import get_random_bytes
 
 DEFAULT_LENGTH_KEY = b'aD\xd8\x11e\xdcy`\t\xdc\xe4\xa7\x1f\x11\x94\x93'
 DEFAULT_KEY_LEN = len(DEFAULT_LENGTH_KEY)
@@ -13,10 +16,12 @@ def fix_len_and_encode_key(key):
 def encrypt_text(b64, fixed_binary_key):
     print('OOOOO encrypt text(): data received: ', b64, 'of type(b64): ', type(b64))
     
-    IV = aes.generate_IV(16)
-    cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
+    #IV = aes.generate_IV(16)
+    #cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
+    IV = AES.get_random_bytes(16)
+    cipher = AES.new(fixed_binary_key, AES.MODE_CBC, IV)
     msg = cipher.encrypt(b64)
-    #print('IV:', IV, ' msg:', msg)
+    print('IV:', IV, ' msg:', msg)
     crypto = IV + msg
     if not crypto:
         print('OOOOO Encryption result Empty')
@@ -28,7 +33,8 @@ def decrypt_crypto(b64, fixed_binary_key):
 
     IV, msg = b64[:16], b64[16:]
     msg = bytearray(msg)
-    cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
+    #cipher = aes.new(fixed_binary_key, aes.MODE_CBC, IV)
+    cipher = AES.new(fixed_binary_key, AES.MODE_CBC, IV)
     decrypted_msg = cipher.decrypt(msg)
     print('XXXXX decrypted_msg: ', decrypted_msg)
     if not decrypted_msg:
