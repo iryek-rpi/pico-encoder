@@ -3,12 +3,10 @@ from datetime import datetime
 import flet as ft
 import comm
 import w5500.constants as c
-
-WINC_WINDOW_WIDTH = 1400
-WINC_WINDOW_HEIGHT = 720
+from pprint import pp
 
 ENC_COLUMN_WIDTH = 1000
-LEFT_TITLE_WIDTH = 80
+LEFT_TITLE_WIDTH = 140
 MID_TITLE_WIDTH = 60 
 
 TITLE_ALIGN = ft.TextAlign.CENTER
@@ -26,24 +24,53 @@ GROUP_WIDTH_MARGIN = 50
 GROUP_WIDTH = LEFT_TITLE_WIDTH + LONG_FIELD + GROUP_WIDTH_MARGIN
 GROUP_TITLE_HEIGHT = 50
 
+BUTTON_HEIGHT = 40
+BUTTON_BAR_HEIGHT = 60
+GROUP_HEIGHT = 500
+WINC_WINDOW_WIDTH = GROUP_WIDTH * 3 + 27 + 50
+WINC_WINDOW_HEIGHT = 620
+
 g_page = None
+info_text = ft.Text('Dropdown focus count', width=LEFT_TITLE_WIDTH, text_align=TITLE_ALIGN, weight=TITLE_WEIGHT)
+
+def on_portlist_focus(e):
+    ports = comm.serial_ports()
+    e.control.options.clear()
+    if ports:
+        for port in ports:
+            e.control.options.append(ft.dropdown.Option(port))
+    e.control.page.update()
+
+def read_from_device(e):
+    pass
+
+button_row = ft.Container( bgcolor=ft.colors.RED, 
+                content=ft.Row(spacing = 50, width = WINC_WINDOW_WIDTH, height = BUTTON_BAR_HEIGHT, alignment=ft.MainAxisAlignment.CENTER,
+                            controls = [
+                                ft.FilledButton("단말에서 설정 읽어오기", on_click=read_from_device, width=200, height=BUTTON_HEIGHT,
+                                        style=ft.ButtonStyle(shape={ft.MaterialState.DEFAULT: ft.RoundedRectangleBorder(radius=2),})),
+                                ft.FilledButton("단말에 설정 저장", on_click=read_from_device, width=200, height=BUTTON_HEIGHT, 
+                                        style=ft.ButtonStyle(shape={ft.MaterialState.DEFAULT: ft.RoundedRectangleBorder(radius=2),})),
+                            ]))
+    
+    
 
 class OptionRow(ft.Row):
     def __init__(self, label, control, options):
-        option_label = ft.Text(label, width=LEFT_TITLE_WIDTH, text_align=TITLE_ALIGN, weight=TITLE_WEIGHT)
+        self.option_label = ft.Text(label, width=LEFT_TITLE_WIDTH, text_align=TITLE_ALIGN, weight=TITLE_WEIGHT)
         if control == ft.TextField:
-            option_control = ft.TextField(width=LONG_FIELD)
+            self.option_control = ft.TextField(width=LONG_FIELD)
         elif control == ft.Dropdown:
-            option_control = ft.Dropdown(width=LONG_FIELD,
+            self.option_control = ft.Dropdown(width=LONG_FIELD,
                                 value=options[1][options[0]],
                                 options=[ft.dropdown.Option(option) for option in options[1]],
                             )
         elif control == ft.RadioGroup:
-            option_control = ft.RadioGroup(value=options[1][options[0]], content = ft.Row([ft.Radio(value=option, label=option) for option in options[1]]))
+            self.option_control = ft.RadioGroup(value=options[1][options[0]], content = ft.Row([ft.Radio(value=option, label=option) for option in options[1]]))
         else:
             assert False, f"Unknown control type: {control}"
         super().__init__(spacing=5, width=ENC_COLUMN_WIDTH, alignment=ft.MainAxisAlignment.START,
-                    controls=[option_label, option_control])
+                    controls=[self.option_label, self.option_control])
     
     def get_value(self):
         return self.controls[1].value
@@ -58,12 +85,38 @@ class OptionGroup(ft.Container):
         self.options = options
         content = ft.Column(scroll=ft.ScrollMode.HIDDEN, expand=True, alignment=ft.MainAxisAlignment.START, 
                          controls=[self.group_title]+self.options, width=GROUP_WIDTH)
-        super().__init__(content=content, width=GROUP_WIDTH, height=WINC_WINDOW_HEIGHT, bgcolor=ft.colors.YELLOW_ACCENT_100)
+        super().__init__(content=content, width=GROUP_WIDTH, height=GROUP_HEIGHT, bgcolor=ft.colors.YELLOW_ACCENT_100)
 
-custom_host_ip = OptionRow("호스트 IP:", ft.TextField, [])
-custom_device_ip = OptionRow("단말 IP:", ft.TextField, [])
-custom_serial_speed = OptionRow("시리얼 속도:", ft.Dropdown, c.SPEED_OPTIONS)
-custom_channel = OptionRow("통신채널:", ft.RadioGroup, c.CHANNEL_OPTIONS)
+
+cfg_channel = OptionRow("통신채널:", ft.RadioGroup, c.CHANNEL_OPTIONS)
+cfg_host_ip = OptionRow("호스트 IP:", ft.TextField, [])
+cfg_host_port = OptionRow("호스트 포트:", ft.TextField, [])
+
+cfg_serial_port = OptionRow("시리얼 포트:", ft.TextField, [])
+cfg_serial_port_list = OptionRow("시리얼 포트 목록:", ft.Dropdown, (0, comm.serial_ports()))
+cfg_serial_port_list.option_control.on_focus = on_portlist_focus
+cfg_serial_speed = OptionRow("시리얼 속도:", ft.Dropdown, c.SPEED_OPTIONS)
+cfg_serial_parity = OptionRow("패리티 비트:", ft.Dropdown, c.PARITY_OPTIONS)
+cfg_serial_data = OptionRow("데이터 비트:", ft.Dropdown, c.DATA_OPTIONS)
+cfg_serial_stop = OptionRow("스톱 속도:", ft.Dropdown, c.STOP_OPTIONS)
+
+cfg_device_ip = OptionRow("단말 IP:", ft.TextField, [])
+cfg_gateway = OptionRow("게이트웨이:", ft.TextField, [])
+cfg_subnet = OptionRow("서브넷마스크:", ft.TextField, [])
+cfg_peer_ip = OptionRow("상대 단말 IP:", ft.TextField, [])
+cfg_key = OptionRow("암호키:", ft.TextField, [])
+ports = comm.serial_ports()
+#custom_serial_speed = OptionRow("시리얼 속도:", ft.Dropdown, (0, ports))
+#custom_serial_speed.option_control.options.clear()
+#custom_serial_speed.option_control.options.append(ft.dropdown.Option(f"없음"))
+#custom_serial_speed.option_control.value=0
+#custom_serial_speed.option_control.on_focus = on_dropdown_focus
+og_host = OptionGroup("호스트 설정", 
+            [cfg_channel, cfg_host_ip, cfg_host_port])
+og_serial = OptionGroup("시리얼 통신 설정", 
+            [cfg_serial_port, cfg_serial_port_list, cfg_serial_speed, cfg_serial_parity, cfg_serial_data, cfg_serial_stop])
+og_device = OptionGroup("단말 설정", 
+            [cfg_device_ip, cfg_gateway, cfg_subnet, cfg_peer_ip, cfg_key])
 
 def add_history(msg):
     global history
