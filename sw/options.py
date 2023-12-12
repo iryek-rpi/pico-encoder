@@ -45,6 +45,11 @@ class OS: #OS
     @classmethod
     def set_options(cls, options):
         cls.options = options
+    
+    @classmethod
+    def apply_settings(cls, settings):
+        for k, v in settings.items():
+            cls.set_value(k, v)
 
 def init_settings():
     #create a new file truncating the old one if it exists
