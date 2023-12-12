@@ -3,6 +3,7 @@ from pprint import pp
 
 import comm
 import w5500.constants as c
+import options
 from options import OS
 
 ENC_COLUMN_WIDTH = 1000
@@ -45,22 +46,25 @@ def on_portlist_focus(e):
 def read_from_device(e):
     pass
 
+def read_and_apply_options():
+    OS.apply_settings(options.load_settings())
+
 def init():
     OS.get(c.HOST_IP).set_value(comm.find_host_ip())
-    #read_and_apply_options()
+    read_and_apply_options()
 
 class OptionRow(ft.Row):
-    def __init__(self, label, control, options):
+    def __init__(self, label, control, options_tuple):
         self.option_label = ft.Text(label, width=LEFT_TITLE_WIDTH, text_align=TITLE_ALIGN, weight=TITLE_WEIGHT)
         if control == ft.TextField:
             self.option_control = ft.TextField(width=LONG_FIELD)
         elif control == ft.Dropdown:
             self.option_control = ft.Dropdown(width=LONG_FIELD,
-                                value=options[1][options[0]],
-                                options=[ft.dropdown.Option(option) for option in options[1]],
-                            )
+                                    value=options_tuple[1][options_tuple[0]],
+                                    options=[ft.dropdown.Option(option) for option in options_tuple[1]],
+                                )
         elif control == ft.RadioGroup:
-            self.option_control = ft.RadioGroup(value=options[1][options[0]], content = ft.Row([ft.Radio(value=option, label=option) for option in options[1]]))
+            self.option_control = ft.RadioGroup(value=options_tuple[0], content = ft.Row([ft.Radio(value=idx, label=option) for idx, option in enumerate(options_tuple[1])]))
         else:
             assert False, f"Unknown control type: {control}"
         super().__init__(spacing=5, width=ENC_COLUMN_WIDTH, alignment=ft.MainAxisAlignment.START,
