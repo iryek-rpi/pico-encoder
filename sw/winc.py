@@ -1,28 +1,21 @@
 import flet as ft
 import controls as ctr
 from control_reference import ControlReference as CR
-import comm
 
 def main_controls(page):
+    ctr.init()
     return ft.SafeArea(
         ft.Column(
             controls = [
                 ctr.button_row,
-                ft.Row(
-                    controls=[
-                        ctr.og_host,
-                        ft.VerticalDivider(width=9, thickness=3),
-                        ctr.og_serial,
-                        ft.VerticalDivider(width=9, thickness=3),
-                        ctr.og_device,
-                    ],
-                    width=ctr.WINC_WINDOW_WIDTH,
+                ft.Row( controls=[ ctr.og_host, ctr.og_serial, ctr.og_device,],
                     alignment=ft.MainAxisAlignment.START,
+                    spacing=ctr.GROUP_SPACE,
                 ),
             ],
-            width=ctr.WINC_WINDOW_WIDTH,
             height=ctr.WINC_WINDOW_HEIGHT,
             alignment=ft.MainAxisAlignment.START,
+            spacing=ctr.GROUP_SPACE
         ),
         expand=True,
     )
@@ -32,8 +25,6 @@ def main(page: ft.Page):
     page.window_width = ctr.WINC_WINDOW_WIDTH
     page.window_height = ctr.WINC_WINDOW_HEIGHT
 
-    ctr.host_ip.value = comm.find_host_ip()
-    ctr.cfg_host_ip.set_value(comm.find_host_ip())
     page.add(main_controls(page))
     CR.add_control_reference("page", page)
 
