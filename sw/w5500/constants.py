@@ -28,3 +28,19 @@ DATA = 'data'
 STOP = 'stop'
 CHANNEL = 'channel'
 KEY = 'key'
+
+DEFAUlT_SETTINGS = {
+    MY_IP : '192.168.0.10',
+    CONFIG : 0,
+    GATEWAY : '192.168.0.1',
+    SUBNET : '255.255.255.0',
+    PEER_IP : '192.168.0.9',
+    HOST_IP : '192.168.0.254',
+    HOST_PORT : 8503,
+    SPEED : 9600,
+    PARITY : 'N',   #N, E, O
+    DATA : 8,
+    STOP : 1,
+    CHANNEL : CH_TCP, # 1=tcp, 0=serial
+    KEY:'12345678'
+}

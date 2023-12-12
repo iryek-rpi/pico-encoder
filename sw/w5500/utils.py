@@ -5,24 +5,10 @@ https://www.vaadata.com/blog/how-to-securely-store-passwords-in-database/
 import os
 import ujson as json
 import constants as c
+from constants import DEFAUlT_SETTINGS
 
 #{"speed": "9600", "parity": "N", "data": "8", "stop": "1", "ip": "192.168.0.5", "subnet": "255.255.255.0", "gateway": "192.168.0.1", "port": "8501", "peer_ip": "192.168.0.6", "peer_port": "8502", "host_ip": "192.168.0.2", "host_port": "8503", "key": "12345678"}
 
-DEFAUlT_SETTINGS = {
-    c.MY_IP : '192.168.0.10',
-    c.CONFIG : 0,
-    c.GATEWAY : '192.168.0.1',
-    c.SUBNET : '255.255.255.0',
-    c.PEER_IP : '192.168.0.9',
-    c.HOST_IP : '192.168.0.254',
-    c.HOST_PORT : 8503,
-    c.SPEED : 9600,
-    c.PARITY : 'N',   #N, E, O
-    c.DATA : 8,
-    c.STOP : 1,
-    c.CHANNEL : c.CH_TCP, # 1=tcp, 0=serial
-    c.KEY:'12345678'
-}
 
 SETTING_FILE = 'settings.json'
 
