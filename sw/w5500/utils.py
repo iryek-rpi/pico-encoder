@@ -9,12 +9,12 @@ import constants as c
 #{"speed": "9600", "parity": "N", "data": "8", "stop": "1", "ip": "192.168.0.5", "subnet": "255.255.255.0", "gateway": "192.168.0.1", "port": "8501", "peer_ip": "192.168.0.6", "peer_port": "8502", "host_ip": "192.168.0.2", "host_port": "8503", "key": "12345678"}
 
 DEFAUlT_SETTINGS = {
-    c.MY_IP : '192.168.1.10',
+    c.MY_IP : '192.168.0.10',
     c.CONFIG : 0,
     c.GATEWAY : '192.168.0.1',
     c.SUBNET : '255.255.255.0',
-    c.PEER_IP : '192.168.0.5',
-    c.HOST_IP : '192.168.0.6',
+    c.PEER_IP : '192.168.0.9',
+    c.HOST_IP : '192.168.0.254',
     c.HOST_PORT : 8503,
     c.SPEED : 9600,
     c.PARITY : 'N',   #N, E, O

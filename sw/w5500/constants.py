@@ -14,6 +14,7 @@ DATA_OPTIONS = (1, [7, 8])
 STOP_OPTIONS = (0, [1, 2])
 SPEED_OPTIONS = (0, [9600, 19200, 38400])
 
+SERIAL_PORT = 'comm'
 MY_IP = 'ip'
 CONFIG = 'config'
 GATEWAY = 'gateway'

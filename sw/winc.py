@@ -1,6 +1,29 @@
+import sys
+import logging
 import flet as ft
 import controls as ctr
 from control_reference import ControlReference as CR
+
+#logging.basicConfig(filename='winc.log', filemode='w', level=logging.DEBUG)
+#logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
+
+
+def setup_custom_logger(name):
+    logger = logging.getLogger(name)
+    formatter = logging.Formatter(fmt='%(asctime)s:%(module)s/%(funcName)s:%(lineno)d %(message)s')
+
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+    handler = logging.FileHandler('winc.log', mode='w')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+    logger.setLevel(logging.DEBUG)
+    return logger
+
+logger = setup_custom_logger('winc')
 
 def main_controls(page):
     ctr.init()

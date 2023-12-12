@@ -1,9 +1,8 @@
-from datetime import datetime
-
 import flet as ft
+from pprint import pp
+
 import comm
 import w5500.constants as c
-from pprint import pp
 
 ENC_COLUMN_WIDTH = 1000
 LEFT_TITLE_WIDTH = 140
@@ -47,7 +46,7 @@ def read_from_device(e):
 
 def init():
     or_host_ip.set_value(comm.find_host_ip())
-
+    #read_and_apply_options()
 
 class OptionRow(ft.Row):
     def __init__(self, label, control, options):
@@ -90,6 +89,43 @@ class OptionGroup(ft.Container):
                         height=GROUP_HEIGHT,)
         super().__init__(content=content, width=GROUP_WIDTH, height=GROUP_HEIGHT, bgcolor=ft.colors.BLUE_GREY_100)
 
+class OptionStore:
+    options = {}
+    dirty = False
+
+    @classmethod
+    def get(cls, key):
+        return cls.options[key]
+
+    @classmethod
+    def add(cls, key, value):
+        cls.options[key] = value
+        cls.dirty = True
+
+    @classmethod
+    def get_value(cls, key):
+        return cls.options[key].get_value()
+
+    @classmethod
+    def set_value(cls, key, value):
+        cls.options[key].set_value(value)
+        cls.dirty = True
+
+    @classmethod
+    def get_dirty(cls):
+        return cls.dirty
+
+    @classmethod
+    def set_dirty(cls, value):
+        cls.dirty = value
+
+    @classmethod
+    def get_options(cls):
+        return cls.options
+
+    @classmethod
+    def set_options(cls, options):
+        cls.options = options
 
 button_row = ft.Container( bgcolor=ft.colors.BLUE_GREY_100, width=GROUP_WIDTH*3+GROUP_SPACE*2, height=BUTTON_BAR_HEIGHT,
                 content=ft.Row(spacing = 50, width = WINC_WINDOW_WIDTH, height = BUTTON_BAR_HEIGHT, alignment=ft.MainAxisAlignment.CENTER,
@@ -117,6 +153,22 @@ or_gateway = OptionRow("게이트웨이:", ft.TextField, [])
 or_subnet = OptionRow("서브넷마스크:", ft.TextField, [])
 or_peer_ip = OptionRow("상대 단말 IP:", ft.TextField, [])
 or_key = OptionRow("암호키:", ft.TextField, [])
+
+OptionStore.add(c.CHANNEL, or_channel)
+OptionStore.add(c.HOST_IP, or_host_ip)
+OptionStore.add(c.HOST_PORT, or_host_port)
+
+OptionStore.add(c.SERIAL_PORT, or_serial_port)
+OptionStore.add(c.SPEED, or_serial_speed)
+OptionStore.add(c.PARITY, or_serial_parity)
+OptionStore.add(c.DATA, or_serial_data)
+OptionStore.add(c.STOP, or_serial_stop)
+
+OptionStore.add(c.MY_IP, or_device_ip)
+OptionStore.add(c.GATEWAY, or_gateway)
+OptionStore.add(c.SUBNET, or_subnet)
+OptionStore.add(c.PEER_IP, or_peer_ip)
+OptionStore.add(c.KEY, or_key)
 
 og_host = OptionGroup("호스트 설정", 
             [or_channel, or_host_ip, or_host_port])
