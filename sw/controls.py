@@ -3,6 +3,7 @@ from pprint import pp
 
 import comm
 import w5500.constants as c
+from options import OS
 
 ENC_COLUMN_WIDTH = 1000
 LEFT_TITLE_WIDTH = 140
@@ -45,7 +46,7 @@ def read_from_device(e):
     pass
 
 def init():
-    or_host_ip.set_value(comm.find_host_ip())
+    OS.get(c.HOST_IP).set_value(comm.find_host_ip())
     #read_and_apply_options()
 
 class OptionRow(ft.Row):
@@ -89,44 +90,6 @@ class OptionGroup(ft.Container):
                         height=GROUP_HEIGHT,)
         super().__init__(content=content, width=GROUP_WIDTH, height=GROUP_HEIGHT, bgcolor=ft.colors.BLUE_GREY_100)
 
-class OptionStore:
-    options = {}
-    dirty = False
-
-    @classmethod
-    def get(cls, key):
-        return cls.options[key]
-
-    @classmethod
-    def add(cls, key, value):
-        cls.options[key] = value
-        cls.dirty = True
-
-    @classmethod
-    def get_value(cls, key):
-        return cls.options[key].get_value()
-
-    @classmethod
-    def set_value(cls, key, value):
-        cls.options[key].set_value(value)
-        cls.dirty = True
-
-    @classmethod
-    def get_dirty(cls):
-        return cls.dirty
-
-    @classmethod
-    def set_dirty(cls, value):
-        cls.dirty = value
-
-    @classmethod
-    def get_options(cls):
-        return cls.options
-
-    @classmethod
-    def set_options(cls, options):
-        cls.options = options
-
 button_row = ft.Container( bgcolor=ft.colors.BLUE_GREY_100, width=GROUP_WIDTH*3+GROUP_SPACE*2, height=BUTTON_BAR_HEIGHT,
                 content=ft.Row(spacing = 50, width = WINC_WINDOW_WIDTH, height = BUTTON_BAR_HEIGHT, alignment=ft.MainAxisAlignment.CENTER,
                             controls = [
@@ -136,46 +99,31 @@ button_row = ft.Container( bgcolor=ft.colors.BLUE_GREY_100, width=GROUP_WIDTH*3+
                                         style=ft.ButtonStyle(shape={ft.MaterialState.DEFAULT: ft.RoundedRectangleBorder(radius=2),})),
                             ]))
 
-or_channel = OptionRow("통신채널:", ft.RadioGroup, c.CHANNEL_OPTIONS)
-or_host_ip = OptionRow("호스트 IP:", ft.TextField, [])
-or_host_port = OptionRow("호스트 포트:", ft.TextField, [])
-
-or_serial_port = OptionRow("시리얼 포트:", ft.TextField, [])
 or_serial_port_list = OptionRow("시리얼 포트 목록:", ft.Dropdown, (0, comm.serial_ports()))
 or_serial_port_list.option_control.on_focus = on_portlist_focus
-or_serial_speed = OptionRow("시리얼 속도:", ft.Dropdown, c.SPEED_OPTIONS)
-or_serial_parity = OptionRow("패리티 비트:", ft.Dropdown, c.PARITY_OPTIONS)
-or_serial_data = OptionRow("데이터 비트:", ft.Dropdown, c.DATA_OPTIONS)
-or_serial_stop = OptionRow("스톱 속도:", ft.Dropdown, c.STOP_OPTIONS)
 
-or_device_ip = OptionRow("단말 IP:", ft.TextField, [])
-or_gateway = OptionRow("게이트웨이:", ft.TextField, [])
-or_subnet = OptionRow("서브넷마스크:", ft.TextField, [])
-or_peer_ip = OptionRow("상대 단말 IP:", ft.TextField, [])
-or_key = OptionRow("암호키:", ft.TextField, [])
+OS.add(c.CHANNEL, OptionRow("통신채널:", ft.RadioGroup, c.CHANNEL_OPTIONS))
+OS.add(c.HOST_IP, OptionRow("호스트 IP:", ft.TextField, []))
+OS.add(c.HOST_PORT, OptionRow("호스트 포트:", ft.TextField, []))
 
-OptionStore.add(c.CHANNEL, or_channel)
-OptionStore.add(c.HOST_IP, or_host_ip)
-OptionStore.add(c.HOST_PORT, or_host_port)
+OS.add(c.SERIAL_PORT, OptionRow("시리얼 포트:", ft.TextField, []))
+OS.add(c.SPEED, OptionRow("시리얼 속도:", ft.Dropdown, c.SPEED_OPTIONS))
+OS.add(c.PARITY, OptionRow("패리티 비트:", ft.Dropdown, c.PARITY_OPTIONS))
+OS.add(c.DATA, OptionRow("데이터 비트:", ft.Dropdown, c.DATA_OPTIONS))
+OS.add(c.STOP, OptionRow("스톱 비트:", ft.Dropdown, c.STOP_OPTIONS))
 
-OptionStore.add(c.SERIAL_PORT, or_serial_port)
-OptionStore.add(c.SPEED, or_serial_speed)
-OptionStore.add(c.PARITY, or_serial_parity)
-OptionStore.add(c.DATA, or_serial_data)
-OptionStore.add(c.STOP, or_serial_stop)
-
-OptionStore.add(c.MY_IP, or_device_ip)
-OptionStore.add(c.GATEWAY, or_gateway)
-OptionStore.add(c.SUBNET, or_subnet)
-OptionStore.add(c.PEER_IP, or_peer_ip)
-OptionStore.add(c.KEY, or_key)
+OS.add(c.MY_IP, OptionRow("단말 IP:", ft.TextField, []))
+OS.add(c.GATEWAY, OptionRow("게이트웨이:", ft.TextField, []))
+OS.add(c.SUBNET, OptionRow("서브넷마스크:", ft.TextField, []))
+OS.add(c.PEER_IP, OptionRow("상대 단말 IP:", ft.TextField, []))
+OS.add(c.KEY, OptionRow("암호키:", ft.TextField, []))
 
 og_host = OptionGroup("호스트 설정", 
-            [or_channel, or_host_ip, or_host_port])
+            [OS.get(c.CHANNEL), OS.get(c.HOST_IP), OS.get(c.HOST_PORT)])
 og_serial = OptionGroup("시리얼 통신 설정", 
-            [or_serial_port, or_serial_port_list, or_serial_speed, or_serial_parity, or_serial_data, or_serial_stop])
+            [OS.get(c.SERIAL_PORT), or_serial_port_list, OS.get(c.SPEED), OS.get(c.PARITY), OS.get(c.DATA), OS.get(c.STOP)])
 og_device = OptionGroup("단말 설정", 
-            [or_device_ip, or_gateway, or_subnet, or_peer_ip, or_key])
+            [OS.get(c.MY_IP), OS.get(c.GATEWAY), OS.get(c.SUBNET), OS.get(c.PEER_IP), OS.get(c.KEY)])
 
 def close_dlg(e):
     alert_dlg.open = False

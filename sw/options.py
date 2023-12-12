@@ -1,12 +1,50 @@
 import logging
 import json
-from w5500.utils import DEFAUlT_SETTINGS
+from w5500.constants import DEFAUlT_SETTINGS
 from w5500 import constants as c
 
 SETTING_FILE = 'pc_settings.json'
 DEFAULT_SERIAL_PORT = 'COM6'
 
 logger = logging.getLogger('winc')
+
+class OS: #OS
+    options = {}
+    dirty = False
+
+    @classmethod
+    def get(cls, key):
+        return cls.options[key]
+
+    @classmethod
+    def add(cls, key, value):
+        cls.options[key] = value
+        cls.dirty = True
+
+    @classmethod
+    def get_value(cls, key):
+        return cls.options[key].get_value()
+
+    @classmethod
+    def set_value(cls, key, value):
+        cls.options[key].set_value(value)
+        cls.dirty = True
+
+    @classmethod
+    def get_dirty(cls):
+        return cls.dirty
+
+    @classmethod
+    def set_dirty(cls, value):
+        cls.dirty = value
+
+    @classmethod
+    def get_options(cls):
+        return cls.options
+
+    @classmethod
+    def set_options(cls, options):
+        cls.options = options
 
 def init_settings():
     #create a new file truncating the old one if it exists
@@ -16,7 +54,7 @@ def init_settings():
 
 def load_settings():
     try:
-        with open(SETTING_FILE, 'r', encoding='utf-8') as f
+        with open(SETTING_FILE, 'r', encoding='utf-8') as f:
            return json.load(f)
     except OSError:
         return init_settings()
