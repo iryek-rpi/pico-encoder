@@ -129,4 +129,4 @@ dmypy.json
 
 hw/pcb/pcb-backups/*.zip
 k2_config.txt
-
+pc_settings.json
