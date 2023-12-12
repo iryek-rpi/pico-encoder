@@ -8,7 +8,7 @@ PARITY_NONE = 'N'
 PARITY_EVEN = 0
 PARITY_ODD = 1
 
-CHANNEL_OPTIONS = (0, ['TCP', '시리얼'])
+CHANNEL_OPTIONS = (1, ['Serial', 'TCP'])
 PARITY_OPTIONS = (0, [PARITY_NONE, PARITY_EVEN, PARITY_ODD])
 DATA_OPTIONS = (1, [7, 8])
 STOP_OPTIONS = (0, [1, 2])
@@ -31,7 +31,7 @@ KEY = 'key'
 
 DEFAUlT_SETTINGS = {
     MY_IP : '192.168.0.10',
-    CONFIG : 0,
+    #CONFIG : 0,  # config mode is not used any more
     GATEWAY : '192.168.0.1',
     SUBNET : '255.255.255.0',
     PEER_IP : '192.168.0.9',
