@@ -57,8 +57,8 @@ def validate_settings(settings):
     ns[c.DATA] = int(settings[c.DATA])
     ns[c.STOP] = int(settings[c.STOP])
 
-    if not validate_ip_string(settings[c.IP]):
-        msg += f'IP 주소 오류: {settings[c.IP]}<br>'
+    if not validate_ip_string(settings[c.MY_IP]):
+        msg += f'IP 주소 오류: {settings[c.MY_IP]}<br>'
 
     if not validate_ip_string(settings[c.GATEWAY]):
         msg += f'게이트웨이 오류: {settings[c.GATEWAY]}<br>'
@@ -74,7 +74,7 @@ def validate_settings(settings):
     else:
         ns[c.HOST_PORT] = int(settings[c.HOST_PORT])
 
-    if len(ns[c.KEY]) > 16 or len(ns[c.KEY]<4):
+    if len(ns[c.KEY])>16 or len(ns[c.KEY])<4:
         msg += f'암호키 오류: {settings[c.KEY]} 암호키는 4~16자리로 지정해야 합니다<br>'
 
     if msg != '':
