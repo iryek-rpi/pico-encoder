@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Input Controls</title>
+    <style>
+        h1 {
+            color: red;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        h1, h2, h3 {
+            /* margin: 0;
+            padding: 0; */
+            margin-top: 0;
+        }
+        .container {
+            width: 80%; /* changed from 100vw */
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            background-color: #ff9050;
+            border: 1px solid black;
+        }
+        .input-group {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .input-control {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .input-control label {
+            display: inline-block;
+            width: 120px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .input-control input,
+        .input-control select {
+            flex: 1;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            width: 70%;
+        }
+        @media only screen and (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Input Controls</h1>
+        <div class="input-group">
+            <h3>Input Group 1</h3>
+            <div class="input-control">
+                <label for="name">Name:</label>
+                <input type="text" id="name" placeholder="Name">
+            </div>
+            <div class="input-control">
+                <label for="color">Color:</label>
+                <select name="color" id="color">
+                    <option value="red">Red</option>
+                    <option value="green">Green</option>
+                    <option value="blue">Blue</option>
+                </select>
+            </div>
+            <div class="input-control">
+                <label for="channel">Channel:</label>
+                <select name="channel" id="channel">
+                    <option value="tcp">TCP</option>
+                    <option value="serial">시리얼</option>
+                </select>
+            </div>
+        </div>
+        <div class="input-group">
+            <h3>Input Group 2</h3>
+            <div class="input-control">
+                <label for="name2">Name2:</label>
+                <input type="text" id="name2" placeholder="Enter your name">
+            </div>
+            <div class="input-control">
+                <label for="color2">Color2:</label>
+                <select name="color2" id="color2">
+                    <option value="red">Red</option>
+                    <option value="green">Green</option>
+                    <option value="blue">Blue</option>
+                </select>
+            </div>
+        </div>
+        <button type="button">Submit</button>
+    </div>
+</body>
+</html>
