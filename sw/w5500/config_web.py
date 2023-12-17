@@ -7,12 +7,14 @@ from phew import logging, server
 from phew.template import render_template
 import utils
 import constants as c
+from main import g_settings
+
+web_settings = None
 
 PHEW_TEMPLATE_PATH = "phew_templates"
 
 def index(request):
-    current_settings = utils.load_settings()
-    return render_template(f"{PHEW_TEMPLATE_PATH}/index.html", ns=current_settings)
+    return render_template(f"{PHEW_TEMPLATE_PATH}/index.html", ns=web_settings)
 
 def configure(request):
     current_settings = utils.load_settings()

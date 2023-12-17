@@ -13,7 +13,9 @@ PARITY_OPTIONS = (0, [PARITY_NONE, PARITY_EVEN, PARITY_ODD])
 DATA_OPTIONS = (1, [7, 8])
 STOP_OPTIONS = (0, [1, 2])
 SPEED_OPTIONS = (0, [9600, 19200, 38400])
+DEFAULT_DEVICE_ID = 999
 
+DEVICE_ID = 'id'
 SERIAL_PORT = 'comm'
 MY_IP = 'ip'
 CONFIG = 'config'
@@ -30,6 +32,7 @@ CHANNEL = 'channel'
 KEY = 'key'
 
 DEFAUlT_SETTINGS = {
+    #DEVICE_ID : DEFAULT_DEVICE_ID, # device id shouldn't be configured by the user
     MY_IP : '192.168.0.10',
     #CONFIG : 0,  # config mode is not used any more
     GATEWAY : '192.168.0.1',

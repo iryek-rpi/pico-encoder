@@ -12,6 +12,17 @@ from constants import DEFAUlT_SETTINGS
 
 SETTING_FILE = 'settings.json'
 
+def get_device_id():
+    l = os.listdir()
+    try:
+        for f in l:
+            if f.startswith('mac_'):
+                return int(f[4:f.find('.')])
+    except Exception as e:
+        print(e)
+
+    return 999
+
 def init_settings():
     #create a new file called 'settings.json' truncating the old one if it exists
     #and write the default settings to it
@@ -54,6 +65,9 @@ def validate_settings(settings):
     #else:
     #    ns[PARITY] = int(ns[PARITY])
 
+    ns[c.CHANNEL] = int(settings[c.CHANNEL])
+    if ns[c.PARITY] != 'N':
+        ns[c.PARITY] = int(settings[c.PARITY])
     ns[c.DATA] = int(settings[c.DATA])
     ns[c.STOP] = int(settings[c.STOP])
 

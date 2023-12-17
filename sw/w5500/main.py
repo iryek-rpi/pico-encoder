@@ -81,9 +81,7 @@ async def process_serial_msg(uart, key, settings):
                 sm = b64.decode('utf-8').strip()
                 print(f'b64: {b64} sm: {sm}')
                 if sm[:7]=='CNF_REQ':
-                    saved_settings = utils.load_settings()
-                    print('saved_settings: ', saved_settings)
-                    str_settings = json.dumps(saved_settings)
+                    str_settings = json.dumps(g_settings)
                     msg = bytes('CNF_JSN', 'utf-8') + bytes(str_settings, 'utf-8') + bytes('CNF_END\n', 'utf-8')
                     asyncio.sleep_ms(nu.ASYNC_SLEEP_30MS)
                     uart.write(msg)
@@ -174,7 +172,10 @@ def main():
     global g_uart
 
     led_start()
+    device_id = utils.get_device_id()
     g_settings = utils.load_settings()
+    g_settings[c.DEVICE_ID] = device_id
+    cw.web_settings = g_settings
     print(g_settings)
 
     g_uart, g_settings = nu.init_connections(g_settings)
