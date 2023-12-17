@@ -15,11 +15,11 @@ import net_utils as nu
 #data = cipher.decrypt_and_verify(ciphertext, tag)
 import mpyaes as aes
 DEFAULT_LENGTH_KEY = b'aD\xd8\x11e\xdcy`\t\xdc\xe4\xa7\x1f\x11\x94\x93'
-default_key_len = len(DEFAULT_LENGTH_KEY)
+DEFAULT_KEY_LEN = len(DEFAULT_LENGTH_KEY)
 
 def fix_len_and_encode_key(key):
-    if len(key) > default_key_len:
-        key = key[:default_key_len]
+    if len(key) > DEFAULT_KEY_LEN:
+        key = key[:DEFAULT_KEY_LEN]
     keyb = key.encode()
     return keyb + DEFAULT_LENGTH_KEY[len(keyb):]
 

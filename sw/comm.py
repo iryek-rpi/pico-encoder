@@ -5,6 +5,7 @@ from threading import Thread
 import logging
 import serial
 import socket
+import glob
 import flet as ft
 
 from w5500 import constants as c
@@ -183,3 +184,44 @@ def tcp_send_plaintext(settings, text):
     except serial.serialutil.SerialException as e:
         #self.add_status_msg(f"시리얼 연결 오류: COM 포트({self.comm_port})를 확인하세요.")
         logging.info('시리얼 예외 발생: ', e)
+
+g_ports = []
+g_port_count = 0
+def serial_ports():
+    global g_ports
+    global g_port_count
+
+    """ Lists serial port names
+
+        :raises EnvironmentError:
+            On unsupported or unknown platforms
+        :returns:
+            A list of the serial ports available on the system
+    """
+    if sys.platform.startswith('win'):
+        ports = ['COM%s' % (i + 1) for i in range(256)]
+    elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
+        # this excludes your current terminal "/dev/tty"
+        ports = glob.glob('/dev/tty[A-Za-z]*')
+    elif sys.platform.startswith('darwin'):
+        ports = glob.glob('/dev/tty.*')
+    else:
+        raise EnvironmentError('Unsupported platform')
+
+    result = []
+    for port in ports:
+        try:
+            s = serial.Serial(port)
+            s.close()
+            result.append(port)
+        except (OSError, serial.SerialException):
+            pass
+    
+    if not result:
+        result = [f'시리얼 포트 없음:{g_port_count}']
+        g_port_count += 1
+    for p in result:
+        g_ports.append(p)
+    result = g_ports.copy()
+    print(f'#### port list: {result} ')
+    return result
