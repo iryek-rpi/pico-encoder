@@ -23,11 +23,12 @@ led_init()
 btn = Pin(9, Pin.IN, Pin.PULL_UP)
 
 def btn_callback(btn):
+    global g_settings
+
     print('Button pressed')
     led_state_setting()
-    settings = utils.load_settings()
-    settings[c.CONFIG] = 0 if settings[c.CONFIG]==1 else 0
-    utils.save_settings(settings)
+    utils.init_settings()
+    g_settings = utils.load_settings()
     time.sleep_ms(500)
     machine.reset()
 
