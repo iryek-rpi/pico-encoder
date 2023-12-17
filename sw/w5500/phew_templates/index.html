@@ -34,6 +34,7 @@
 				/* margin: 0;
 				padding: 0; */
 				margin-top: 0;
+				text-align: center;
 			}
 			.container {
 				width: 80%; /* changed from 100vw */
@@ -93,16 +94,18 @@
 						</select>
 					</div>
 					<div class="input-control">
-						<label for="host_ip">IP 주소:</label>
+						<label for="host_ip">IP 주소</label>
 						<input type="text" id="host_ip" name="host_ip" placeholder="IP 주소"><br>
-						<label for="host_port">호스트 포트:</label>
+					</div>
+					<div class="input-control">
+						<label for="host_port">호스트 포트</label>
 						<input type="text" id="host_port" name="host_port" placeholder="포트 번호"><br>
 					</div>
 				</div>
 				<div class="input-group">
 					<h3>시리얼 통신</h3>
 					<div class="input-control">
-						<label for="speed">시리얼 속도:</label>
+						<label for="speed">시리얼 속도</label>
 						<select id="speed" name="speed">
 							<option value="4800">4800</option>
 							<option selected value="9600">9600</option>
@@ -111,7 +114,7 @@
 						</select><br>
 					</div>
 					<div class="input-control">
-						<label for="parity">패리티 비트:</label>
+						<label for="parity">패리티 비트</label>
 						<select id="parity" name="parity">
 							<option selected value="N">N</option>
 							<option value="0">0</option>
@@ -119,7 +122,7 @@
 						</select><br>
 					</div>	
 					<div class="input-control">
-						<label for="data">데이터 비트:</label>
+						<label for="data">데이터 비트</label>
 						<select id="data" name="data">
 							<option value="7">7</option>
 							<option selected value="8">8</option>
@@ -127,7 +130,7 @@
 						</select><br>
 					</div>
 					<div class="input-control">
-						<label for="stop">스톱 비트:</label>
+						<label for="stop">스톱 비트</label>
 						<select id="stop" name="stop">
 							<option selected value="1">1 비트</option>
 							<option value="2">2 비트</option>
@@ -137,30 +140,30 @@
 				<div class="input-group">
 					<h3>단말 설정</h3>
 					<div class="input-control">
-						<label for="ip">단말 IP:</label>
+						<label for="ip">단말 IP</label>
 						<input type="text" id="ip" name="ip"><br>
 					</div>
 					<div class="input-control">
-						<label for="gateway">게이트웨이:</label>
+						<label for="gateway">게이트웨이</label>
 						<input type="text" id="gateway" name="gateway"><br>
 					</div>
 					<div class="input-control">
-						<label for="subnet">서브넷마스크:</label>
+						<label for="subnet">서브넷마스크</label>
 						<input type="text" id="subnet" name="subnet"><br>
 					</div>
 					<div class="input-control">
-						<label for="peer_ip">상대 단말 IP:</label>
+						<label for="peer_ip">상대 단말 IP</label>
 						<input type="text" id="peer_ip" name="peer_ip"><br>
 					</div>
 					<div class="input-control">
-						<label for="key">암호키(8글자 이내):</label>
+						<label for="key">암호키(16자 이내)</label>
 						<input type="text" id="key" name="key"><br>
 					</div>
 				</div> <!-- input-group -->
-				<button form="settings-form">저장</button>&nbsp;&nbsp;&nbsp;
 				<!--<button form="settings-form" formaction="/reset">초기화</button>&nbsp;&nbsp;&nbsp;
 				<button form="settings-form" formaction="/cancel">취소</button>-->
 			</form>
+			<button form="settings-form">저장</button>
 		</div> <!-- container -->
     </body>
 </html>
