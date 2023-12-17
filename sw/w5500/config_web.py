@@ -31,7 +31,6 @@ def configure(request):
     if not ns:
         return render_template(f"{PHEW_TEMPLATE_PATH}/index.html", ns=settings)
     else:
-        ns[c.CONFIG] = 0
         utils.save_settings(ns)
         time.sleep_ms(100)
         machine.reset()
