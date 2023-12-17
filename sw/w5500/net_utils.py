@@ -12,7 +12,8 @@ import constants as c
 import utils
 
 SERIAL1_TIMEOUT = 50 # ms
-SERIAL_BUF = 1024
+MAX_MSG = 1500
+SERIAL_BUF = MAX_MSG
 ASYNC_SLEEP_30MS = 30
 ASYNC_SLEEP_100MS = 100
 

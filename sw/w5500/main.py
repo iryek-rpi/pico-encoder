@@ -47,7 +47,7 @@ async def send_tcp_data_async(data, reader, writer):
     print(f'send_tcp_data_async: {data}')
     writer.write(data)
     await writer.drain()
-    data = await reader.read(100)
+    data = await reader.read(nu.MAX_MSG)
     print(f'send_tcp_data_async: read: {data.decode("utf-8")}')
     #return data.decode('utf-8')
     return data
@@ -57,18 +57,18 @@ async def send_serial_data_async(data, reader, writer):
     writer.write(data)
     while True:
         await asyncio.sleep_ms(nu.ASYNC_SLEEP_30MS)
-        b64 = reader.read(256)
+        b64 = reader.read(nu.MAX_MSG)
         if b64:
-            print(f'+++ send_serial_data_async: reader.read(256) => b64:{b64}')
+            print(f'+++ send_serial_data_async: reader.read({nu.MAX_MSG}) => b64:{b64}')
             return b64
 
 def send_serial_data_sync(data, uart):
     print(f'\n@@@@@ send_serial_data_sync: writer.write(data:{data}) via uart')
     uart.write(data)
     while True:
-        b64 = uart.read(256)
+        b64 = uart.read(nu.MAX_MSG)
         if b64:
-            print(f'@@@@@ send_serial_data_sync: reader.read(256) => b64:{b64}')
+            print(f'@@@@@ send_serial_data_sync: reader.read({nu.MAX_MSG}) => b64:{b64}')
             return b64
 
 async def process_serial_msg(uart, key, settings):
@@ -103,7 +103,7 @@ async def process_serial_msg(uart, key, settings):
                     #response= await send_tcp_data_async(encoded_msg, relay_reader, relay_writer) # never use this
                     relay_writer.write(encoded_msg)
                     await relay_writer.drain()
-                    response = await relay_reader.read(256)
+                    response = await relay_reader.read(nu.MAX_MSG)
                     print(f'process_serial_msg: response: {response}:{type(response)} writing to uart')
                     response = coder.decrypt_crypto(response, key)
                     print(f'decryped serial response: {response}:{type(response)} writing to uart')
@@ -121,7 +121,7 @@ async def process_stream(handler1, handler2, key, reader, writer, name, dest):
         print(f'\n=== process_stream: relay open connection to {dest}')
 
     while True:
-        b64 = await reader.read(100)
+        b64 = await reader.read(nu.MAX_MSG)
         addr = writer.get_extra_info('peername')
         print(f"\n=== process_stream() Received {b64} from {addr}")
         if len(b64)>0:
@@ -133,7 +133,7 @@ async def process_stream(handler1, handler2, key, reader, writer, name, dest):
                 print(f'=== process_stream: sending to relay at {dest}: {processed_msg}')
                 relay_writer.write(processed_msg)
                 await relay_writer.drain()
-                response = await relay_reader.read(100)
+                response = await relay_reader.read(nu.MAX_MSG)
             print(f'=== process_stream: response: {response}')
             if len(response)>0:
                 processed_response = handler2(response, key)
