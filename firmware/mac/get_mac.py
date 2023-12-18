@@ -18,13 +18,16 @@ def get_mac():
     print(f'mac: {m} {h}')
     return m, h
 
-def save_mac():
+def save_mac(id=None):
     m, h = get_mac()
-    with open('mac.bin', 'wb') as f:
+    filename = f'mac_{id}.bin' if id else 'mac.bin'
+    with open(filename, 'wb') as f:
         f.write(m)
+        return m, h
         
-def read_mac():
-    with open('mac.bin', 'rb') as f:
+def read_mac(id=None):
+    filename = f'mac_{id}.bin' if id else 'mac.bin'
+    with open(filename, 'rb') as f:
         m = f.read()
         h = m.hex()
         return m, h
@@ -52,3 +55,13 @@ def w5x00_init(net_config):
     ifc = nic.ifconfig()
     print(ifc)
     return ifc
+
+if __name__ == '__main__':
+    id = 1
+    m, h = save_mac(id)
+    m2, h2 = read_mac(id)
+    if m != m2:
+        print('Error: macs do not match')
+    else:
+        print('macs match')
+    #read_mac()
