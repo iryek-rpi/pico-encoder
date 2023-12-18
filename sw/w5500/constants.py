@@ -33,13 +33,13 @@ KEY = 'key'
 
 DEFAUlT_SETTINGS = {
     #DEVICE_ID : DEFAULT_DEVICE_ID, # device id shouldn't be configured by the user
-    MY_IP : '192.168.0.10',
+    MY_IP : '192.168.2.10',
     #CONFIG : 0,  # config mode is not used any more
-    GATEWAY : '192.168.0.1',
+    GATEWAY : '192.168.2.1',
     SUBNET : '255.255.255.0',
-    PEER_IP : '192.168.0.9',
-    HOST_IP : '192.168.0.254',
-    HOST_PORT : 8503,
+    PEER_IP : '192.168.2.9',
+    HOST_IP : '192.168.2.88',
+    HOST_PORT : 2004,
     SPEED : 9600,
     PARITY : 'N',   #N, E, O
     DATA : 8,
