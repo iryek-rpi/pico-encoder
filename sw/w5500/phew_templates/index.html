@@ -23,18 +23,14 @@
             };
 		</script>
 		<style>
-			h1 {
-				color: red;
-			}
 			body {
 				margin: 0;
 				padding: 0;
 			}
 			h1, h2, h3 {
-				/* margin: 0;
-				padding: 0; */
 				margin-top: 0;
 				text-align: center;
+				color: #555555;
 			}
 			.container {
 				width: 80%; /* changed from 100vw */
@@ -43,18 +39,22 @@
 				display: flex;
 				flex-direction: column;
 				padding: 20px;
-				background-color: #ff9050;
-				border: 1px solid black;
+				background-color: #DADDB1;
+				border: 1px solid rgb(55, 55, 55);
+
 			}
 			.input-group {
 				border: 1px solid #ccc;
 				padding: 10px;
 				margin-bottom: 20px;
+				background-color: #EAECCC;
+				border: 1px solid rgb(192, 192, 192);
 			}
 			.input-control {
 				margin-bottom: 15px;
 				display: flex;
 				align-items: center;
+				color: #555555;
 			}
 			.input-control label {
 				display: inline-block;
@@ -69,6 +69,15 @@
 				border: 1px solid #ccc;
 				border-radius: 3px;
 				width: 70%;
+			}
+			.button {
+				padding: 8px;
+				border: 1px solid #888;
+				border-radius: 5px;
+				background-color: #fea;
+				color: #555555;
+				font-weight: bold;
+				cursor: pointer;
 			}
 			@media only screen and (max-width: 768px) {
 				.container {
@@ -163,7 +172,7 @@
 				<!--<button form="settings-form" formaction="/reset">초기화</button>&nbsp;&nbsp;&nbsp;
 				<button form="settings-form" formaction="/cancel">취소</button>-->
 			</form>
-			<button form="settings-form">저장</button>
+			<button class="button" form="settings-form">저장</button>
 		</div> <!-- container -->
     </body>
 </html>
