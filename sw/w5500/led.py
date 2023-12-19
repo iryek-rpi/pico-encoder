@@ -47,6 +47,10 @@ def led_state_reset():
     blink_led(green, 8) # 8Hz
     blink_led(yellow, 8) # 8Hz
 
+def led_state_data_error():
+    blink_led(green, 5)
+    led_onoff(yellow, False)
+
 def blink_led(_led, freq):  # freq = Hz
     global timer_led, timer_yellow, timer_green, timer_red
 

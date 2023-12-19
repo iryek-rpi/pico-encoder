@@ -1,5 +1,5 @@
 import mpyaes as aes
-import net_utils as nu
+import led
 
 #NONCE = b'K\xa2\x02\xb5+N\xd3\x1c\xd9i\xf62\xcf\x95\x93 '
 #TAG = b'\xf3\xe6\xf34\xd2\xa5K\xe3c\xe3C\xba\x94la\x1b'
@@ -32,8 +32,11 @@ def encrypt_text(b64, fixed_binary_key):
     #print('IV:', IV, ' msg:', msg)
     crypto = IV + msg
     if not crypto:
+        led.led_state_data_error()
         print('OOOOO Encryption result Empty')
         crypto = bytes('***BAD DATA***', 'utf-8')
+    else:
+        led.led_state_good()
     return crypto
     
 
@@ -46,8 +49,11 @@ def decrypt_crypto(b64, fixed_binary_key):
     decrypted_msg = cipher.decrypt(msg)
     print('XXXXX decrypted_msg: ', decrypted_msg)
     if not decrypted_msg:
+        led.led_state_data_error()
         print('XXXXX Decryption result Empty')
         decrypted_msg = bytes('***BAD DATA***', 'utf-8')
+    else:
+        led.led_state_good()
     return decrypted_msg
 
 def enc_aes(key, iv, data):
