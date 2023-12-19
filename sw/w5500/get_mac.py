@@ -57,7 +57,7 @@ def w5x00_init(net_config):
     return ifc
 
 if __name__ == '__main__':
-    id = 3
+    id = 1
     m, h = save_mac(id)
     m2, h2 = read_mac(id)
     if m != m2:
