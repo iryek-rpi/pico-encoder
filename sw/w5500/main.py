@@ -25,8 +25,8 @@ btn = Pin(9, Pin.IN, Pin.PULL_UP)
 def btn_callback(btn):
     global g_settings
 
+    led_state_reset()
     print('Button pressed')
-    led_state_setting()
     utils.init_settings()
     g_settings = utils.load_settings()
     time.sleep_ms(500)
@@ -93,13 +93,11 @@ async def process_serial_msg(uart, key, settings):
                     utils.save_settings(json.loads(received_settings))
                     asyncio.sleep_ms(1000)
                     machine.reset()
-                #elif sm[:7]=='TXT_WRT' and sm[-7:]=='TXT_END':
                 elif settings[c.CHANNEL]==c.CH_SERIAL:
                     msg_bin = bytes(sm, 'utf-8')
                     encoded_msg = coder.encrypt_text(msg_bin, key)
                     if not relay_reader:
                         relay_reader, relay_writer = await open_relay_connection(settings[c.PEER_IP], c.CRYPTO_PORT)
-                    #response= await send_tcp_data_async(encoded_msg, relay_reader, relay_writer) # never use this
                     relay_writer.write(encoded_msg)
                     await relay_writer.drain()
                     response = await relay_reader.read(nu.MAX_MSG)
@@ -114,7 +112,7 @@ async def process_serial_msg(uart, key, settings):
     return
 
 async def process_stream(handler1, handler2, key, reader, writer, name, dest):
-    print(f'\nhandling {name}..')
+    print(f'\n=== process_stream: handling {name}..')
     if dest!=g_uart:
         relay_reader, relay_writer = await asyncio.open_connection(*dest)
         print(f'\n=== process_stream: relay open connection to {dest}')
@@ -126,10 +124,10 @@ async def process_stream(handler1, handler2, key, reader, writer, name, dest):
         if len(b64)>0:
             processed_msg = handler1(b64, key)
             if dest==g_uart:
+                print(f'=== process_stream: sending to serial: {processed_msg}')
                 response = send_serial_data_sync(processed_msg, g_uart)
             else:
-                #response = await send_tcp_data_async(processed_msg, relay_reader, relay_writer)
-                print(f'=== process_stream: sending to relay at {dest}: {processed_msg}')
+                print(f'=== process_stream: relaying to {dest}: {processed_msg}')
                 relay_writer.write(processed_msg)
                 await relay_writer.drain()
                 response = await relay_reader.read(nu.MAX_MSG)
@@ -158,12 +156,12 @@ async def process_stream(handler1, handler2, key, reader, writer, name, dest):
     await reader.wait_closed()
 
 async def handle_tcp_text(reader, writer):
-    print(f"\n### handle TCP TEXT from {reader} {writer}")
+    print("\n### handle Plain TEXT from TCP stream")
     dest = (g_settings[c.PEER_IP], c.CRYPTO_PORT)
     await process_stream(coder.encrypt_text, coder.decrypt_crypto, fixed_binary_key, reader, writer, 'TEXT', dest)
 
 async def handle_crypto(reader, writer):
-    print(f"\n### handle CRYPTO TEXT from {reader} {writer}")
+    print("\n### handle CRYPTO TEXT from TCP stream")
     dest = g_uart if g_settings[c.CHANNEL] == c.CH_SERIAL else (g_settings[c.HOST_IP], int(g_settings[c.HOST_PORT]))
     await process_stream(coder.decrypt_crypto, coder.encrypt_text, fixed_binary_key, reader, writer, 'CRYPTO', dest)
 
