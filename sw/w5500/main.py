@@ -41,6 +41,7 @@ async def open_relay_connection(ip, port):
             print(f'### open_relay_connection to {ip}:{port}')
             return reader, writer
         except Exception as e:
+            led_state_tcp_error()
             print(e)
             await asyncio.sleep_ms(nu.ASYNC_SLEEP_100MS)
 
@@ -106,6 +107,7 @@ async def process_serial_msg(uart, key, settings):
                     print(f'decryped serial response: {response}:{type(response)} writing to uart')
                     uart.write(response)
     except Exception as e:
+        led_state_serial_error()
         print(e)
         
     print('.', end='')

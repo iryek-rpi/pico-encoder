@@ -18,9 +18,15 @@ ASYNC_SLEEP_30MS = 30
 ASYNC_SLEEP_100MS = 100
 
 def init_serial(baud, parity, bits, stop, timeout):
-    uart0 = UART(0, tx=Pin(0), rx=Pin(1))
-    parity = None if parity=='N' else int(parity)
-    uart0.init(int(baud), int(bits), parity, int(stop), timeout=timeout, txbuf=SERIAL_BUF, rxbuf=SERIAL_BUF)
+    uart0 = None
+    try:
+        uart0 = UART(0, tx=Pin(0), rx=Pin(1))
+        parity = None if parity=='N' else int(parity)
+        uart0.init(int(baud), int(bits), parity, int(stop), timeout=timeout, txbuf=SERIAL_BUF, rxbuf=SERIAL_BUF)
+    except Exception as e:
+        led_state_serial_error()
+        print(e)
+        
     return uart0
 
 def w5x00_init(net_config):
