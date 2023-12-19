@@ -6,6 +6,7 @@ import utime as time
 from phew import logging, server
 from phew.template import render_template
 import utils
+import led
 import constants as c
 from main import g_settings
 
@@ -18,9 +19,8 @@ def index(request):
 
 def configure(request):
     current_settings = utils.load_settings()
-    print(f"Previous settings in configure: {current_settings}")
-
-    print(request.form)
+    #print(f"Previous settings in configure: {current_settings}")
+    #print(request.form)
     
     settings = request.form #ujson.loads(request.form)
     print(settings)
@@ -28,13 +28,15 @@ def configure(request):
     with open("./phew_templates/msg.html", "w") as f:
         f.write(msg)
         f.close()
+
     if not ns:
         return render_template(f"{PHEW_TEMPLATE_PATH}/index.html", ns=settings)
     else:
+        led.led_state_reset()
         utils.save_settings(ns)
-        time.sleep_ms(100)
+        time.sleep_ms(200)
         machine.reset()
-        return render_template(f"{PHEW_TEMPLATE_PATH}/index.html", ns=ns)
+        #return render_template(f"{PHEW_TEMPLATE_PATH}/index.html", ns=ns)
     
 def app_catch_all(request):
     return "Not found.", 404

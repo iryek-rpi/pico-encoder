@@ -31,12 +31,21 @@ def led_state_error():
     blink_led(yellow, 2)
 
 def led_state_no_ip():
-    led_onoff(green, True)
-    blink_led(yellow, 2)
+    led_onoff(green, False)
+    led_onoff(yellow, True)
 
-def led_state_setting():
-    led_onoff(red, False)
-    blink_led(red, 4)
+def led_state_tcp_error():
+    led_onoff(green, True)
+    blink_led(yellow, 5) # 5Hz
+
+def led_state_serial_error():
+    led_onoff(green, True)
+    blink_led(yellow, 2) # 2Hz
+
+def led_state_reset():
+    blink_led(red, 8) # 8Hz
+    blink_led(green, 8) # 8Hz
+    blink_led(yellow, 8) # 8Hz
 
 def blink_led(_led, freq):  # freq = Hz
     global timer_led, timer_yellow, timer_green, timer_red
