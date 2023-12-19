@@ -179,23 +179,26 @@ def main():
     cw.web_settings = g_settings
     print(g_settings)
 
-    g_uart, g_settings = nu.init_connections(g_settings)
+    g_uart, g_settings, ip_assigned = nu.init_connections(g_settings)
     fixed_binary_key = coder.fix_len_and_encode_key(g_settings['key'])
 
     loop = asyncio.get_event_loop()
 
     loop.create_task(process_serial_msg(g_uart, fixed_binary_key, g_settings))
 
-    print(f'\n### starting CRYPTO server at {g_settings[c.MY_IP]}:{c.CRYPTO_PORT}')
-    loop.create_task(asyncio.start_server(handle_crypto, '0.0.0.0', c.CRYPTO_PORT))
+    if ip_assigned:
+        print(f'\n### starting CRYPTO server at {g_settings[c.MY_IP]}:{c.CRYPTO_PORT}')
+        loop.create_task(asyncio.start_server(handle_crypto, '0.0.0.0', c.CRYPTO_PORT))
 
-    print('Channel: TCP') if g_settings[c.CHANNEL] == c.CH_TCP else print('Channel: SERIAL')  
-    if g_settings[c.CHANNEL] == c.CH_TCP:
-        print(f'\n### starting TEXT server at {g_settings[c.MY_IP]}:{c.TEXT_PORT}')
-        loop.create_task(asyncio.start_server(handle_tcp_text, '0.0.0.0', c.TEXT_PORT))
+        print('Channel: TCP') if g_settings[c.CHANNEL] == c.CH_TCP else print('Channel: SERIAL')  
+        if g_settings[c.CHANNEL] == c.CH_TCP:
+            print(f'\n### starting TEXT server at {g_settings[c.MY_IP]}:{c.TEXT_PORT}')
+            loop.create_task(asyncio.start_server(handle_tcp_text, '0.0.0.0', c.TEXT_PORT))
 
-    cw.prepare_web()
-    loop.create_task(asyncio.start_server(cw.server._handle_request, '0.0.0.0', 80))
+        cw.prepare_web()
+        loop.create_task(asyncio.start_server(cw.server._handle_request, '0.0.0.0', 80))
+    else:
+        loop.create_task(nu.w5x00_init_async((g_settings[c.MY_IP], g_settings[c.SUBNET], g_settings[c.GATEWAY])))
 
     print('run_forever')
     loop.run_forever()

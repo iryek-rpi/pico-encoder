@@ -1,3 +1,4 @@
+import machine
 from machine import Pin
 from machine import SPI
 from machine import UART
@@ -5,7 +6,7 @@ from usocket import socket
 import utime
 import ujson as json
 import uselect
-import uasyncio
+import uasyncio as asyncio
 import network
 from led import *
 import constants as c
@@ -16,6 +17,10 @@ MAX_MSG = 1500
 SERIAL_BUF = MAX_MSG
 ASYNC_SLEEP_30MS = 30
 ASYNC_SLEEP_100MS = 100
+ASYNC_SLEEP_200MS = 200
+ASYNC_SLEEP_500MS = 500
+ASYNC_SLEEP_1SEC = 1000
+ASYNC_SLEEP_2SEC = 2000
 
 def init_serial(baud, parity, bits, stop, timeout):
     uart0 = None
@@ -38,16 +43,34 @@ def w5x00_init(net_config):
 
     wait_count = 0
     while not nic.isconnected():
-        print(nic.regs())
         print('Waiting for Link...')
         utime.sleep_ms(1000)
         wait_count += 1
-        if wait_count > 20:
+        if wait_count > 7:
             return None
     
     ifc = nic.ifconfig()
     print(ifc)
     return ifc
+
+
+async def w5x00_init_async(net_config):
+    spi=SPI(0,2_000_000, mosi=Pin(19),miso=Pin(16),sck=Pin(18))
+    nic = network.WIZNET5K(spi,Pin(17),Pin(20)) #spi,cs,reset pin
+    
+    nic.active(True)
+    print('w5x00_init_async: ', net_config)
+    nic.ifconfig((net_config[0], net_config[1], net_config[2],'8.8.8.8'))
+
+    while not nic.isconnected():
+        print('Waiting for Link...')
+        await asyncio.sleep_ms(ASYNC_SLEEP_2SEC)
+    
+    led_state_reset()
+    ifc = nic.ifconfig()
+    print(ifc)
+    await asyncio.sleep_ms(ASYNC_SLEEP_500MS)
+    machine.reset()
 
 def init_ip(ip, subnet, gateway):
     net_info = w5x00_init((ip, subnet, gateway))
@@ -55,19 +78,19 @@ def init_ip(ip, subnet, gateway):
 
 def init_connections(settings):
     uart = init_serial(settings[c.SPEED], settings[c.PARITY], settings[c.DATA], settings[c.STOP], SERIAL1_TIMEOUT)
-    net_info = w5x00_init((settings['ip'], settings['subnet'], settings['gateway']))
+    net_info = w5x00_init((settings[c.MY_IP], settings[c.SUBNET], settings[c.GATEWAY]))
 
     if net_info and net_info[0]:
         led_state_good()
         print('IP assigned: ', net_info[0])
-        settings['ip'], settings['subnet'], settings['gateway'] = net_info[0], net_info[1], net_info[2]
+        settings[c.MY_IP], settings[c.SUBNET], settings[c.GATEWAY] = net_info[0], net_info[1], net_info[2]
         utils.save_settings(settings)
     else:
         led_state_no_ip()
-        settings['ip'] = None
         print('No IP assigned')
+        return uart, settings, False
     
-    return uart, settings
+    return uart, settings, True
 
 def get_poller(polled, poller=None):
     if not poller:
