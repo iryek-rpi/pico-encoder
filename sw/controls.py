@@ -57,12 +57,13 @@ class OptionRow(ft.Row):
     def __init__(self, label, control, options_tuple):
         self.option_label = ft.Text(label, width=LEFT_TITLE_WIDTH, text_align=TITLE_ALIGN, weight=TITLE_WEIGHT)
         if control == ft.TextField:
-            self.option_control = ft.TextField(width=LONG_FIELD)
+            self.option_control = ft.TextField(width=LONG_FIELD, bgcolor=ft.colors.WHITE70)
         elif control == ft.Dropdown:
-            self.option_control = ft.Dropdown(width=LONG_FIELD,
+            _dd = ft.Dropdown(width=LONG_FIELD, bgcolor=ft.colors.WHITE70,
                                     value=options_tuple[1][options_tuple[0]],
                                     options=[ft.dropdown.Option(option) for option in options_tuple[1]],
                                 )
+            self.option_control = ft.Container(_dd, width=LONG_FIELD, bgcolor=ft.colors.WHITE70)
         elif control == ft.RadioGroup:
             self.option_control = ft.RadioGroup(value=options_tuple[0], content = ft.Row([ft.Radio(value=idx, label=option) for idx, option in enumerate(options_tuple[1])]))
         else:
