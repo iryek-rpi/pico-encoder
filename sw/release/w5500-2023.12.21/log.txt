@@ -1,0 +1,2 @@
+2023-12-19 01:27:38 [debug    / 122kB] > parsed template: phew_templates/index.html (took 416 ms)
+2023-12-19 01:27:38 [info     / 120kB] > GET / (200 OK) [658ms]
