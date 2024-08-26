@@ -14,10 +14,12 @@ import net_utils as nu
 import utils
 from led import *
 import coder
+import xor
 
 fixed_binary_key = None
 g_settings = None
 g_uart = None
+g_is_xor = True
 
 led_init()
 btn = Pin(9, Pin.IN, Pin.PULL_UP)
@@ -95,15 +97,26 @@ async def process_serial_msg(uart, key, settings):
                     asyncio.sleep_ms(1000)
                     machine.reset()
                 elif settings[c.CHANNEL]==c.CH_SERIAL:
-                    msg_bin = bytes(sm, 'utf-8')
-                    encoded_msg = coder.encrypt_text(msg_bin, key)
+                    if g_is_xor:
+                        print(f'XOR encoding with token:{key} MSG:{sm}')
+                        encoded_msg = xor.xor_with_token(sm, key)
+                        print(f'XOR encoded msg:{encoded_msg}')
+                    else:
+                        msg_bin = bytes(sm, 'utf-8')
+                        encoded_msg = coder.encrypt_text(msg_bin, key)
+                    
                     if not relay_reader:
                         relay_reader, relay_writer = await open_relay_connection(settings[c.PEER_IP], c.CRYPTO_PORT)
                     relay_writer.write(encoded_msg)
                     await relay_writer.drain()
                     response = await relay_reader.read(nu.MAX_MSG)
                     print(f'process_serial_msg: response: {response}:{type(response)} writing to uart')
-                    response = coder.decrypt_crypto(response, key)
+                    if g_is_xor:
+                        print(f'XOR decoding with token:{key} MSG:{response}')
+                        response = xor.xor_bin_with_token(response, key)
+                        print(f'XOR decoded msg:{response}')
+                    else:
+                        response = coder.decrypt_crypto(response, key)
                     print(f'decryped serial response: {response}:{type(response)} writing to uart')
                     uart.write(response)
     except Exception as e:
@@ -160,17 +173,24 @@ async def process_stream(handler1, handler2, key, reader, writer, name, dest):
 async def handle_tcp_text(reader, writer):
     print("\n### handle Plain TEXT from TCP stream")
     dest = (g_settings[c.PEER_IP], c.CRYPTO_PORT)
-    await process_stream(coder.encrypt_text, coder.decrypt_crypto, fixed_binary_key, reader, writer, 'TEXT', dest)
+    if g_is_xor:
+        await process_stream(xor.xor_bin_with_token, xor.xor_bin_with_token, fixed_binary_key, reader, writer, 'TEXT', dest)
+    else:
+        await process_stream(coder.encrypt_text, coder.decrypt_crypto, fixed_binary_key, reader, writer, 'TEXT', dest)
 
 async def handle_crypto(reader, writer):
     print("\n### handle CRYPTO TEXT from TCP stream")
     dest = g_uart if g_settings[c.CHANNEL] == c.CH_SERIAL else (g_settings[c.HOST_IP], int(g_settings[c.HOST_PORT]))
-    await process_stream(coder.decrypt_crypto, coder.encrypt_text, fixed_binary_key, reader, writer, 'CRYPTO', dest)
+    if g_is_xor:
+        await process_stream(xor.xor_bin_with_token, xor.xor_bin_with_token, fixed_binary_key, reader, writer, 'TEXT', dest)
+    else:
+        await process_stream(coder.decrypt_crypto, coder.encrypt_text, fixed_binary_key, reader, writer, 'CRYPTO', dest)
 
 def main():
     global fixed_binary_key
     global g_settings
     global g_uart
+    global g_xor
 
     led_start()
     device_id = utils.get_device_id()
@@ -180,7 +200,10 @@ def main():
     print(g_settings)
 
     g_uart, g_settings, ip_assigned = nu.init_connections(g_settings)
-    fixed_binary_key = coder.fix_len_and_encode_key(g_settings['key'])
+    if g_is_xor:
+        fixed_binary_key = xor.create_token(g_settings['key'])
+    else:
+        fixed_binary_key = coder.fix_len_and_encode_key(g_settings['key'])
 
     loop = asyncio.get_event_loop()
 
