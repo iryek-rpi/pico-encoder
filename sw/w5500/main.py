@@ -180,10 +180,11 @@ async def handle_tcp_text(reader, writer):
 
 async def handle_crypto(reader, writer):
     print("\n### handle CRYPTO TEXT from TCP stream")
-    dest = g_uart if g_settings[c.CHANNEL] == c.CH_SERIAL else (g_settings[c.HOST_IP], int(g_settings[c.HOST_PORT]))
     if g_is_xor:
-        await process_stream(xor.xor_bin_with_token, xor.xor_bin_with_token, fixed_binary_key, reader, writer, 'TEXT', dest)
+        dest = g_uart if g_settings[c.CHANNEL] == c.CH_SERIAL else (g_settings[c.PEER_IP], int(g_settings[c.CRYPTO_PORT]))
+        await process_stream(xor.xor_bin_with_token, xor.xor_bin_with_token, fixed_binary_key, reader, writer, 'CRYPTO', dest)
     else:
+        dest = g_uart if g_settings[c.CHANNEL] == c.CH_SERIAL else (g_settings[c.HOST_IP], int(g_settings[c.HOST_PORT]))
         await process_stream(coder.decrypt_crypto, coder.encrypt_text, fixed_binary_key, reader, writer, 'CRYPTO', dest)
 
 def main():
@@ -198,6 +199,11 @@ def main():
     g_settings[c.DEVICE_ID] = device_id
     cw.web_settings = g_settings
     print(g_settings)
+    g_settings[c.KEY] = g_settings[c.KEY].strip()
+    if g_settings[c.KEY]=='':
+        print("Key is empty. Please set the key.")
+    else:
+        print("Key: ", g_settings[c.KEY])
 
     g_uart, g_settings, ip_assigned = nu.init_connections(g_settings)
     if g_is_xor:

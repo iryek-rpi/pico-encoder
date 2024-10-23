@@ -1,18 +1,33 @@
 import sys
 
 def create_token(string):
-    ascii_sum = sum(ord(char) for char in string) # 문자열의 각 문자의 ASCII 값을 더함
-    token = ascii_sum % 256 # 1바이트 값으로 변환 (0-255 사이 값)
+    if len(string)>0:
+        ascii_sum = sum(ord(char) for char in string) # 문자열의 각 문자의 ASCII 값을 더함
+        token = ascii_sum % 256 # 1바이트 값으로 변환 (0-255 사이 값)
+    else:
+        token = ''
     return token
 
 def xor_with_token(string, token):
-    xor_result = [ord(char) ^ token for char in string] # 각 문자를 토큰 값으로 XOR 연산 수행
-    return bytes(xor_result)
+    if token=='':
+        print(f'xor_with_token: token is empty')
+        return string
+    else:
+        xor_result = [ord(char) ^ token for char in string] # 각 문자를 토큰 값으로 XOR 연산 수행
+        print(f'xor_with_token: xor_result: {xor_result}')
+        print(f'xor_with_token: returning bytes(xor_result): {bytes(xor_result)}')
+        return bytes(xor_result)
 
 def xor_bin_with_token(bstr, token):
     #xor_result = [ord(char) ^ token for char in string] # 각 문자를 토큰 값으로 XOR 연산 수행
-    xor_result = [b ^ token for b in bstr] # 각 문자를 토큰 값으로 XOR 연산 수행
-    return bytes(xor_result)
+    if token=='':
+        print(f'xor_with_token: token is empty')
+        return bstr
+    else:
+        xor_result = [b ^ token for b in bstr] # 각 문자를 토큰 값으로 XOR 연산 수행
+        print(f'xor_bin_with_token: xor_result: {xor_result}')
+        print(f'xor_bin_with_token: returning bytes(xor_result): {bytes(xor_result)}')
+        return bytes(xor_result)
 
 def ascii_to_string(ascii_list):
     return ''.join(chr(val) for val in ascii_list) # ASCII 값 리스트를 문자열로 변환
