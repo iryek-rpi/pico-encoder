@@ -181,7 +181,7 @@ async def handle_tcp_text(reader, writer):
 async def handle_crypto(reader, writer):
     print("\n### handle CRYPTO TEXT from TCP stream")
     if g_is_xor:
-        dest = g_uart if g_settings[c.CHANNEL] == c.CH_SERIAL else (g_settings[c.PEER_IP], int(g_settings[c.CRYPTO_PORT]))
+        dest = g_uart if g_settings[c.CHANNEL] == c.CH_SERIAL else (g_settings[c.PEER_IP], int(g_settings[c.HOST_PORT]))
         await process_stream(xor.xor_bin_with_token, xor.xor_bin_with_token, fixed_binary_key, reader, writer, 'CRYPTO', dest)
     else:
         dest = g_uart if g_settings[c.CHANNEL] == c.CH_SERIAL else (g_settings[c.HOST_IP], int(g_settings[c.HOST_PORT]))
