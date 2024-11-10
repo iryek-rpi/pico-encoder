@@ -2,9 +2,11 @@ import socket
 
 
 def server_program():
-    host = socket.gethostname() # get the hostname
+    #host = socket.gethostname() # get the hostname
+    host = '127.0.0.1'
     port = 5005  # initiate port no above 1024
     server_socket = socket.socket()  # instantiate
+    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server_socket.bind((host, port))  # bind host address and port together
     server_socket.listen(2) # configure how many client the server can listen simultaneously
     print('Server accepting...')

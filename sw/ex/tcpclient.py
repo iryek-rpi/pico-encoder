@@ -1,9 +1,11 @@
 from socket import *
 
-ip = "192.168.1.10"
+#ip = "192.168.1.10"
+ip = "127.0.0.1"
 port = 5002
 
 cs = socket(AF_INET, SOCK_STREAM)
+cs.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 cs.connect((ip, port))
 
 print("connected")
