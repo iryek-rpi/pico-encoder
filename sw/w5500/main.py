@@ -136,19 +136,21 @@ async def process_stream(handler1, handler2, key, reader, writer, name, dest):
                     relay_writer.write(processed_msg)
                     await relay_writer.drain()
                     response = await relay_reader.read(nu.MAX_MSG)
+                    print(f'=== process_stream: response: {response}')
                 except Exception as e:
                     print(f'=== process_stream: relay_writer.write exception: {e}')
                     break                
-                #relay_writer.write(processed_msg)
-                #await relay_writer.drain()
-                #response = await relay_reader.read(nu.MAX_MSG)
-            print(f'=== process_stream: response: {response}')
             if len(response)>0:
-                processed_response = handler2(response, key)
-                print(f'=== process_stream: procesed_response: {processed_response}')
-                writer.write(processed_response)
-                await writer.drain()
+                try:
+                    processed_response = handler2(response, key)
+                    print(f'=== process_stream: procesed_response: {processed_response}')
+                    writer.write(processed_response)
+                    await writer.drain()
+                except Exception as e:
+                    print(f'=== process_stream: writer.write exception: {e}')
+                    break
             else:
+                print(f'=== process_stream: response is empty')
                 break
         else:
             break
@@ -198,12 +200,12 @@ def main():
     loop.create_task(process_serial_msg(g_uart, fixed_binary_key, g_settings))
 
     if ip_assigned:
-        print(f'\n### starting CRYPTO server at {g_settings[c.MY_IP]}:{c.CRYPTO_PORT}')
+        print(f'\n### starting Encryption server at {g_settings[c.MY_IP]}:{c.CRYPTO_PORT}')
         loop.create_task(asyncio.start_server(handle_tcp_text, '0.0.0.0', c.CRYPTO_PORT))
 
         print('Channel: TCP') if g_settings[c.CHANNEL] == c.CH_TCP else print('Channel: SERIAL')  
         if g_settings[c.CHANNEL] == c.CH_TCP:
-            print(f'\n### starting TEXT server at {g_settings[c.MY_IP]}:{c.TEXT_PORT}')
+            print(f'\n### starting Decryption server at {g_settings[c.MY_IP]}:{c.TEXT_PORT}')
             loop.create_task(asyncio.start_server(handle_crypto, '0.0.0.0', c.TEXT_PORT))
 
         cw.prepare_web()
