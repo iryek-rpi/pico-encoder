@@ -110,6 +110,7 @@ async def process_serial_msg(uart, key, settings):
     except Exception as e:
         led_state_serial_error()
         print(e)
+        machine.reset()
         
     print('.', end='')
     return
@@ -131,9 +132,16 @@ async def process_stream(handler1, handler2, key, reader, writer, name, dest):
                 response = send_serial_data_sync(processed_msg, g_uart)
             else:
                 print(f'=== process_stream: relaying to {dest}: {processed_msg}')
-                relay_writer.write(processed_msg)
-                await relay_writer.drain()
-                response = await relay_reader.read(nu.MAX_MSG)
+                try:
+                    relay_writer.write(processed_msg)
+                    await relay_writer.drain()
+                    response = await relay_reader.read(nu.MAX_MSG)
+                except Exception as e:
+                    print(f'=== process_stream: relay_writer.write exception: {e}')
+                    break                
+                #relay_writer.write(processed_msg)
+                #await relay_writer.drain()
+                #response = await relay_reader.read(nu.MAX_MSG)
             print(f'=== process_stream: response: {response}')
             if len(response)>0:
                 processed_response = handler2(response, key)
@@ -152,15 +160,17 @@ async def process_stream(handler1, handler2, key, reader, writer, name, dest):
         relay_reader.close()
         await relay_reader.wait_closed()
 
-    print(f"Close the connection for handle_{name}()")
+    print(f"Close writer for handle_{name}()")
     writer.close()
     await writer.wait_closed()
+    print(f"Close reader for handle_{name}()")
     reader.close()
     await reader.wait_closed()
+    machine.reset()
 
 async def handle_tcp_text(reader, writer):
     print("\n### handle Plain TEXT from TCP stream")
-    dest = (g_settings[c.PEER_IP], c.CRYPTO_PORT)
+    dest = (g_settings[c.PEER_IP], c.TEXT_PORT)
     await process_stream(coder.encrypt_text, coder.decrypt_crypto, fixed_binary_key, reader, writer, 'TEXT', dest)
 
 async def handle_crypto(reader, writer):
@@ -189,12 +199,12 @@ def main():
 
     if ip_assigned:
         print(f'\n### starting CRYPTO server at {g_settings[c.MY_IP]}:{c.CRYPTO_PORT}')
-        loop.create_task(asyncio.start_server(handle_crypto, '0.0.0.0', c.CRYPTO_PORT))
+        loop.create_task(asyncio.start_server(handle_tcp_text, '0.0.0.0', c.CRYPTO_PORT))
 
         print('Channel: TCP') if g_settings[c.CHANNEL] == c.CH_TCP else print('Channel: SERIAL')  
         if g_settings[c.CHANNEL] == c.CH_TCP:
             print(f'\n### starting TEXT server at {g_settings[c.MY_IP]}:{c.TEXT_PORT}')
-            loop.create_task(asyncio.start_server(handle_tcp_text, '0.0.0.0', c.TEXT_PORT))
+            loop.create_task(asyncio.start_server(handle_crypto, '0.0.0.0', c.TEXT_PORT))
 
         cw.prepare_web()
         loop.create_task(asyncio.start_server(cw.server._handle_request, '0.0.0.0', 80))
