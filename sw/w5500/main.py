@@ -99,7 +99,7 @@ async def process_serial_msg(uart, key, settings):
                     encoded_msg = coder.encrypt_text(msg_bin, key)
                     
                     if not relay_reader:
-                        relay_reader, relay_writer = await open_relay_connection(settings[c.PEER_IP], c.CRYPTO_PORT)
+                        relay_reader, relay_writer = await open_relay_connection(settings[c.PEER_IP], c.TEXT_PORT)
                     relay_writer.write(encoded_msg)
                     await relay_writer.drain()
                     response = await relay_reader.read(nu.MAX_MSG)
@@ -200,13 +200,13 @@ def main():
     loop.create_task(process_serial_msg(g_uart, fixed_binary_key, g_settings))
 
     if ip_assigned:
-        print(f'\n### starting Encryption server at {g_settings[c.MY_IP]}:{c.CRYPTO_PORT}')
-        loop.create_task(asyncio.start_server(handle_tcp_text, '0.0.0.0', c.CRYPTO_PORT))
-
         print('Channel: TCP') if g_settings[c.CHANNEL] == c.CH_TCP else print('Channel: SERIAL')  
         if g_settings[c.CHANNEL] == c.CH_TCP:
-            print(f'\n### starting Decryption server at {g_settings[c.MY_IP]}:{c.TEXT_PORT}')
-            loop.create_task(asyncio.start_server(handle_crypto, '0.0.0.0', c.TEXT_PORT))
+            print(f'\n### starting Encryption server at {g_settings[c.MY_IP]}:{c.CRYPTO_PORT}')
+            loop.create_task(asyncio.start_server(handle_tcp_text, '0.0.0.0', c.CRYPTO_PORT))
+
+        print(f'\n### starting Decryption server at {g_settings[c.MY_IP]}:{c.TEXT_PORT}')
+        loop.create_task(asyncio.start_server(handle_crypto, '0.0.0.0', c.TEXT_PORT))
 
         cw.prepare_web()
         loop.create_task(asyncio.start_server(cw.server._handle_request, '0.0.0.0', 80))
