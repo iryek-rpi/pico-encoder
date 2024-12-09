@@ -3,8 +3,9 @@ import socket
 
 def server_program():
     #host = socket.gethostname() # get the hostname
-    host = '127.0.0.1'
-    port = 5005  # initiate port no above 1024
+    #host = '127.0.0.1'
+    host = '192.168.0.154'
+    port = 2005  # initiate port no above 1024
     server_socket = socket.socket()  # instantiate
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server_socket.bind((host, port))  # bind host address and port together
