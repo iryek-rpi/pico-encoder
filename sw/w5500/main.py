@@ -171,12 +171,12 @@ async def process_stream(handler1, handler2, key, reader, writer, name, dest):
     machine.reset()
 
 async def handle_tcp_text(reader, writer):
-    print("\n### handle Plain TEXT from TCP stream")
+    print("\n### handle encrypting Plain TEXT from TCP stream")
     dest = (g_settings[c.PEER_IP], c.TEXT_PORT)
     await process_stream(coder.encrypt_text, coder.decrypt_crypto, fixed_binary_key, reader, writer, 'TEXT', dest)
 
 async def handle_crypto(reader, writer):
-    print("\n### handle CRYPTO TEXT from TCP stream")
+    print("\n### handle decrypting CRYPTO TEXT from TCP stream")
     dest = g_uart if g_settings[c.CHANNEL] == c.CH_SERIAL else (g_settings[c.HOST_IP], int(g_settings[c.HOST_PORT]))
     await process_stream(coder.decrypt_crypto, coder.encrypt_text, fixed_binary_key, reader, writer, 'CRYPTO', dest)
 
