@@ -172,7 +172,7 @@ async def process_stream(handler1, handler2, key, reader, writer, name, dest):
 
 async def handle_tcp_text(reader, writer):
     print("\n### handle encrypting Plain TEXT from TCP stream")
-    dest = (g_settings[c.PEER_IP], c.TEXT_PORT)
+    dest = (g_settings[c.PEER_IP], c.PEER_PORT)
     await process_stream(coder.encrypt_text, coder.decrypt_crypto, fixed_binary_key, reader, writer, 'TEXT', dest)
 
 async def handle_crypto(reader, writer):
@@ -202,11 +202,11 @@ def main():
     if ip_assigned:
         print('Channel: TCP') if g_settings[c.CHANNEL] == c.CH_TCP else print('Channel: SERIAL')  
         if g_settings[c.CHANNEL] == c.CH_TCP:
-            print(f'\n### starting Encryption server at {g_settings[c.MY_IP]}:{c.CRYPTO_PORT}')
-            loop.create_task(asyncio.start_server(handle_tcp_text, '0.0.0.0', c.CRYPTO_PORT))
+            print(f'\n### starting Encryption server at {g_settings[c.MY_IP]}:{c.ENCRYPT_PORT}')
+            loop.create_task(asyncio.start_server(handle_tcp_text, '0.0.0.0', c.ENCRYPT_PORT))
 
-        print(f'\n### starting Decryption server at {g_settings[c.MY_IP]}:{c.TEXT_PORT}')
-        loop.create_task(asyncio.start_server(handle_crypto, '0.0.0.0', c.TEXT_PORT))
+        print(f'\n### starting Decryption server at {g_settings[c.MY_IP]}:{c.PEER_PORT}')
+        loop.create_task(asyncio.start_server(handle_crypto, '0.0.0.0', c.PEER_PORT))
 
         cw.prepare_web()
         loop.create_task(asyncio.start_server(cw.server._handle_request, '0.0.0.0', 80))
