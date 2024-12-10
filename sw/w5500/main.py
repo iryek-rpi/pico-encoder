@@ -132,23 +132,15 @@ async def process_stream(handler1, handler2, key, reader, writer, name, dest):
                 response = send_serial_data_sync(processed_msg, g_uart)
             else:
                 print(f'=== process_stream: relaying to {dest}: {processed_msg}')
-                try:
-                    relay_writer.write(processed_msg)
-                    await relay_writer.drain()
-                    response = await relay_reader.read(nu.MAX_MSG)
-                    print(f'=== process_stream: response: {response}')
-                except Exception as e:
-                    print(f'=== process_stream: relay_writer.write exception: {e}')
-                    break                
+                relay_writer.write(processed_msg)
+                await relay_writer.drain()
+                response = await relay_reader.read(nu.MAX_MSG)
+                print(f'=== process_stream: response: {response}')
             if len(response)>0:
-                try:
-                    processed_response = handler2(response, key)
-                    print(f'=== process_stream: procesed_response: {processed_response}')
-                    writer.write(processed_response)
-                    await writer.drain()
-                except Exception as e:
-                    print(f'=== process_stream: writer.write exception: {e}')
-                    break
+                processed_response = handler2(response, key)
+                print(f'=== process_stream: procesed_response: {processed_response}')
+                writer.write(processed_response)
+                await writer.drain()
             else:
                 print(f'=== process_stream: response is empty')
                 break
